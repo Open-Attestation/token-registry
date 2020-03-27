@@ -43,9 +43,11 @@
       "/dist"
     ]
   },
+  "peerDependencies": {
+    "ethers": "^4.0.45"
+  },
   "dependencies": {
     "dotenv": "^8.2.0",
-    "ethers": "^4.0.45",
     "lodash": "^4.17.15",
     "semantic-release": "^17.0.4",
     "truffle": "5.1.3",
