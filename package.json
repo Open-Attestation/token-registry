@@ -1,0 +1,99 @@
+{
+  "name": "@govtechsg/token-registry",
+  "version": "1.0.0",
+  "files": [
+    "dist",
+    "src",
+    "types",
+    "truffle-config.js"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/ts/index.d.ts",
+  "repository": "git@github.com:Open-Attestation/token-registry-contract.git",
+  "author": "GovTech",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build:sol": "truffle build",
+    "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
+    "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src",
+    "build": "npm run build:sol && npm run typechain && npm run build:js",
+    "copy-types": "rm -rf types && mkdir -p types && cp src/contracts/*.d.ts types/",
+    "commit": "git-cz",
+    "commit:retry": "npm run commit -- --retry",
+    "lint:js": "eslint . --ext .js",
+    "lint:js:fix": "eslint . --ext .js --fix",
+    "lint:sol": "./node_modules/.bin/solhint contracts/**/*.sol",
+    "lint:sol:fix": "./node_modules/.bin/prettier --write contracts/**/*.sol",
+    "lint": "npm run lint:sol && npm run lint:js",
+    "lint:fix": "npm run lint:sol:fix && npm run lint:js:fix",
+    "test:sol": "truffle test",
+    "test:js": "jest --testPathPattern=src",
+    "test": "npm run test:sol && npm run test:js",
+    "truffle": "truffle",
+    "typechain": "typechain --target ethers \"build/contracts/*.json\" --outDir src/contracts && npm run copy-types",
+    "postinstall": "npm run build:sol && npm run typechain",
+    "semantic-release": "semantic-release"
+  },
+  "jest": {
+    "globalSetup": "./jest/setup.ts",
+    "globalTeardown": "./jest/teardown.ts",
+    "testPathIgnorePatterns": [
+      "/node_modules",
+      "/build",
+      "/dist"
+    ]
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "ethers": "^4.0.45",
+    "lodash": "^4.17.15",
+    "semantic-release": "^17.0.4",
+    "truffle": "5.1.3",
+    "typechain": "^1.0.5",
+    "typechain-target-ethers": "^1.0.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.7",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.8.3",
+    "@babel/plugin-proposal-optional-chaining": "^7.8.3",
+    "@babel/preset-env": "^7.8.7",
+    "@babel/preset-typescript": "^7.8.3",
+    "@babel/register": "^7.8.6",
+    "@commitlint/cli": "8.2.0",
+    "@commitlint/config-conventional": "8.2.0",
+    "@commitlint/prompt": "8.2.0",
+    "@ls-age/commitlint-circle": "1.0.0",
+    "@types/jest": "^25.1.4",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^25.1.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "commitizen": "4.0.3",
+    "eslint": "^5.6.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-chai-expect": "^1.1.1",
+    "eslint-plugin-chai-friendly": "^0.4.1",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "ganache-cli": "^6.9.1",
+    "git-cz": "3.2.1",
+    "jest": "^25.1.0",
+    "prettier": "^1.19.1",
+    "prettier-plugin-solidity": "^1.0.0-alpha.36",
+    "solhint": "^2.3.0",
+    "solhint-plugin-prettier": "0.0.3",
+    "solium": "^1.2.5",
+    "typescript": "^3.8.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/@commitlint/prompt"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
