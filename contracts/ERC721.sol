@@ -1227,11 +1227,10 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     // solhint-disable-previous-line no-empty-blocks
   }
 
-  function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data)
+  function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes memory _data)
     public
     returns (bytes4)
   {
-    _burn(tokenId);
     return this.onERC721Received.selector;
   }
 }

@@ -16,7 +16,7 @@ contract("TradeTrustERC721", accounts => {
     expect(currentOwner).to.deep.equal(owner1);
   });
 
-  it("should burn tokens that it receives", async () => {
+  it("should not burn tokens that it receives", async () => {
     const tokenRegistryInstanceWithShippingLine = await ERC721.new("foo", "bar", {from: shippingLine});
     await tokenRegistryInstanceWithShippingLine.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
@@ -28,10 +28,8 @@ contract("TradeTrustERC721", accounts => {
       merkleRoot,
       {from: owner1}
     );
-    const nextOwnerQuery = tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
-    await expect(nextOwnerQuery).to.be.rejectedWith(
-      /VM Exception while processing transaction: revert ERC721: owner query for nonexistent token/
-    );
+    const nextOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
+    expect(nextOwner).to.deep.equal(tokenRegistryInstanceWithShippingLine.address);
   });
 
   it("should be able to mint", async () => {
