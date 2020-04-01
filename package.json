@@ -17,7 +17,7 @@
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src",
     "build": "npm run build:sol && npm run typechain && npm run build:js",
-    "copy-types": "rm -rf types && mkdir -p types && cp src/contracts/*.d.ts types/",
+    "copy-types": "rm -rf types && mkdir -p types && cp src/contracts/*.d.ts types/ && mkdir -p dist/ts/contracts && cp src/contracts/*.d.ts dist/ts/contracts",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
     "lint:js": "eslint . --ext .js",
