@@ -4,6 +4,7 @@
   "files": [
     "dist",
     "src",
+    "scripts",
     "types",
     "truffle-config.js"
   ],
@@ -31,7 +32,7 @@
     "test": "npm run test:sol && npm run test:js",
     "truffle": "truffle",
     "typechain": "typechain --target ethers \"build/contracts/*.json\" --outDir src/contracts && npm run copy-types",
-    "postinstall": "npm run build:sol && npm run typechain",
+    "postinstall": "node scripts/postInstall",
     "semantic-release": "semantic-release"
   },
   "jest": {
@@ -46,11 +47,7 @@
   "peerDependencies": {
     "ethers": ">=4.0.45"
   },
-  "dependencies": {
-    "truffle": "5.1.3",
-    "typechain": "^1.0.5",
-    "typechain-target-ethers": "^1.0.4"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.7",
@@ -88,6 +85,9 @@
     "solhint": "^2.3.0",
     "solhint-plugin-prettier": "0.0.3",
     "solium": "^1.2.5",
+    "truffle": "5.1.3",
+    "typechain": "^1.0.5",
+    "typechain-target-ethers": "^1.0.4",
     "typescript": "^3.8.3"
   },
   "config": {
