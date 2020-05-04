@@ -1,6 +1,7 @@
 import {providers} from "ethers";
-import {TitleEscrowFactory, TradeTrustERC721Factory} from "./index";
+import {TitleEscrowFactory, TradeTrustERC721Factory, TitleEscrowCreatorFactory} from "./index";
 import {TradeTrustERC721} from "../types/TradeTrustERC721";
+import {TitleEscrowCreator} from "../types/TitleEscrowCreator";
 
 const provider = new providers.JsonRpcProvider();
 const signer1 = provider.getSigner(0);
@@ -14,6 +15,32 @@ beforeAll(async () => {
   account2 = await signer2.getAddress();
 });
 
+describe("TitleEscrowCreatorFactory", () => {
+  let tokenRegistry: TradeTrustERC721;
+  let titleEscrowFactory: TitleEscrowCreator;
+
+  beforeEach(async () => {
+    const factory = new TitleEscrowCreatorFactory(signer1);
+    titleEscrowFactory = await factory.deploy();
+    const tokenRegistryFactory = new TradeTrustERC721Factory(signer1);
+    tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
+  });
+
+  it("should be able to deploy a new TitleEscrowCreator", async () => {
+    expect(titleEscrowFactory.address).not.toBeUndefined();
+  });
+
+  it("should be able to connect to an existing TitleEscrowCreator and write to it", async () => {
+    const connectedCreator = TitleEscrowCreatorFactory.connect(titleEscrowFactory.address, signer1);
+    const receipt = await connectedCreator.deployNewTitleEscrow(tokenRegistry.address, account1, account2);
+    const tx = await receipt.wait();
+    const deployedEventArgs = tx.events?.find(evt => evt.event === "TitleEscrowDeployed")?.args as any;
+    expect(deployedEventArgs.tokenRegistry).toBe(tokenRegistry.address);
+    expect(deployedEventArgs.beneficiary).toBe(account1);
+    expect(deployedEventArgs.holder).toBe(account2);
+  });
+});
+
 describe("TitleEscrowFactory", () => {
   let tokenRegistry: TradeTrustERC721;
 
@@ -24,7 +51,7 @@ describe("TitleEscrowFactory", () => {
 
   const deployTitleEscrow = async () => {
     const factory = new TitleEscrowFactory(signer1);
-    const escrowInstance = await factory.deploy(tokenRegistry.address, account1, account2);
+    const escrowInstance = await factory.deploy(tokenRegistry.address, account1, account2, account1);
     return escrowInstance;
   };
 
