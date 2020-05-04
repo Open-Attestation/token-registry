@@ -329,9 +329,15 @@ contract("TitleEscrow", accounts => {
 
   it("should be able to transfer to a new beneficiary and holder instantly", async () => {
     const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
-    const escrowInstance = await TitleEscrow.new(ERC721Address, beneficiary1, beneficiary1, titleEscrowCreatorInstance.address, {
-      from: beneficiary1
-    });
+    const escrowInstance = await TitleEscrow.new(
+      ERC721Address,
+      beneficiary1,
+      beneficiary1,
+      titleEscrowCreatorInstance.address,
+      {
+        from: beneficiary1
+      }
+    );
 
     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
 
