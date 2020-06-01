@@ -12,7 +12,7 @@ contract HasNamedBeneficiary is Context {
   }
 
   modifier onlyBeneficiary() {
-    require(isBeneficiary(), "HasNamedBeneficiary: only the beneficiary may invoke a transfer");
+    require(isBeneficiary(), "HasNamedBeneficiary: only the beneficiary may invoke this function");
     _;
   }
 
@@ -50,6 +50,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   event TitleReceived(address indexed _tokenRegistry, address indexed _from, uint256 indexed _id);
   event TitleCeded(address indexed _tokenRegistry, address indexed _to, uint256 indexed _id);
   event TransferEndorsed(uint256 indexed _tokenid, address indexed _from, address indexed _to);
+  event TransferTargetApproval(address indexed newBeneficiary, address indexed newHolder);
 
   enum StatusTypes {Uninitialised, InUse, Exited}
   ERC721 public tokenRegistry;
@@ -58,6 +59,9 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   StatusTypes public status = StatusTypes.Uninitialised;
   bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xd9841dc4;
   ITitleEscrowCreator public titleEscrowFactory;
+
+  address public approvedBeneficiary;
+  address public approvedHolder;
 
   //TODO: change ERC721 to address so that external contracts don't need to import ERC721 to use this
   constructor(ERC721 _tokenRegistry, address _beneficiary, address _holder, address _titleEscrowFactoryAddress)
@@ -130,5 +134,16 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
       newHolder
     );
     transferTo(newTitleEscrowAddress);
+  }
+
+  function approveNewTransferTargets(address newBeneficiary, address newHolder) public onlyBeneficiary isHoldingToken {
+    require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
+    require(newHolder != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
+
+    emit TransferTargetApproval(newBeneficiary, newHolder);
+
+    approvedBeneficiary = newBeneficiary;
+    approvedHolder = newHolder;
+
   }
 }

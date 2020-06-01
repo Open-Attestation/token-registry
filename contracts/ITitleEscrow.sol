@@ -11,6 +11,9 @@ interface ITitleEscrow {
   /// @dev This emits when the beneficiary endorsed the the holder's transfer.
   event TransferEndorsed(uint256 indexed _tokenid, address indexed _from, address indexed _to);
 
+  /// @dev This emits when the beneficiary endorsed the the holder's transfer.
+  event TransferTargetApproval(address indexed newBeneficiary, address indexed newHolder);
+
   /// @notice Handle the receipt of an NFT
   /// @param operator The address which called `safeTransferFrom` function
   /// @param from The address which previously owned the token
@@ -56,6 +59,8 @@ interface ITitleEscrow {
   /// @param newBeneficiary The address of the new beneficiary
   /// @param newHolder The address of the new holder
   function transferToNewEscrow(address newBeneficiary, address newHolder) external;
+
+  function approveNewTransferTargets(address newBeneficiary, address newHolder) external;
 }
 
 contract CalculateSelector {
