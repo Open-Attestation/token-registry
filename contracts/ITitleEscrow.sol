@@ -9,10 +9,10 @@ interface ITitleEscrow {
   event TitleCeded(address indexed _tokenRegistry, address indexed _to, uint256 indexed _id);
 
   /// @dev This emits when the beneficiary approves new owner for non-title escrow transfer.
-  event TransferEndorsed(uint256 indexed _tokenid, address indexed _from, address indexed _to);
+  event TransferOwnerApproval(uint256 indexed _tokenid, address indexed _from, address indexed _to);
 
   /// @dev This emits when the beneficiary approves new beneficiary and holder for the next title escrow.
-  event TransferTargetApproval(address indexed newBeneficiary, address indexed newHolder);
+  event TransferTitleEscrowApproval(address indexed newBeneficiary, address indexed newHolder);
 
   /// @notice Handle the receipt of an NFT
   /// @param operator The address which called `safeTransferFrom` function
@@ -37,8 +37,14 @@ interface ITitleEscrow {
   /// @param newBeneficiary The address of the new holder
   function transferTo(address newBeneficiary) external;
 
-  /// @notice Public getter to access the endorsement if any
+  /// @notice Public getter to access the approved owner if any
   function approvedOwner() external;
+
+  /// @notice Public getter to access the approved beneficiary if any
+  function approvedBeneficiary() external;
+
+  /// @notice Public getter to access the approved holder if any
+  function approvedHolder() external;
 
   /// @notice Public getter to access the beneficiary of the Title. The beneficiary is the legal owner of the Title.
   function beneficiary() external returns (address);
@@ -75,6 +81,8 @@ contract CalculateSelector {
       i.approveNewOwner.selector ^
       i.transferTo.selector ^
       i.approvedOwner.selector ^
+      i.approvedBeneficiary.selector ^
+      i.approvedHolder.selector ^
       i.beneficiary.selector ^
       i.holder.selector ^
       i.status.selector ^

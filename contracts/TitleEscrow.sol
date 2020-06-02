@@ -49,11 +49,11 @@ contract HasHolder is Context {
 contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, ERC165 {
   event TitleReceived(address indexed _tokenRegistry, address indexed _from, uint256 indexed _id);
   event TitleCeded(address indexed _tokenRegistry, address indexed _to, uint256 indexed _id);
-  event TransferEndorsed(uint256 indexed _tokenid, address indexed _from, address indexed _to);
-  event TransferTargetApproval(address indexed newBeneficiary, address indexed newHolder);
+  event TransferOwnerApproval(uint256 indexed _tokenid, address indexed _from, address indexed _to);
+  event TransferTitleEscrowApproval(address indexed newBeneficiary, address indexed newHolder);
 
   // ERC165: Interface for this contract, can be calculated by calculateSelector()
-  bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0x04c91cb6;
+  bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xdcce2211;
 
   enum StatusTypes {Uninitialised, InUse, Exited}
   StatusTypes public status = StatusTypes.Uninitialised;
@@ -118,7 +118,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   }
 
   function approveNewOwner(address newOwner) public isHoldingToken onlyBeneficiary {
-    emit TransferEndorsed(_tokenId, beneficiary, newOwner);
+    emit TransferOwnerApproval(_tokenId, beneficiary, newOwner);
     approvedOwner = newOwner;
   }
 
@@ -152,7 +152,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
     require(newHolder != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
 
-    emit TransferTargetApproval(newBeneficiary, newHolder);
+    emit TransferTitleEscrowApproval(newBeneficiary, newHolder);
 
     approvedBeneficiary = newBeneficiary;
     approvedHolder = newHolder;

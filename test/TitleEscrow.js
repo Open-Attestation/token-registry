@@ -22,8 +22,8 @@ const assertTitleCededLog = (log, tokenRegistry, receiver) => {
   expect(log.args[0]).to.deep.equal(tokenRegistry);
   expect(log.args[1]).to.deep.equal(receiver);
 };
-const assertTransferEndorsedLog = (log, sender, receiver) => {
-  expect(log.event).to.deep.equal("TransferEndorsed");
+const assertTransferOwnerApprovalLog = (log, sender, receiver) => {
+  expect(log.event).to.deep.equal("TransferOwnerApproval");
   expect(log.args[1]).to.deep.equal(sender);
   expect(log.args[2]).to.deep.equal(receiver);
 };
@@ -192,7 +192,7 @@ contract("TitleEscrow", accounts => {
 
     const approveapproveNewOwnerTx = await escrowInstance.approveNewOwner(beneficiary2, {from: beneficiary1});
 
-    assertTransferEndorsedLog(approveapproveNewOwnerTx.logs[0], beneficiary1, beneficiary2);
+    assertTransferOwnerApprovalLog(approveapproveNewOwnerTx.logs[0], beneficiary1, beneficiary2);
 
     const tranferOwnerTx = await escrowInstance.transferTo(beneficiary2, {
       from: holder1
