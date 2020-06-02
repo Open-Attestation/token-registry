@@ -8,10 +8,10 @@ interface ITitleEscrow {
   /// @dev This emits when the ownership is transferred out of the escrow contract.
   event TitleCeded(address indexed _tokenRegistry, address indexed _to, uint256 indexed _id);
 
-  /// @dev This emits when the beneficiary endorsed the the holder's transfer.
+  /// @dev This emits when the beneficiary approves new owner for non-title escrow transfer.
   event TransferEndorsed(uint256 indexed _tokenid, address indexed _from, address indexed _to);
 
-  /// @dev This emits when the beneficiary endorsed the the holder's transfer.
+  /// @dev This emits when the beneficiary approves new beneficiary and holder for the next title escrow.
   event TransferTargetApproval(address indexed newBeneficiary, address indexed newHolder);
 
   /// @notice Handle the receipt of an NFT
