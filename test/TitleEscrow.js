@@ -65,7 +65,7 @@ contract("TitleEscrow", accounts => {
     const calculatorInstance = await CalculateSelector.new();
     const expectedInterface = await calculatorInstance.calculateSelector();
     const interfaceSupported = await escrowInstance.supportsInterface(expectedInterface);
-    expect(interfaceSupported).to.be.equal(true);
+    expect(interfaceSupported).to.be.equal(true, `Expected selector: ${expectedInterface}`);
   });
 
   it("should be instantiated correctly when deployed by 3rd party to be held by beneficiary1", async () => {
@@ -439,7 +439,7 @@ contract("TitleEscrow", accounts => {
     );
 
     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
-    
+
     await escrowInstance.approveNewTransferTargets(beneficiary2, holder2, {from: beneficiary1});
 
     await escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: holder1});
@@ -454,7 +454,7 @@ contract("TitleEscrow", accounts => {
     expect(escrowHolder).to.be.equal(holder2);
     expect(escrowTokenRegistry).to.be.equal(ERC721Address);
   });
-  
+
   it("should not allow holder to execute transferToNewEscrow when new beneficiary and holder has not been appointed", async () => {
     const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
     const escrowInstance = await TitleEscrow.new(
@@ -466,16 +466,14 @@ contract("TitleEscrow", accounts => {
         from: beneficiary1
       }
     );
-    
+
     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
 
     const attemptToTransfer = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: holder1});
-  
-    await expect(attemptToTransfer).to.be.rejectedWith(
-      /TitleEscrow: Beneficiary has not been endorsed by beneficiary/
-    );
+
+    await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
   });
-  
+
   it("should not allow anyone else (esp beneficiary) to execute transferToNewEscrow when new beneficiary and holder has been appointed", async () => {
     const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
     const escrowInstance = await TitleEscrow.new(
@@ -487,16 +485,20 @@ contract("TitleEscrow", accounts => {
         from: beneficiary1
       }
     );
-    
+
     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
-    
-    const attemptToTransferByBeneficiay = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: beneficiary1});
-    await expect(attemptToTransferByBeneficiay).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
-    
+
+    const attemptToTransferByBeneficiay = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {
+      from: beneficiary1
+    });
+    await expect(attemptToTransferByBeneficiay).to.be.rejectedWith(
+      /HasHolder: only the holder may invoke this function/
+    );
+
     const attemptToTransferByCarrier = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: carrier1});
     await expect(attemptToTransferByCarrier).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
   });
-  
+
   it("should not allow holder to execute transferToNewEscrow to other targets not appointed by beneficiary", async () => {
     const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
     const escrowInstance = await TitleEscrow.new(
@@ -510,11 +512,11 @@ contract("TitleEscrow", accounts => {
     );
 
     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
-    
+
     await escrowInstance.approveNewTransferTargets(beneficiary2, holder2, {from: beneficiary1});
 
     const attemptToTransfer = escrowInstance.transferToNewEscrow(carrier1, carrier1, {from: holder1});
-    
+
     await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
   });
 
@@ -529,6 +531,7 @@ contract("TitleEscrow", accounts => {
         from: beneficiary1
       }
     );
+    // eslint-disable-next-line no-underscore-dangle
     expect(escrowInstance._transferTo).to.be.undefined;
   });
 });

@@ -55,11 +55,14 @@ interface ITitleEscrow {
   ///@notice TokenRegistry which this TitleEscrow is registered to accept tokens from
   function tokenRegistry() external returns (address);
 
-  /// @notice Handle the token transfer by the holder after beneficiary's endorsement
+  /// @notice Used by holder to transfer token to a newly created title escrow contract
   /// @param newBeneficiary The address of the new beneficiary
   /// @param newHolder The address of the new holder
   function transferToNewEscrow(address newBeneficiary, address newHolder) external;
 
+  /// @notice Used by beneficiary to approve new beneficiary and holder to be next owners for the token
+  /// @param newBeneficiary The address of the new beneficiary
+  /// @param newHolder The address of the new holder
   function approveNewTransferTargets(address newBeneficiary, address newHolder) external;
 }
 
@@ -76,6 +79,7 @@ contract CalculateSelector {
       i.holder.selector ^
       i.status.selector ^
       i.tokenRegistry.selector ^
-      i.transferToNewEscrow.selector;
+      i.transferToNewEscrow.selector ^
+      i.approveNewTransferTargets.selector;
   }
 }

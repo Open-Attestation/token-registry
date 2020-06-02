@@ -52,11 +52,17 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   event TransferEndorsed(uint256 indexed _tokenid, address indexed _from, address indexed _to);
   event TransferTargetApproval(address indexed newBeneficiary, address indexed newHolder);
 
+  // ERC165: Interface for this contract, can be calculated by calculateSelector()
+  bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0x04c91cb6;
+
   enum StatusTypes {Uninitialised, InUse, Exited}
+  StatusTypes public status = StatusTypes.Uninitialised;
+
+  // Information on token held
   ERC721 public tokenRegistry;
   uint256 public _tokenId;
-  StatusTypes public status = StatusTypes.Uninitialised;
-  bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xd9841dc4;
+
+  // Factory to clone this title escrow
   ITitleEscrowCreator public titleEscrowFactory;
 
   // For exiting into title escrow contracts
@@ -99,10 +105,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   modifier allowTransfer(address newBeneficiary) {
     require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
     if (holder != beneficiary) {
-      require(
-        newBeneficiary == approvedOwner,
-        "TitleEscrow: Transfer target has not been endorsed by beneficiary"
-      );
+      require(newBeneficiary == approvedOwner, "TitleEscrow: Transfer target has not been endorsed by beneficiary");
     }
     _;
   }
@@ -118,7 +121,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     emit TransferEndorsed(_tokenId, beneficiary, newOwner);
     approvedOwner = newOwner;
   }
-  
+
   function _transferTo(address newOwner) private {
     status = StatusTypes.Exited;
     emit TitleCeded(address(tokenRegistry), newOwner, _tokenId);
@@ -129,24 +132,14 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     _transferTo(newOwner);
   }
 
-  function transferToNewEscrow(address newBeneficiary, address newHolder)
-    public
-    isHoldingToken
-    onlyHolder
-  {
+  function transferToNewEscrow(address newBeneficiary, address newHolder) public isHoldingToken onlyHolder {
     require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
     require(newHolder != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
     if (holder != beneficiary) {
-      require(
-        newBeneficiary == approvedBeneficiary,
-        "TitleEscrow: Beneficiary has not been endorsed by beneficiary"
-      );
-      require(
-        newHolder == approvedHolder,
-        "TitleEscrow: Holder has not been endorsed by beneficiary"
-      );
+      require(newBeneficiary == approvedBeneficiary, "TitleEscrow: Beneficiary has not been endorsed by beneficiary");
+      require(newHolder == approvedHolder, "TitleEscrow: Holder has not been endorsed by beneficiary");
     }
-    
+
     address newTitleEscrowAddress = titleEscrowFactory.deployNewTitleEscrow(
       address(tokenRegistry),
       newBeneficiary,
