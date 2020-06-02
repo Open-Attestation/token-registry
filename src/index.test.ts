@@ -76,8 +76,8 @@ describe("TitleEscrowFactory", () => {
   it("should be able to write to TitleEscrow", async () => {
     const escrowInstance = await deployTitleEscrow();
     await tokenRegistry.safeMint(escrowInstance.address, tokenId, []);
-    await escrowInstance.endorseTransfer(account2);
-    const target = await escrowInstance.approvedTransferTarget();
+    await escrowInstance.approveNewOwner(account2);
+    const target = await escrowInstance.approvedOwner();
     expect(target).toBe(account2);
   });
 });
