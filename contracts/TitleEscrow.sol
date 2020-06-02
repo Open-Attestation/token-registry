@@ -59,7 +59,10 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xd9841dc4;
   ITitleEscrowCreator public titleEscrowFactory;
 
+  // For exiting to non-title escrow contracts
   address public approvedOwner;
+
+  // For exiting to title escrow contracts with named beneficiary and holder
   address public approvedBeneficiary;
   address public approvedHolder;
 
