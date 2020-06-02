@@ -29,16 +29,16 @@ interface ITitleEscrow {
   /// @param newHolder The address of the new holder
   function changeHolder(address newHolder) external;
 
-  /// @notice Handle the transfer endorsement by the beneficiary
-  /// @param newBeneficiary The address of the new holder
-  function endorseTransfer(address newBeneficiary) external;
+  /// @notice Used by beneficiary to approve an EOA or smart contract to be the next owner for the token
+  /// @param newOwner The address of the new holder
+  function approveNewOwner(address newOwner) external;
 
   /// @notice Handle the token transfer by the holder after beneficiary's endorsement
   /// @param newBeneficiary The address of the new holder
   function transferTo(address newBeneficiary) external;
 
   /// @notice Public getter to access the endorsement if any
-  function approvedTransferTarget() external;
+  function approvedOwner() external;
 
   /// @notice Public getter to access the beneficiary of the Title. The beneficiary is the legal owner of the Title.
   function beneficiary() external returns (address);
@@ -69,9 +69,9 @@ contract CalculateSelector {
     return
       i.onERC721Received.selector ^
       i.changeHolder.selector ^
-      i.endorseTransfer.selector ^
+      i.approveNewOwner.selector ^
       i.transferTo.selector ^
-      i.approvedTransferTarget.selector ^
+      i.approvedOwner.selector ^
       i.beneficiary.selector ^
       i.holder.selector ^
       i.status.selector ^

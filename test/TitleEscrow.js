@@ -99,11 +99,11 @@ contract("TitleEscrow", accounts => {
       from: carrier1
     });
 
-    const endorseTransferTx = escrowInstance.endorseTransfer(beneficiary2, {
+    const approveNewOwnerTx = escrowInstance.approveNewOwner(beneficiary2, {
       from: beneficiary1
     });
 
-    await expect(endorseTransferTx).to.be.rejectedWith(/TitleEscrow: Contract is not holding a token/);
+    await expect(approveNewOwnerTx).to.be.rejectedWith(/TitleEscrow: Contract is not holding a token/);
     const changeHolderTx = escrowInstance.changeHolder(holder2, {
       from: holder1
     });
@@ -190,9 +190,9 @@ contract("TitleEscrow", accounts => {
 
     expect(await escrowInstance.holder()).to.be.equal(holder1);
 
-    const approveEndorseTransferTx = await escrowInstance.endorseTransfer(beneficiary2, {from: beneficiary1});
+    const approveapproveNewOwnerTx = await escrowInstance.approveNewOwner(beneficiary2, {from: beneficiary1});
 
-    assertTransferEndorsedLog(approveEndorseTransferTx.logs[0], beneficiary1, beneficiary2);
+    assertTransferEndorsedLog(approveapproveNewOwnerTx.logs[0], beneficiary1, beneficiary2);
 
     const tranferOwnerTx = await escrowInstance.transferTo(beneficiary2, {
       from: holder1
@@ -272,11 +272,11 @@ contract("TitleEscrow", accounts => {
     });
 
     await expect(attemptToTransferHolderTx).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
-    const attemptToEndorseTransferTx = escrowInstance.endorseTransfer(holder2, {
+    const attemptToapproveNewOwnerTx = escrowInstance.approveNewOwner(holder2, {
       from: beneficiary2
     });
 
-    await expect(attemptToEndorseTransferTx).to.be.rejectedWith(
+    await expect(attemptToapproveNewOwnerTx).to.be.rejectedWith(
       /HasNamedBeneficiary: only the beneficiary may invoke this function/
     );
   });

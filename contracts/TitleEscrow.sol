@@ -59,12 +59,12 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xd9841dc4;
   ITitleEscrowCreator public titleEscrowFactory;
 
-  // For exiting to non-title escrow contracts
-  address public approvedOwner;
-
-  // For exiting to title escrow contracts with named beneficiary and holder
+  // For exiting into title escrow contracts
   address public approvedBeneficiary;
   address public approvedHolder;
+
+  // For exiting into non-title escrow contracts
+  address public approvedOwner = address(0);
 
   //TODO: change ERC721 to address so that external contracts don't need to import ERC721 to use this
   constructor(ERC721 _tokenRegistry, address _beneficiary, address _holder, address _titleEscrowFactoryAddress)
@@ -100,11 +100,11 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
     if (holder != beneficiary) {
       require(
+        newBeneficiary == approvedOwner,
         "TitleEscrow: Transfer target has not been endorsed by beneficiary"
       );
     }
     _;
-        newBeneficiary == approvedOwner,
   }
 
   modifier isHoldingToken() {
@@ -114,13 +114,13 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     _;
   }
 
-  function endorseTransfer(address newBeneficiary) public isHoldingToken onlyBeneficiary {
-    emit TransferEndorsed(_tokenId, beneficiary, newBeneficiary);
+  function approveNewOwner(address newOwner) public isHoldingToken onlyBeneficiary {
+    emit TransferEndorsed(_tokenId, beneficiary, newOwner);
+    approvedOwner = newOwner;
   }
   
   function _transferTo(address newOwner) private {
     status = StatusTypes.Exited;
-    approvedOwner = newBeneficiary;
     emit TitleCeded(address(tokenRegistry), newOwner, _tokenId);
     tokenRegistry.safeTransferFrom(address(this), address(newOwner), _tokenId);
   }
