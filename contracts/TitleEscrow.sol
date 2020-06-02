@@ -55,11 +55,11 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   enum StatusTypes {Uninitialised, InUse, Exited}
   ERC721 public tokenRegistry;
   uint256 public _tokenId;
-  address public approvedTransferTarget = address(0);
   StatusTypes public status = StatusTypes.Uninitialised;
   bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xd9841dc4;
   ITitleEscrowCreator public titleEscrowFactory;
 
+  address public approvedOwner;
   address public approvedBeneficiary;
   address public approvedHolder;
 
@@ -97,11 +97,11 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
     if (holder != beneficiary) {
       require(
-        newBeneficiary == approvedTransferTarget,
         "TitleEscrow: Transfer target has not been endorsed by beneficiary"
       );
     }
     _;
+        newBeneficiary == approvedOwner,
   }
 
   modifier isHoldingToken() {
@@ -113,11 +113,11 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
 
   function endorseTransfer(address newBeneficiary) public isHoldingToken onlyBeneficiary {
     emit TransferEndorsed(_tokenId, beneficiary, newBeneficiary);
-    approvedTransferTarget = newBeneficiary;
   }
   
   function _transferTo(address newOwner) private {
     status = StatusTypes.Exited;
+    approvedOwner = newBeneficiary;
     emit TitleCeded(address(tokenRegistry), newOwner, _tokenId);
     tokenRegistry.safeTransferFrom(address(this), address(newOwner), _tokenId);
   }
