@@ -8,11 +8,8 @@ interface ITitleEscrow {
   /// @dev This emits when the ownership is transferred out of the escrow contract.
   event TitleCeded(address indexed _tokenRegistry, address indexed _to, uint256 indexed _id);
 
-  /// @dev This emits when the beneficiary approves new owner for non-title escrow transfer.
-  event TransferOwnerApproval(uint256 indexed _tokenid, address indexed _from, address indexed _to);
-
-  /// @dev This emits when the beneficiary approves new beneficiary and holder for the next title escrow.
-  event TransferTitleEscrowApproval(address indexed newBeneficiary, address indexed newHolder);
+  /// @dev This emits when the beneficiary endorsed the the holder's transfer.
+  event TransferEndorsed(uint256 indexed _tokenid, address indexed _from, address indexed _to);
 
   /// @notice Handle the receipt of an NFT
   /// @param operator The address which called `safeTransferFrom` function
@@ -29,22 +26,16 @@ interface ITitleEscrow {
   /// @param newHolder The address of the new holder
   function changeHolder(address newHolder) external;
 
-  /// @notice Used by beneficiary to approve an EOA or smart contract to be the next owner for the token
-  /// @param newOwner The address of the new holder
-  function approveNewOwner(address newOwner) external;
+  /// @notice Handle the transfer endorsement by the beneficiary
+  /// @param newBeneficiary The address of the new holder
+  function endorseTransfer(address newBeneficiary) external;
 
   /// @notice Handle the token transfer by the holder after beneficiary's endorsement
   /// @param newBeneficiary The address of the new holder
   function transferTo(address newBeneficiary) external;
 
-  /// @notice Public getter to access the approved owner if any
-  function approvedOwner() external;
-
-  /// @notice Public getter to access the approved beneficiary if any
-  function approvedBeneficiary() external;
-
-  /// @notice Public getter to access the approved holder if any
-  function approvedHolder() external;
+  /// @notice Public getter to access the endorsement if any
+  function approvedTransferTarget() external;
 
   /// @notice Public getter to access the beneficiary of the Title. The beneficiary is the legal owner of the Title.
   function beneficiary() external returns (address);
@@ -61,15 +52,10 @@ interface ITitleEscrow {
   ///@notice TokenRegistry which this TitleEscrow is registered to accept tokens from
   function tokenRegistry() external returns (address);
 
-  /// @notice Used by holder to transfer token to a newly created title escrow contract
+  /// @notice Handle the token transfer by the holder after beneficiary's endorsement
   /// @param newBeneficiary The address of the new beneficiary
   /// @param newHolder The address of the new holder
   function transferToNewEscrow(address newBeneficiary, address newHolder) external;
-
-  /// @notice Used by beneficiary to approve new beneficiary and holder to be next owners for the token
-  /// @param newBeneficiary The address of the new beneficiary
-  /// @param newHolder The address of the new holder
-  function approveNewTransferTargets(address newBeneficiary, address newHolder) external;
 }
 
 contract CalculateSelector {
@@ -78,16 +64,13 @@ contract CalculateSelector {
     return
       i.onERC721Received.selector ^
       i.changeHolder.selector ^
-      i.approveNewOwner.selector ^
+      i.endorseTransfer.selector ^
       i.transferTo.selector ^
-      i.approvedOwner.selector ^
-      i.approvedBeneficiary.selector ^
-      i.approvedHolder.selector ^
+      i.approvedTransferTarget.selector ^
       i.beneficiary.selector ^
       i.holder.selector ^
       i.status.selector ^
       i.tokenRegistry.selector ^
-      i.transferToNewEscrow.selector ^
-      i.approveNewTransferTargets.selector;
+      i.transferToNewEscrow.selector;
   }
 }
