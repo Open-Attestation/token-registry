@@ -70,7 +70,7 @@ contract("TradeTrustErc721", (accounts) => {
     );
   });
 
-  describe.only("TradeTrustERC721", () => {
+  describe("Surrendered TradeTrustERC721 Work Flow", () => {
     let tokenRegistryInstanceWithShippingLineWallet;
     let tokenRegistryAddress;
     let escrowInstance;
