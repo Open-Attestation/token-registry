@@ -1,13 +1,17 @@
-const {expect} = require("chai").use(require("chai-as-promised"));
-
+const { expect } = require("chai").use(require("chai-as-promised"));
 const Erc721 = artifacts.require("TradeTrustERC721");
+const TitleEscrow = artifacts.require("TitleEscrow");
 
-contract("TradeTrustErc721", accounts => {
+contract("TradeTrustErc721", (accounts) => {
   const shippingLine = accounts[0];
   const owner1 = accounts[1];
   const owner2 = accounts[2];
+  const nonMinter = accounts[3];
+  const beneficiary1 = accounts[4];
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
+  const merkleRoot1 = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb4";
+  const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
   it("should work without a wallet for read operations", async () => {
     const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar");
@@ -17,7 +21,7 @@ contract("TradeTrustErc721", accounts => {
   });
 
   it("should not burn tokens that it receives", async () => {
-    const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar", {from: shippingLine});
+    const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar", { from: shippingLine });
     await tokenRegistryInstanceWithShippingLine.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);
@@ -26,32 +30,32 @@ contract("TradeTrustErc721", accounts => {
       owner1,
       tokenRegistryInstanceWithShippingLine.address,
       merkleRoot,
-      {from: owner1}
+      { from: owner1 }
     );
     const nextOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(nextOwner).to.deep.equal(tokenRegistryInstanceWithShippingLine.address);
   });
 
   it("should be able to mint", async () => {
-    const tokenRegistryInstance = await Erc721.new("foo", "bar", {from: shippingLine});
+    const tokenRegistryInstance = await Erc721.new("foo", "bar", { from: shippingLine });
     await tokenRegistryInstance.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstance.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);
   });
 
   it("should be able to transfer", async () => {
-    const tokenRegistryInstanceWithShippingLineWallet = await Erc721.new("foo", "bar", {from: shippingLine});
+    const tokenRegistryInstanceWithShippingLineWallet = await Erc721.new("foo", "bar", { from: shippingLine });
     await tokenRegistryInstanceWithShippingLineWallet.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);
 
-    await tokenRegistryInstanceWithShippingLineWallet.safeTransferFrom(owner1, owner2, merkleRoot, {from: owner1});
+    await tokenRegistryInstanceWithShippingLineWallet.safeTransferFrom(owner1, owner2, merkleRoot, { from: owner1 });
     const nextOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(nextOwner).to.deep.equal(owner2);
   });
 
   it("non-owner should not be able to initiate a transfer", async () => {
-    const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar", {from: shippingLine});
+    const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar", { from: shippingLine });
     await tokenRegistryInstanceWithShippingLine.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);
@@ -64,5 +68,85 @@ contract("TradeTrustErc721", accounts => {
     await expect(transferQuery).to.be.rejectedWith(
       /VM Exception while processing transaction: revert ERC721: transfer caller is not owner nor approved/
     );
+  });
+
+  describe.only("TradeTrustERC721", () => {
+    let tokenRegistryInstanceWithShippingLineWallet;
+    let tokenRegistryAddress;
+    let escrowInstance;
+    let escrowInstanceAddress;
+    let escrowInstance1;
+    let escrowInstanceAddress1;
+
+    beforeEach("", async () => {
+      // Setup in accordance to workflow, starting test after the point of surrendering ERC721 Token
+      tokenRegistryInstanceWithShippingLineWallet = await Erc721.new("foo", "bar", { from: shippingLine });
+      tokenRegistryAddress = tokenRegistryInstanceWithShippingLineWallet.address;
+      escrowInstance = await TitleEscrow.new(tokenRegistryAddress, beneficiary1, beneficiary1, ZERO_ADDRESS, {
+        from: beneficiary1,
+      });
+      escrowInstanceAddress = escrowInstance.address;
+      escrowInstance1 = await TitleEscrow.new(tokenRegistryAddress, beneficiary1, beneficiary1, ZERO_ADDRESS, {
+        from: beneficiary1,
+      });
+      escrowInstanceAddress1 = escrowInstance1.address;
+      await tokenRegistryInstanceWithShippingLineWallet.safeMint(escrowInstanceAddress, merkleRoot);
+      await escrowInstance.transferTo(tokenRegistryAddress, {
+        from: beneficiary1,
+      });
+    });
+
+    it("should be able to destroy token", async () => {
+      await tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot);
+      const currentOwner = tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+      await expect(currentOwner).to.be.rejectedWith(
+        /VM Exception while processing transaction: revert ERC721: owner query for nonexistent token/
+      );
+    });
+
+    it("non-minter should not be able to destroy token", async () => {
+      const attemptDestroyToken = tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot, {
+        from: nonMinter,
+      });
+      await expect(attemptDestroyToken).to.be.rejectedWith(
+        /VM Exception while processing transaction: revert MinterRole: caller does not have the Minter role/
+      );
+    });
+
+    it("token cannot be destroyed if not owned by registry", async () => {
+      await tokenRegistryInstanceWithShippingLineWallet.mint(escrowInstanceAddress, merkleRoot1);
+      const attemptDestroyToken = tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot1);
+      await expect(attemptDestroyToken).to.be.rejectedWith(
+        /VM Exception while processing transaction: revert Cannot destroy token: Token not owned by token registry/
+      );
+    });
+
+    it("should be able to send token owned by registry", async () => {
+      await tokenRegistryInstanceWithShippingLineWallet.sendToken(escrowInstanceAddress1, merkleRoot);
+      const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+      expect(currentOwner).to.deep.equal(escrowInstanceAddress1);
+    });
+
+    it("non-minter should not be able to send token", async () => {
+      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(
+        escrowInstanceAddress1,
+        merkleRoot,
+        { from: nonMinter }
+      );
+      await expect(attemptSendToken).to.be.rejectedWith(
+        /VM Exception while processing transaction: revert MinterRole: caller does not have the Minter role/
+      );
+    });
+
+    it("minter should not be able to send token not owned by registry", async () => {
+      await tokenRegistryInstanceWithShippingLineWallet.mint(escrowInstanceAddress, merkleRoot1);
+      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(
+        escrowInstanceAddress1,
+        merkleRoot1
+      );
+      await expect(attemptSendToken).to.be.rejectedWith(
+        /VM Exception while processing transaction: revert Cannot send token: Token not owned by token registry/
+      );
+    });
   });
 });
