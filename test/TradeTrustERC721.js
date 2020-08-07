@@ -1,8 +1,8 @@
 const {expect} = require("chai").use(require("chai-as-promised"));
 
-const ERC721 = artifacts.require("TradeTrustERC721");
+const Erc721 = artifacts.require("TradeTrustERC721");
 
-contract("TradeTrustERC721", accounts => {
+contract("TradeTrustErc721", accounts => {
   const shippingLine = accounts[0];
   const owner1 = accounts[1];
   const owner2 = accounts[2];
@@ -10,14 +10,14 @@ contract("TradeTrustERC721", accounts => {
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
 
   it("should work without a wallet for read operations", async () => {
-    const tokenRegistryInstanceWithShippingLine = await ERC721.new("foo", "bar");
+    const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar");
     await tokenRegistryInstanceWithShippingLine.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);
   });
 
   it("should not burn tokens that it receives", async () => {
-    const tokenRegistryInstanceWithShippingLine = await ERC721.new("foo", "bar", {from: shippingLine});
+    const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar", {from: shippingLine});
     await tokenRegistryInstanceWithShippingLine.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);
@@ -33,14 +33,14 @@ contract("TradeTrustERC721", accounts => {
   });
 
   it("should be able to mint", async () => {
-    const tokenRegistryInstance = await ERC721.new("foo", "bar", {from: shippingLine});
+    const tokenRegistryInstance = await Erc721.new("foo", "bar", {from: shippingLine});
     await tokenRegistryInstance.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstance.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);
   });
 
   it("should be able to transfer", async () => {
-    const tokenRegistryInstanceWithShippingLineWallet = await ERC721.new("foo", "bar", {from: shippingLine});
+    const tokenRegistryInstanceWithShippingLineWallet = await Erc721.new("foo", "bar", {from: shippingLine});
     await tokenRegistryInstanceWithShippingLineWallet.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);
@@ -51,7 +51,7 @@ contract("TradeTrustERC721", accounts => {
   });
 
   it("non-owner should not be able to initiate a transfer", async () => {
-    const tokenRegistryInstanceWithShippingLine = await ERC721.new("foo", "bar", {from: shippingLine});
+    const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar", {from: shippingLine});
     await tokenRegistryInstanceWithShippingLine.mint(owner1, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1);

@@ -17,18 +17,18 @@ To use the package, you will need to provide your own Web3 [provider](https://do
 Deploying new TradeTrustERC721
 
 ```ts
-import {TradeTrustERC721Factory} from "@govtechsg/token-registry";
+import {TradeTrustErc721Factory} from "@govtechsg/token-registry";
 
-const factory = new TradeTrustERC721Factory(signer1);
+const factory = new TradeTrustErc721Factory(signer1);
 const tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
 ```
 
 Connecting to existing TradeTrustERC721 on Ethereum
 
 ```ts
-import {TradeTrustERC721Factory} from "@govtechsg/token-registry";
+import {TradeTrustErc721Factory} from "@govtechsg/token-registry";
 
-const connectedRegistry = TradeTrustERC721Factory.connect(existingERC721Address, signer1);
+const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer1);
 ```
 
 List of available functions on TradeTrustERC721
