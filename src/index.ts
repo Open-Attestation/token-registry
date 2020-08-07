@@ -1,3 +1,3 @@
 export {TitleEscrowFactory} from "./contracts/TitleEscrowFactory";
-export {TradeTrustERC721Factory} from "./contracts/TradeTrustERC721Factory";
+export {TradeTrustErc721Factory} from "./contracts/TradeTrustErc721Factory";
 export {TitleEscrowCreatorFactory} from "./contracts/TitleEscrowCreatorFactory";
