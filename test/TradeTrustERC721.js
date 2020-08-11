@@ -7,11 +7,9 @@ contract("TradeTrustErc721", (accounts) => {
   const owner1 = accounts[1];
   const owner2 = accounts[2];
   const nonMinter = accounts[3];
-  const beneficiary1 = accounts[4];
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
   const merkleRoot1 = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb4";
-  const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
   it("should work without a wallet for read operations", async () => {
     const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar");
@@ -73,27 +71,12 @@ contract("TradeTrustErc721", (accounts) => {
   describe("Surrendered TradeTrustERC721 Work Flow", () => {
     let tokenRegistryInstanceWithShippingLineWallet;
     let tokenRegistryAddress;
-    let escrowInstance;
-    let escrowInstanceAddress;
-    let escrowInstance1;
-    let escrowInstanceAddress1;
 
     beforeEach("", async () => {
-      // Setup in accordance to workflow, starting test after the point of surrendering ERC721 Token
+      // Starting test after the point of surrendering ERC721 Token
       tokenRegistryInstanceWithShippingLineWallet = await Erc721.new("foo", "bar", { from: shippingLine });
       tokenRegistryAddress = tokenRegistryInstanceWithShippingLineWallet.address;
-      escrowInstance = await TitleEscrow.new(tokenRegistryAddress, beneficiary1, beneficiary1, ZERO_ADDRESS, {
-        from: beneficiary1,
-      });
-      escrowInstanceAddress = escrowInstance.address;
-      escrowInstance1 = await TitleEscrow.new(tokenRegistryAddress, beneficiary1, beneficiary1, ZERO_ADDRESS, {
-        from: beneficiary1,
-      });
-      escrowInstanceAddress1 = escrowInstance1.address;
-      await tokenRegistryInstanceWithShippingLineWallet.safeMint(escrowInstanceAddress, merkleRoot);
-      await escrowInstance.transferTo(tokenRegistryAddress, {
-        from: beneficiary1,
-      });
+      await tokenRegistryInstanceWithShippingLineWallet.safeMint(tokenRegistryAddress, merkleRoot);
     });
 
     it("should be able to destroy token", async () => {
@@ -114,7 +97,7 @@ contract("TradeTrustErc721", (accounts) => {
     });
 
     it("token cannot be destroyed if not owned by registry", async () => {
-      await tokenRegistryInstanceWithShippingLineWallet.mint(escrowInstanceAddress, merkleRoot1);
+      await tokenRegistryInstanceWithShippingLineWallet.safeMint(owner1, merkleRoot1);
       const attemptDestroyToken = tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot1);
       await expect(attemptDestroyToken).to.be.rejectedWith(
         /VM Exception while processing transaction: revert Cannot destroy token: Token not owned by token registry/
@@ -122,14 +105,14 @@ contract("TradeTrustErc721", (accounts) => {
     });
 
     it("should be able to send token owned by registry", async () => {
-      await tokenRegistryInstanceWithShippingLineWallet.sendToken(escrowInstanceAddress1, merkleRoot);
+      await tokenRegistryInstanceWithShippingLineWallet.sendToken(owner1, merkleRoot);
       const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
-      expect(currentOwner).to.deep.equal(escrowInstanceAddress1);
+      expect(currentOwner).to.deep.equal(owner1);
     });
 
     it("non-minter should not be able to send token", async () => {
       const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(
-        escrowInstanceAddress1,
+        owner1,
         merkleRoot,
         { from: nonMinter }
       );
@@ -139,9 +122,9 @@ contract("TradeTrustErc721", (accounts) => {
     });
 
     it("minter should not be able to send token not owned by registry", async () => {
-      await tokenRegistryInstanceWithShippingLineWallet.mint(escrowInstanceAddress, merkleRoot1);
+      await tokenRegistryInstanceWithShippingLineWallet.safeMint(owner1, merkleRoot1);
       const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(
-        escrowInstanceAddress1,
+        owner2,
         merkleRoot1
       );
       await expect(attemptSendToken).to.be.rejectedWith(
