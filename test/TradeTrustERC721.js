@@ -1,6 +1,11 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
 const Erc721 = artifacts.require("TradeTrustERC721");
-const TitleEscrow = artifacts.require("TitleEscrow");
+const ethers = require('ethers');
+
+const assertDestroyBurntLog = (logs, tokenId) => {
+  expect(logs.event).to.deep.equal("TokenBurnt");
+  expect(ethers.BigNumber.from(logs.args[0].toString()).toHexString()).to.deep.equal(tokenId);
+};
 
 contract("TradeTrustErc721", (accounts) => {
   const shippingLine = accounts[0];
@@ -80,7 +85,9 @@ contract("TradeTrustErc721", (accounts) => {
     });
 
     it("should be able to destroy token", async () => {
-      await tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot);
+      const destroyTx = await tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot);
+      const burntTokenLog = destroyTx.logs.find((log) => log.event == "TokenBurnt")
+      assertDestroyBurntLog(burntTokenLog, merkleRoot)
       const currentOwner = tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       await expect(currentOwner).to.be.rejectedWith(
         /VM Exception while processing transaction: revert ERC721: owner query for nonexistent token/
