@@ -7,6 +7,11 @@ const assertDestroyBurntLog = (logs, tokenId) => {
   expect(ethers.BigNumber.from(logs.args[0].toString()).toHexString()).to.deep.equal(tokenId);
 };
 
+const assertTokenReceivedLog = (logs, tokenId) => {
+  expect(logs.event).to.deep.equal("TokenReceived");
+  expect(ethers.BigNumber.from(logs.args[0].toString()).toHexString()).to.deep.equal(tokenId);
+};
+
 contract("TradeTrustErc721", (accounts) => {
   const shippingLine = accounts[0];
   const owner1 = accounts[1];
@@ -71,6 +76,13 @@ contract("TradeTrustErc721", (accounts) => {
     await expect(transferQuery).to.be.rejectedWith(
       /VM Exception while processing transaction: revert ERC721: transfer caller is not owner nor approved/
     );
+  });
+
+  it("should emit TokenReceive event on safeMint", async () => {
+    const tokenRegistryInstance = await Erc721.new("foo", "bar", { from: shippingLine });
+    const mintTX = await tokenRegistryInstance.safeMint(owner1, merkleRoot);
+    const receivedTokenLog = mintTX.logs.find((log) => log.event == "TokenReceived");
+    assertTokenReceivedLog(receivedTokenLog, merkleRoot);
   });
 
   describe("Surrendered TradeTrustERC721 Work Flow", () => {
