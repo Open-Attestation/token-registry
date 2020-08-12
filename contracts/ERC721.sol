@@ -1226,7 +1226,7 @@ contract ERC721MintableFull is ERC721Mintable, ERC721Full {
 
 contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
-  event TokenReceived(uint256 indexed tokenId);
+  event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes indexed data);
 
   constructor(string memory name, string memory symbol) public ERC721MintableFull(name, symbol) {
     // solhint-disable-previous-line no-empty-blocks
@@ -1236,7 +1236,7 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     public
     returns (bytes4)
   {
-    emit TokenReceived(_tokenId);
+    emit TokenReceived(_operator, _from, _tokenId, _data);
     return this.onERC721Received.selector;
   }
 

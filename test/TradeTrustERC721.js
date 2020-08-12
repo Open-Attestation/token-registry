@@ -9,7 +9,10 @@ const assertDestroyBurntLog = (logs, tokenId) => {
 
 const assertTokenReceivedLog = (logs, tokenId) => {
   expect(logs.event).to.deep.equal("TokenReceived");
-  expect(ethers.BigNumber.from(logs.args[0].toString()).toHexString()).to.deep.equal(tokenId);
+  expect(logs.args[0]).to.deep.equal(operator);
+  expect(logs.args[1]).to.deep.equal(from);
+  expect(ethers.BigNumber.from(logs.args[2].toString()).toHexString()).to.deep.equal(tokenId);
+  expect(logs.args[3]).to.deep.equal(data);
 };
 
 contract("TradeTrustErc721", (accounts) => {
@@ -80,9 +83,10 @@ contract("TradeTrustErc721", (accounts) => {
 
   it("should emit TokenReceive event on safeMint", async () => {
     const tokenRegistryInstance = await Erc721.new("foo", "bar", { from: shippingLine });
-    const mintTx = await tokenRegistryInstance.safeMint(tokenRegistryInstance.address, merkleRoot);
+    const tokenRegistryInstanceAddress = tokenRegistryInstance.address;
+    const mintTx = await tokenRegistryInstance.safeMint(owner1, merkleRoot);
     const receivedTokenLog = mintTx.logs.find((log) => log.event == "TokenReceived");
-    assertTokenReceivedLog(receivedTokenLog, merkleRoot);
+    assertTokenReceivedLog(receivedTokenLog, tokenRegistryInstanceAddress, tokenRegistryInstanceAddress, merkleRoot, "");
   });
 
   describe("Surrendered TradeTrustERC721 Work Flow", () => {
