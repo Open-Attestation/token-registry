@@ -1,6 +1,6 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
 const Erc721 = artifacts.require("TradeTrustERC721");
-const ethers = require('ethers');
+const ethers = require("ethers");
 
 const assertDestroyBurntLog = (logs, tokenId) => {
   expect(logs.event).to.deep.equal("TokenBurnt");
@@ -77,7 +77,7 @@ contract("TradeTrustErc721", (accounts) => {
     let tokenRegistryInstanceWithShippingLineWallet;
     let tokenRegistryAddress;
 
-    beforeEach("", async () => {
+    beforeEach(async () => {
       // Starting test after the point of surrendering ERC721 Token
       tokenRegistryInstanceWithShippingLineWallet = await Erc721.new("foo", "bar", { from: shippingLine });
       tokenRegistryAddress = tokenRegistryInstanceWithShippingLineWallet.address;
@@ -86,8 +86,8 @@ contract("TradeTrustErc721", (accounts) => {
 
     it("should be able to destroy token", async () => {
       const destroyTx = await tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot);
-      const burntTokenLog = destroyTx.logs.find((log) => log.event == "TokenBurnt")
-      assertDestroyBurntLog(burntTokenLog, merkleRoot)
+      const burntTokenLog = destroyTx.logs.find((log) => log.event == "TokenBurnt");
+      assertDestroyBurntLog(burntTokenLog, merkleRoot);
       const currentOwner = tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       await expect(currentOwner).to.be.rejectedWith(
         /VM Exception while processing transaction: revert ERC721: owner query for nonexistent token/
@@ -118,11 +118,9 @@ contract("TradeTrustErc721", (accounts) => {
     });
 
     it("non-minter should not be able to send token", async () => {
-      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(
-        owner1,
-        merkleRoot,
-        { from: nonMinter }
-      );
+      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(owner1, merkleRoot, {
+        from: nonMinter,
+      });
       await expect(attemptSendToken).to.be.rejectedWith(
         /VM Exception while processing transaction: revert MinterRole: caller does not have the Minter role/
       );
@@ -130,10 +128,7 @@ contract("TradeTrustErc721", (accounts) => {
 
     it("minter should not be able to send token not owned by registry", async () => {
       await tokenRegistryInstanceWithShippingLineWallet.safeMint(owner1, merkleRoot1);
-      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(
-        owner2,
-        merkleRoot1
-      );
+      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(owner2, merkleRoot1);
       await expect(attemptSendToken).to.be.rejectedWith(
         /VM Exception while processing transaction: revert Cannot send token: Token not owned by token registry/
       );
