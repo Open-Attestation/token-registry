@@ -80,8 +80,8 @@ contract("TradeTrustErc721", (accounts) => {
 
   it("should emit TokenReceive event on safeMint", async () => {
     const tokenRegistryInstance = await Erc721.new("foo", "bar", { from: shippingLine });
-    const mintTX = await tokenRegistryInstance.safeMint(owner1, merkleRoot);
-    const receivedTokenLog = mintTX.logs.find((log) => log.event == "TokenReceived");
+    const mintTx = await tokenRegistryInstance.safeMint(tokenRegistryInstance.address, merkleRoot);
+    const receivedTokenLog = mintTx.logs.find((log) => log.event == "TokenReceived");
     assertTokenReceivedLog(receivedTokenLog, merkleRoot);
   });
 
