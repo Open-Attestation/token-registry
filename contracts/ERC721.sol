@@ -1222,7 +1222,12 @@ contract ERC721MintableFull is ERC721Mintable, ERC721Full {
   }
 }
 
+// Everything above is imported from OpenZeppelin ERC721 implementation
+
 contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
+  event TokenBurnt(uint256 indexed tokenId);
+  event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
+
   constructor(string memory name, string memory symbol) public ERC721MintableFull(name, symbol) {
     // solhint-disable-previous-line no-empty-blocks
   }
@@ -1231,6 +1236,19 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     public
     returns (bytes4)
   {
+    emit TokenReceived(_operator, _from, _tokenId, _data);
     return this.onERC721Received.selector;
   }
+
+  function destroyToken(uint256 _tokenId) public onlyMinter {
+    require(ownerOf(_tokenId) == address(this), "Cannot destroy token: Token not owned by token registry");
+    _burn(_tokenId);
+    emit TokenBurnt(_tokenId);
+  }
+
+  function sendToken(address to, uint256 _tokenId) public onlyMinter {
+    require(ownerOf(_tokenId) == address(this), "Cannot send token: Token not owned by token registry");
+    _safeTransferFrom(ownerOf(_tokenId), to, _tokenId, "");
+  }
+
 }
