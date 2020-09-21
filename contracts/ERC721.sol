@@ -1228,8 +1228,12 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
+  // ERC165: Interface for this contract, can be calculated by calculateTradeTrustERC721Selector()
+  bytes4 private constant _INTERFACE_ID_TRADETRUST_ERC721 = 0xde500ce7;
+  
   constructor(string memory name, string memory symbol) public ERC721MintableFull(name, symbol) {
-    // solhint-disable-previous-line no-empty-blocks
+    // register the supported interface to conform to TradeTrustERC721 via ERC165
+    _registerInterface(_INTERFACE_ID_TRADETRUST_ERC721);
   }
 
   function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes memory _data)
@@ -1251,4 +1255,14 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     _safeTransferFrom(ownerOf(_tokenId), to, _tokenId, "");
   }
 
+}
+
+contract calculateTradeTrustERC721Selector {
+  function calculateSelector() public pure returns (bytes4) {
+    TradeTrustERC721 i;
+    return
+      i.onERC721Received.selector ^
+      i.destroyToken.selector ^
+      i.sendToken.selector;
+  }
 }
