@@ -53,6 +53,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   event TransferTitleEscrowApproval(address indexed newBeneficiary, address indexed newHolder);
 
   // ERC165: Interface for this contract, can be calculated by calculateSelector()
+  // Only append new interface id for backward compatibility
   bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xdcce2211;
 
   enum StatusTypes {Uninitialised, InUse, Exited}

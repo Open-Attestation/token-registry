@@ -1229,6 +1229,7 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
   // ERC165: Interface for this contract, can be calculated by calculateTradeTrustERC721Selector()
+  // Only append new interface id for backward compatibility
   bytes4 private constant _INTERFACE_ID_TRADETRUST_ERC721 = 0xde500ce7;
   
   constructor(string memory name, string memory symbol) public ERC721MintableFull(name, symbol) {
