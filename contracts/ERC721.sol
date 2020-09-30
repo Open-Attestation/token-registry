@@ -1247,7 +1247,8 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
 
   function destroyToken(uint256 _tokenId) public onlyMinter {
     require(ownerOf(_tokenId) == address(this), "Cannot destroy token: Token not owned by token registry");
-    _burn(_tokenId);
+    // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
+    _safeTransferFrom(ownerOf(_tokenId), 0x000000000000000000000000000000000000dEaD, _tokenId, "");
     emit TokenBurnt(_tokenId);
   }
 
