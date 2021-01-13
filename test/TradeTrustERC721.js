@@ -25,6 +25,7 @@ contract("TradeTrustErc721", accounts => {
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
   const merkleRoot1 = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb4";
   const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+  const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
   it("should work without a wallet for read operations", async () => {
     const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar");
@@ -83,7 +84,7 @@ contract("TradeTrustErc721", accounts => {
     );
   });
 
-  it.only("should emit TokenReceive event on safeMint", async () => {
+  it("should emit TokenReceive event on safeMint", async () => {
     const tokenRegistryInstance = await Erc721.new("foo", "bar", {from: shippingLine});
     const tokenRegistryInstanceAddress = tokenRegistryInstance.address;
     const mintTx = await tokenRegistryInstance.safeMint(tokenRegistryInstanceAddress, merkleRoot);
@@ -107,9 +108,7 @@ contract("TradeTrustErc721", accounts => {
       const burntTokenLog = destroyTx.logs.find(log => log.event === "TokenBurnt");
       assertDestroyBurntLog(burntTokenLog, merkleRoot);
       const currentOwner = tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
-      await expect(currentOwner).to.be.rejectedWith(
-        /VM Exception while processing transaction: revert ERC721: owner query for nonexistent token/
-      );
+      await expect(currentOwner).to.become(BURN_ADDRESS);
     });
 
     it("non-minter should not be able to destroy token", async () => {
