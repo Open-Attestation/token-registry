@@ -101,13 +101,3 @@ npm truffle <command>
 ## Notes
 
 If you are using vscode, you may need to link the openzeppelin libraries. See https://github.com/juanfranblanco/vscode-solidity#openzeppelin
-
-if you are trying to run tests locally, install truffle globally and then do execute these commands within the project dir.
-```sh
-truffle develop
-```
-once the development blockchain is spun up, the interactive console should look like this:
-```
-truffle(develop)>
-```
-at the prompt type test
