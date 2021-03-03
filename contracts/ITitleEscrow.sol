@@ -21,9 +21,12 @@ interface ITitleEscrow {
   /// @param data Additional data with no specified format
   /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
   /// unless throwing
-  function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data)
-    external
-    returns (bytes4);
+  function onERC721Received(
+    address operator,
+    address from,
+    uint256 tokenId,
+    bytes calldata data
+  ) external returns (bytes4);
 
   /// @notice Handle the change of holdership by current holder
   /// @param newHolder The address of the new holder
@@ -61,10 +64,10 @@ interface ITitleEscrow {
   ///@notice TokenRegistry which this TitleEscrow is registered to accept tokens from
   function tokenRegistry() external returns (address);
 
-  /// @notice Used by holder to transfer token to a newly created title escrow contract
-  /// @param newBeneficiary The address of the new beneficiary
-  /// @param newHolder The address of the new holder
-  function transferToNewEscrow(address newBeneficiary, address newHolder) external;
+  // /// @notice Used by holder to transfer token to a newly created title escrow contract
+  // /// @param newBeneficiary The address of the new beneficiary
+  // /// @param newHolder The address of the new holder
+  // function transferToNewEscrow(address newBeneficiary, address newHolder) external;
 
   /// @notice Used by beneficiary to approve new beneficiary and holder to be next owners for the token
   /// @param newBeneficiary The address of the new beneficiary
@@ -87,7 +90,7 @@ contract CalculateSelector {
       i.holder.selector ^
       i.status.selector ^
       i.tokenRegistry.selector ^
-      i.transferToNewEscrow.selector ^
+      // i.transferToNewEscrow.selector ^
       i.approveNewTransferTargets.selector;
   }
 }

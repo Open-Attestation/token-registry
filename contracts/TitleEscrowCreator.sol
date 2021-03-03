@@ -12,8 +12,12 @@ contract TitleEscrowCreator is ITitleEscrowCreator {
     address holder
   );
 
-  function deployNewTitleEscrow(address tokenRegistry, address beneficiary, address holder) external returns (address) {
-    TitleEscrow newEscrow = new TitleEscrow(ERC721(tokenRegistry), beneficiary, holder, address(this));
+  function deployNewTitleEscrow(
+    address tokenRegistry,
+    address beneficiary,
+    address holder
+  ) external returns (address) {
+    TitleEscrow newEscrow = new TitleEscrow(ERC721(tokenRegistry), beneficiary, holder);
     emit TitleEscrowDeployed(address(newEscrow), tokenRegistry, beneficiary, holder);
     return address(newEscrow);
   }

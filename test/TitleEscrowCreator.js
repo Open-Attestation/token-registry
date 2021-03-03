@@ -36,30 +36,30 @@ contract("TitleEscrowCreator", accounts => {
     expect(escrowTokenRegistry).to.be.equal(ERC721Address);
   });
 
-  it("should allow instances of TitleEscrow to have the function transferToNewEscrow", async () => {
-    const {logs} = await TitleEscrowCreatorInstance.deployNewTitleEscrow(ERC721Address, beneficiary1, beneficiary1, {
-      from: beneficiary1
-    });
+  // it("should allow instances of TitleEscrow to have the function transferToNewEscrow", async () => {
+  //   const {logs} = await TitleEscrowCreatorInstance.deployNewTitleEscrow(ERC721Address, beneficiary1, beneficiary1, {
+  //     from: beneficiary1
+  //   });
 
-    const {escrowAddress} = logs[0].args;
+  //   const {escrowAddress} = logs[0].args;
 
-    await ERC721Instance.safeMint(escrowAddress, SAMPLE_TOKEN_ID);
+  //   await ERC721Instance.safeMint(escrowAddress, SAMPLE_TOKEN_ID);
 
-    const escrowInstance = await TitleEscrow.at(escrowAddress);
-    const receipt = await escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: beneficiary1});
-    const titleCededLog = receipt.logs.find(log => log.event === "TitleCeded");
-    const newAddress = titleCededLog.args._to; // eslint-disable-line no-underscore-dangle
-    const ownerOnRegistry = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
+  //   const escrowInstance = await TitleEscrow.at(escrowAddress);
+  //   const receipt = await escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: beneficiary1});
+  //   const titleCededLog = receipt.logs.find(log => log.event === "TitleCeded");
+  //   const newAddress = titleCededLog.args._to; // eslint-disable-line no-underscore-dangle
+  //   const ownerOnRegistry = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
 
-    expect(escrowAddress).not.to.be.equal(newAddress);
-    expect(newAddress).to.be.equal(ownerOnRegistry);
+  //   expect(escrowAddress).not.to.be.equal(newAddress);
+  //   expect(newAddress).to.be.equal(ownerOnRegistry);
 
-    const newEscrowInstance = await TitleEscrow.at(ownerOnRegistry);
-    const escrowBeneficiary = await newEscrowInstance.beneficiary();
-    const escrowHolder = await newEscrowInstance.holder();
-    const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
-    expect(escrowBeneficiary).to.be.equal(beneficiary2);
-    expect(escrowHolder).to.be.equal(holder2);
-    expect(escrowTokenRegistry).to.be.equal(ERC721Address);
-  });
+  //   const newEscrowInstance = await TitleEscrow.at(ownerOnRegistry);
+  //   const escrowBeneficiary = await newEscrowInstance.beneficiary();
+  //   const escrowHolder = await newEscrowInstance.holder();
+  //   const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
+  //   expect(escrowBeneficiary).to.be.equal(beneficiary2);
+  //   expect(escrowHolder).to.be.equal(holder2);
+  //   expect(escrowTokenRegistry).to.be.equal(ERC721Address);
+  // });
 });

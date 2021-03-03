@@ -1,7 +1,6 @@
 import {providers} from "ethers";
-import {TitleEscrowFactory, TradeTrustErc721Factory, TitleEscrowCreatorFactory} from "./index";
+import {TitleEscrowFactory, TradeTrustErc721Factory} from "./index";
 import {TradeTrustErc721} from "../types/TradeTrustErc721";
-import {TitleEscrowCreator} from "../types/TitleEscrowCreator";
 
 const provider = new providers.JsonRpcProvider();
 const signer1 = provider.getSigner(0);
@@ -15,31 +14,31 @@ beforeAll(async () => {
   account2 = await signer2.getAddress();
 });
 
-describe("TitleEscrowCreatorFactory", () => {
-  let tokenRegistry: TradeTrustErc721;
-  let titleEscrowFactory: TitleEscrowCreator;
+// describe("TitleEscrowCreatorFactory", () => {
+//   let tokenRegistry: TradeTrustErc721;
+//   let titleEscrowFactory: TitleEscrowCreator;
 
-  beforeEach(async () => {
-    const factory = new TitleEscrowCreatorFactory(signer1);
-    titleEscrowFactory = await factory.deploy();
-    const tokenRegistryFactory = new TradeTrustErc721Factory(signer1);
-    tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
-  });
+//   beforeEach(async () => {
+//     const factory = new TitleEscrowCreatorFactory(signer1);
+//     titleEscrowFactory = await factory.deploy();
+//     const tokenRegistryFactory = new TradeTrustErc721Factory(signer1);
+//     tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
+//   });
 
-  it("should be able to deploy a new TitleEscrowCreator", async () => {
-    expect(titleEscrowFactory.address).not.toBeUndefined();
-  });
+//   it("should be able to deploy a new TitleEscrowCreator", async () => {
+//     expect(titleEscrowFactory.address).not.toBeUndefined();
+//   });
 
-  it("should be able to connect to an existing TitleEscrowCreator and write to it", async () => {
-    const connectedCreator = TitleEscrowCreatorFactory.connect(titleEscrowFactory.address, signer1);
-    const receipt = await connectedCreator.deployNewTitleEscrow(tokenRegistry.address, account1, account2);
-    const tx = await receipt.wait();
-    const deployedEventArgs = tx.events?.find(evt => evt.event === "TitleEscrowDeployed")?.args as any;
-    expect(deployedEventArgs.tokenRegistry).toBe(tokenRegistry.address);
-    expect(deployedEventArgs.beneficiary).toBe(account1);
-    expect(deployedEventArgs.holder).toBe(account2);
-  });
-});
+//   it("should be able to connect to an existing TitleEscrowCreator and write to it", async () => {
+//     const connectedCreator = TitleEscrowCreatorFactory.connect(titleEscrowFactory.address, signer1);
+//     const receipt = await connectedCreator.deployNewTitleEscrow(tokenRegistry.address, account1, account2);
+//     const tx = await receipt.wait();
+//     const deployedEventArgs = tx.events?.find(evt => evt.event === "TitleEscrowDeployed")?.args as any;
+//     expect(deployedEventArgs.tokenRegistry).toBe(tokenRegistry.address);
+//     expect(deployedEventArgs.beneficiary).toBe(account1);
+//     expect(deployedEventArgs.holder).toBe(account2);
+//   });
+// });
 
 describe("TitleEscrowFactory", () => {
   let tokenRegistry: TradeTrustErc721;
@@ -51,7 +50,7 @@ describe("TitleEscrowFactory", () => {
 
   const deployTitleEscrow = async () => {
     const factory = new TitleEscrowFactory(signer1);
-    const escrowInstance = await factory.deploy(tokenRegistry.address, account1, account2, account1);
+    const escrowInstance = await factory.deploy(tokenRegistry.address, account1, account2);
     return escrowInstance;
   };
 

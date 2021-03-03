@@ -19,7 +19,7 @@ contract("TradeTrustErc721", (accounts) => {
     });
 
     it("should be able to surrender token", async () => {
-      escrowInstance = await TitleEscrow.new(tokenRegistryAddress, beneficiary1, beneficiary1, ZERO_ADDRESS, {
+      escrowInstance = await TitleEscrow.new(tokenRegistryAddress, beneficiary1, beneficiary1, {
         from: beneficiary1,
       });
       escrowInstanceAddress = escrowInstance.address;
