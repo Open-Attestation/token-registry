@@ -42,10 +42,17 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
 }
 
 contract TradeTrustERC721WithTitleEscrow is TradeTrustERC721 {
+  event TitleEscrowDeployed(
+    address indexed escrowAddress,
+    address indexed tokenRegistry,
+    address beneficiary,
+    address holder
+  );
   constructor(string memory name, string memory symbol) public TradeTrustERC721(name, symbol) {}
 
   function deployNewTitleEscrow(address beneficiary, address holder) external returns (address) {
     TitleEscrow newTitleEscrow = new TitleEscrow(this, beneficiary, holder);
+    emit TitleEscrowDeployed(address(newTitleEscrow), address(this), beneficiary, holder);
     return address(newTitleEscrow);
   }
 
@@ -53,9 +60,10 @@ contract TradeTrustERC721WithTitleEscrow is TradeTrustERC721 {
     address newBeneficiary,
     address newHolder,
     uint256 _tokenId
-  ) public {
+  ) public
+  {
     address newTitleEscrowAddress = this.deployNewTitleEscrow(newBeneficiary, newHolder);
-    safeTransferFrom(msg.sender, newTitleEscrowAddress, _tokenId);
+    safeTransferFrom(address(this), newTitleEscrowAddress, _tokenId);
   }
 }
 

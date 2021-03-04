@@ -2,6 +2,10 @@ const {expect} = require("chai").use(require("chai-as-promised"));
 const ethers = require("ethers");
 
 const Erc721 = artifacts.require("TradeTrustERC721");
+const Erc721WithTitleEscrow = artifacts.require("TradeTrustERC721WithTitleEscrow");
+const TitleEscrow = artifacts.require("TitleEscrow");
+
+const SAMPLE_TOKEN_ID = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
 
 const assertDestroyBurntLog = (logs, tokenId) => {
   expect(logs.event).to.deep.equal("TokenBurnt");
@@ -154,108 +158,139 @@ contract("TradeTrustErc721", accounts => {
 });
 
 
-// contract("TradeTrustErc721WithTitleEscrow", accounts => {
+contract("TradeTrustErc721WithTitleEscrow", accounts => {
 
-//   const carrier1 = accounts[0];
-//   const beneficiary1 = accounts[1];
-//   const beneficiary2 = accounts[2];
-//   const holder1 = accounts[3];
-//   const holder2 = accounts[4];
+  const carrier1 = accounts[0];
+  const beneficiary1 = accounts[1];
+  const beneficiary2 = accounts[2];
+  const holder1 = accounts[3];
+  const holder2 = accounts[4];
 
-//   let ERC721Address = "";
-//   let ERC721Instance;
+  let ERC721Address = "";
+  let ERC721Instance;
 
-//   beforeEach("", async () => {
-//     ERC721Instance = await ERC721.new("foo", "bar");
-//     ERC721Address = ERC721Instance.address;
-//   });
-//   it("should allow holder to execute transferToNewEscrow when new beneficiary and holder has been appointed by beneficiary", async () => {
-//     const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
-//     const escrowInstance = await TitleEscrow.new(
-//       ERC721Address,
-//       beneficiary1,
-//       holder1,
-//       {
-//         from: beneficiary1
-//       }
-//     );
+  beforeEach("", async () => {
+    ERC721Instance = await Erc721WithTitleEscrow.new("foo", "bar");
+    // ERC721Instance = await Erc721.new("foo", "bar");
+    ERC721Address = ERC721Instance.address;
+  });
+  it("should be able to transfer to a new owner and holder instantly", async () => {
+    // const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
+    const escrowInstance = await TitleEscrow.new(
+      ERC721Address,
+      beneficiary1,
+      beneficiary1,
+      {
+        from: beneficiary1
+      }
+    );
 
-//     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
+    await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
 
-//     await escrowInstance.approveNewTransferTargets(beneficiary2, holder2, {from: beneficiary1});
+    // const receipt = await escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: beneficiary1});
+    const receipt = await ERC721Instance.transferToNewTitleEscrow(beneficiary2, holder2, SAMPLE_TOKEN_ID, {from: beneficiary1});
+    const titleCededLog = receipt.logs.find(log => log.event === "TitleCeded");
+    const newAddress = titleCededLog.args._to; // eslint-disable-line no-underscore-dangle
+    const ownerOnRegistry = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
 
-//     await escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: holder1});
+    expect(escrowInstance.address).not.to.be.equal(newAddress);
+    expect(newAddress).to.be.equal(ownerOnRegistry);
 
-//     // Make sure the transfer really has happened
-//     const ownerOnRegistry = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
-//     const newEscrowInstance = await TitleEscrow.at(ownerOnRegistry);
-//     const escrowBeneficiary = await newEscrowInstance.beneficiary();
-//     const escrowHolder = await newEscrowInstance.holder();
-//     const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
-//     expect(escrowBeneficiary).to.be.equal(beneficiary2);
-//     expect(escrowHolder).to.be.equal(holder2);
-//     expect(escrowTokenRegistry).to.be.equal(ERC721Address);
-//   });
+    const newEscrowInstance = await TitleEscrow.at(ownerOnRegistry);
+    const escrowBeneficiary = await newEscrowInstance.beneficiary();
+    const escrowHolder = await newEscrowInstance.holder();
+    const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
+    expect(escrowBeneficiary).to.be.equal(beneficiary2);
+    expect(escrowHolder).to.be.equal(holder2);
+    expect(escrowTokenRegistry).to.be.equal(ERC721Address);
+  });
+  it("should allow holder to execute transferToNewEscrow when new beneficiary and holder has been appointed by beneficiary", async () => {
+    // const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
+    const escrowInstance = await TitleEscrow.new(
+      ERC721Address,
+      beneficiary1,
+      holder1,
+      {
+        from: beneficiary1
+      }
+    );
 
-//   it("should not allow holder to execute transferToNewEscrow when new beneficiary and holder has not been appointed", async () => {
-//     const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
-//     const escrowInstance = await TitleEscrow.new(
-//       ERC721Address,
-//       beneficiary1,
-//       holder1,
-//       {
-//         from: beneficiary1
-//       }
-//     );
+    await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
 
-//     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
+    await escrowInstance.approveNewTransferTargets(beneficiary2, holder2, {from: beneficiary1});
 
-//     const attemptToTransfer = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: holder1});
+    await ERC721Instance.transferToNewTitleEscrow(beneficiary2, holder2, SAMPLE_TOKEN_ID, {from: holder1});
 
-//     await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
-//   });
+    // Make sure the transfer really has happened
+    const ownerOnRegistry = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
+    const newEscrowInstance = await TitleEscrow.at(ownerOnRegistry);
+    const escrowBeneficiary = await newEscrowInstance.beneficiary();
+    const escrowHolder = await newEscrowInstance.holder();
+    const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
+    expect(escrowBeneficiary).to.be.equal(beneficiary2);
+    expect(escrowHolder).to.be.equal(holder2);
+    expect(escrowTokenRegistry).to.be.equal(ERC721Address);
+  });
 
-//   it("should not allow anyone else (esp beneficiary) to execute transferToNewEscrow when new beneficiary and holder has been appointed", async () => {
-//     const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
-//     const escrowInstance = await TitleEscrow.new(
-//       ERC721Address,
-//       beneficiary1,
-//       holder1,
-//       {
-//         from: beneficiary1
-//       }
-//     );
+  it("should not allow holder to execute transferToNewEscrow when new beneficiary and holder has not been appointed", async () => {
+    // const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
+    const escrowInstance = await TitleEscrow.new(
+      ERC721Address,
+      beneficiary1,
+      holder1,
+      {
+        from: beneficiary1
+      }
+    );
 
-//     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
+    await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
 
-//     const attemptToTransferByBeneficiay = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {
-//       from: beneficiary1
-//     });
-//     await expect(attemptToTransferByBeneficiay).to.be.rejectedWith(
-//       /HasHolder: only the holder may invoke this function/
-//     );
+    const attemptToTransfer = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: holder1});
 
-//     const attemptToTransferByCarrier = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: carrier1});
-//     await expect(attemptToTransferByCarrier).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
-//   });
+    await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
+  });
 
-//   it("should not allow holder to execute transferToNewEscrow to other targets not appointed by beneficiary", async () => {
-//     const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
-//     const escrowInstance = await TitleEscrow.new(
-//       ERC721Address,
-//       beneficiary1,
-//       holder1,
-//       {
-//         from: beneficiary1
-//       }
-//     );
+  it("should not allow anyone else (esp beneficiary) to execute transferToNewEscrow when new beneficiary and holder has been appointed", async () => {
+    // const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
+    const escrowInstance = await TitleEscrow.new(
+      ERC721Address,
+      beneficiary1,
+      holder1,
+      {
+        from: beneficiary1
+      }
+    );
 
-//     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
+    await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
 
-//     await escrowInstance.approveNewTransferTargets(beneficiary2, holder2, {from: beneficiary1});
+    const attemptToTransferByBeneficiay = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {
+      from: beneficiary1
+    });
+    await expect(attemptToTransferByBeneficiay).to.be.rejectedWith(
+      /HasHolder: only the holder may invoke this function/
+    );
 
-//     const attemptToTransfer = escrowInstance.transferToNewEscrow(carrier1, carrier1, {from: holder1});
+    const attemptToTransferByCarrier = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: carrier1});
+    await expect(attemptToTransferByCarrier).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
+  });
 
-//     await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
-//   });
-// })
+  it("should not allow holder to execute transferToNewEscrow to other targets not appointed by beneficiary", async () => {
+    // const titleEscrowCreatorInstance = await TitleEscrowCreator.new();
+    const escrowInstance = await TitleEscrow.new(
+      ERC721Address,
+      beneficiary1,
+      holder1,
+      {
+        from: beneficiary1
+      }
+    );
+
+    await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
+
+    await escrowInstance.approveNewTransferTargets(beneficiary2, holder2, {from: beneficiary1});
+
+    const attemptToTransfer = escrowInstance.transferToNewEscrow(carrier1, carrier1, {from: holder1});
+
+    await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
+  });
+})
