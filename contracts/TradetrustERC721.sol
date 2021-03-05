@@ -8,6 +8,13 @@ import "./TitleEscrow.sol";
 contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
+  event TitleEscrowDeployed(
+    address indexed escrowAddress,
+    address indexed tokenRegistry,
+    address beneficiary,
+    address holder
+  );
+  event Test(address indexed who);
 
   // ERC165: Interface for this contract, can be calculated by calculateTradeTrustERC721Selector()
   // Only append new interface id for backward compatibility
@@ -39,16 +46,6 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     require(ownerOf(_tokenId) == address(this), "Cannot send token: Token not owned by token registry");
     _safeTransferFrom(ownerOf(_tokenId), to, _tokenId, "");
   }
-}
-
-contract TradeTrustERC721WithTitleEscrow is TradeTrustERC721 {
-  event TitleEscrowDeployed(
-    address indexed escrowAddress,
-    address indexed tokenRegistry,
-    address beneficiary,
-    address holder
-  );
-  constructor(string memory name, string memory symbol) public TradeTrustERC721(name, symbol) {}
 
   function deployNewTitleEscrow(address beneficiary, address holder) external returns (address) {
     TitleEscrow newTitleEscrow = new TitleEscrow(this, beneficiary, holder);
@@ -63,13 +60,41 @@ contract TradeTrustERC721WithTitleEscrow is TradeTrustERC721 {
   ) public
   {
     address newTitleEscrowAddress = this.deployNewTitleEscrow(newBeneficiary, newHolder);
-    safeTransferFrom(address(this), newTitleEscrowAddress, _tokenId);
+    emit Test(msg.sender);
+    safeTransferFrom(msg.sender, newTitleEscrowAddress, _tokenId);
   }
+
 }
+
+// contract TradeTrustERC721WithTitleEscrow is TradeTrustERC721 {
+  // event TitleEscrowDeployed(
+  //   address indexed escrowAddress,
+  //   address indexed tokenRegistry,
+  //   address beneficiary,
+  //   address holder
+  // );
+  // constructor(string memory name, string memory symbol) public TradeTrustERC721(name, symbol) {}
+
+  // function deployNewTitleEscrow(address beneficiary, address holder) external returns (address) {
+  //   TitleEscrow newTitleEscrow = new TitleEscrow(this, beneficiary, holder);
+  //   emit TitleEscrowDeployed(address(newTitleEscrow), address(this), beneficiary, holder);
+  //   return address(newTitleEscrow);
+  // }
+
+  // function transferToNewTitleEscrow(
+  //   address newBeneficiary,
+  //   address newHolder,
+  //   uint256 _tokenId
+  // ) public
+  // {
+  //   address newTitleEscrowAddress = this.deployNewTitleEscrow(newBeneficiary, newHolder);
+  //   safeTransferFrom(address(this), newTitleEscrowAddress, _tokenId);
+  // }
+// }
 
 contract calculateTradeTrustERC721Selector {
   function calculateSelector() public pure returns (bytes4) {
     TradeTrustERC721 i;
-    return i.onERC721Received.selector ^ i.destroyToken.selector ^ i.sendToken.selector;
+    return i.onERC721Received.selector ^ i.destroyToken.selector ^ i.sendToken.selector ^ i.deployNewTitleEscrow.selector ^ i.transferToNewTitleEscrow.selector;
   }
 }
