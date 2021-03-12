@@ -2,7 +2,7 @@ const {expect} = require("chai").use(require("chai-as-promised"));
 const ethers = require("ethers");
 
 const Erc721 = artifacts.require("TradeTrustERC721");
-const Erc721WithTitleEscrow = artifacts.require("TradeTrustERC721WithTitleEscrow");
+// const Erc721WithTitleEscrow = artifacts.require("TradeTrustERC721WithTitleEscrow");
 const TitleEscrow = artifacts.require("TitleEscrow");
 
 const SAMPLE_TOKEN_ID = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
