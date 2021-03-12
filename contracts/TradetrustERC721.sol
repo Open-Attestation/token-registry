@@ -14,7 +14,7 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     address beneficiary,
     address holder
   );
-  event Test(address indexed who);
+  // event Test(address indexed who);
 
   // ERC165: Interface for this contract, can be calculated by calculateTradeTrustERC721Selector()
   // Only append new interface id for backward compatibility
@@ -35,6 +35,27 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     return this.onERC721Received.selector;
   }
 
+  modifier onlyHolder(uint256 _tokenId) {
+    // find owner of tokenId and pass the address it inside "from"
+    TitleEscrow currentTitleEscrow = TitleEscrow(ownerOf(_tokenId));
+    // emit Test(address(currentTitleEscrow));
+    // validate to see if msg.sender is holder here
+    require(currentTitleEscrow.holder() == msg.sender, "TradeTrustERC721: only holder has permission.");
+    _;
+  }
+
+  modifier allowTransferTitleEscrow(address newBeneficiary, address newHolder, uint256 _tokenId) {
+    require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
+    require(newHolder != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
+    TitleEscrow currentTitleEscrow = TitleEscrow(ownerOf(_tokenId));
+    currentTitleEscrow.approvedBeneficiary;
+    if (currentTitleEscrow.holder() != currentTitleEscrow.beneficiary()) {
+      require(newBeneficiary == currentTitleEscrow.approvedBeneficiary(), "TitleEscrow: Beneficiary has not been endorsed by beneficiary");
+      require(newHolder == currentTitleEscrow.approvedHolder(), "TitleEscrow: Holder has not been endorsed by beneficiary");
+    }
+    _;
+  }
+
   function destroyToken(uint256 _tokenId) public onlyMinter {
     require(ownerOf(_tokenId) == address(this), "Cannot destroy token: Token not owned by token registry");
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -50,6 +71,7 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
   function deployNewTitleEscrow(address beneficiary, address holder) external returns (address) {
     TitleEscrow newTitleEscrow = new TitleEscrow(this, beneficiary, holder);
     emit TitleEscrowDeployed(address(newTitleEscrow), address(this), beneficiary, holder);
+    // return newTitleEscrow;
     return address(newTitleEscrow);
   }
 
@@ -58,10 +80,18 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     address newHolder,
     uint256 _tokenId
   ) public
+    onlyHolder(_tokenId)
+    allowTransferTitleEscrow(newBeneficiary, newHolder, _tokenId)
+    returns (address)
   {
     address newTitleEscrowAddress = this.deployNewTitleEscrow(newBeneficiary, newHolder);
-    emit Test(msg.sender);
-    safeTransferFrom(msg.sender, newTitleEscrowAddress, _tokenId);
+    // // find owner of tokenId and pass the address it inside "from"
+    // TitleEscrow currentTitleEscrow = TitleEscrow(ownerOf(_tokenId));
+    // // emit Test(address(currentTitleEscrow));
+    // // validate to see if msg.sender is holder here
+    // require(currentTitleEscrow.holder() == msg.sender, "TradeTrustERC721: only holder has permission.");
+    _transferFrom(ownerOf(_tokenId), newTitleEscrowAddress, _tokenId);
+
   }
 
 }

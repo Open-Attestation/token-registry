@@ -185,12 +185,18 @@ contract("TradeTrustErc721WithTitleEscrow", accounts => {
       }
     );
 
-    const test = await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
+    await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
+    // const approve = await ERC721Instance.approve(beneficiary1, SAMPLE_TOKEN_ID, {from: ERC721Instance.address});
+    const add = await ERC721Instance.transferToNewTitleEscrow(beneficiary2, holder2, SAMPLE_TOKEN_ID, {from: beneficiary1});
 
-    // const receipt = await escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: beneficiary1});
-    const receipt = await ERC721Instance.transferToNewTitleEscrow(beneficiary2, holder2, SAMPLE_TOKEN_ID, {from: beneficiary1});
-    // const titleCededLog = receipt.logs.find(log => log.event === "TitleCeded");
-    // const newAddress = titleCededLog.args._to; // eslint-disable-line no-underscore-dangle
+    // console.log("ADD from TTERC721.js: " + escrowInstance.address);
+    // console.log("ADD from transferToNewTitleEscrow: " + JSON.stringify(add,null,2));
+    
+
+    // // const receipt = await escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: beneficiary1});
+    // const receipt = await ERC721Instance.transferToNewTitleEscrow(beneficiary2, holder2, SAMPLE_TOKEN_ID, {from: beneficiary1});
+    // // const titleCededLog = receipt.logs.find(log => log.event === "TitleCeded");
+    // // const newAddress = titleCededLog.args._to; // eslint-disable-line no-underscore-dangle
     const ownerOnRegistry = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
 
     // expect(escrowInstance.address).not.to.be.equal(newAddress);
@@ -245,7 +251,7 @@ contract("TradeTrustErc721WithTitleEscrow", accounts => {
 
     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
 
-    const attemptToTransfer = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: holder1});
+    const attemptToTransfer = ERC721Instance.transferToNewTitleEscrow(beneficiary2, holder2, SAMPLE_TOKEN_ID, {from: holder1});
 
     await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
   });
@@ -263,15 +269,15 @@ contract("TradeTrustErc721WithTitleEscrow", accounts => {
 
     await ERC721Instance.safeMint(escrowInstance.address, SAMPLE_TOKEN_ID);
 
-    const attemptToTransferByBeneficiay = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {
+    const attemptToTransferByBeneficiay = ERC721Instance.transferToNewTitleEscrow(beneficiary2, holder2, SAMPLE_TOKEN_ID, {
       from: beneficiary1
     });
     await expect(attemptToTransferByBeneficiay).to.be.rejectedWith(
-      /HasHolder: only the holder may invoke this function/
+      /TradeTrustERC721: only holder has permission./
     );
 
-    const attemptToTransferByCarrier = escrowInstance.transferToNewEscrow(beneficiary2, holder2, {from: carrier1});
-    await expect(attemptToTransferByCarrier).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
+    const attemptToTransferByCarrier = ERC721Instance.transferToNewTitleEscrow(beneficiary2, holder2, SAMPLE_TOKEN_ID, {from: carrier1});
+    await expect(attemptToTransferByCarrier).to.be.rejectedWith(/TradeTrustERC721: only holder has permission./);
   });
 
   it("should not allow holder to execute transferToNewEscrow to other targets not appointed by beneficiary", async () => {
@@ -289,7 +295,7 @@ contract("TradeTrustErc721WithTitleEscrow", accounts => {
 
     await escrowInstance.approveNewTransferTargets(beneficiary2, holder2, {from: beneficiary1});
 
-    const attemptToTransfer = escrowInstance.transferToNewEscrow(carrier1, carrier1, {from: holder1});
+    const attemptToTransfer = ERC721Instance.transferToNewTitleEscrow(carrier1, carrier1, SAMPLE_TOKEN_ID, {from: holder1});
 
     await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
   });

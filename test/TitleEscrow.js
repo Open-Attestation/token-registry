@@ -60,13 +60,13 @@ contract("TitleEscrow", accounts => {
     expect(escrowTokenRegistry).to.be.equal(ERC721Address);
   });
 
-  // it("should have the correct ERC165 interface support", async () => {
-  //   const escrowInstance = await TitleEscrow.new(ERC721Address, beneficiary1, beneficiary1);
-  //   const calculatorInstance = await CalculateSelector.new();
-  //   const expectedInterface = await calculatorInstance.calculateSelector();
-  //   const interfaceSupported = await escrowInstance.supportsInterface(expectedInterface);
-  //   expect(interfaceSupported).to.be.equal(true, `Expected selector: ${expectedInterface}`);
-  // });
+  it("should have the correct ERC165 interface support", async () => {
+    const escrowInstance = await TitleEscrow.new(ERC721Address, beneficiary1, beneficiary1);
+    const calculatorInstance = await CalculateSelector.new();
+    const expectedInterface = await calculatorInstance.calculateSelector();
+    const interfaceSupported = await escrowInstance.supportsInterface(expectedInterface);
+    expect(interfaceSupported).to.be.equal(true, `Expected selector: ${expectedInterface}`);
+  });
 
   it("should be instantiated correctly when deployed by 3rd party to be held by beneficiary1", async () => {
     const escrowInstance = await TitleEscrow.new(ERC721Address, beneficiary1, beneficiary1, {

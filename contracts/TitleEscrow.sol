@@ -55,7 +55,8 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
 
   // ERC165: Interface for this contract, can be calculated by calculateSelector()
   // Only append new interface id for backward compatibility
-  bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xdcce2211;
+  // bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xdcce2211;
+  bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xa8759141;
 
   enum StatusTypes {Uninitialised, InUse, Exited}
   StatusTypes public status = StatusTypes.Uninitialised;
