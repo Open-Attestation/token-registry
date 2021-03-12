@@ -15,11 +15,12 @@ contract("TitleEscrowCreator", accounts => {
   let TitleEscrowCreatorInstance;
 
   before(async () => {
-    TitleEscrowCreatorInstance = await TitleEscrowCreator.new();
+    // TitleEscrowCreatorInstance = await ERC721.new();
   });
 
   beforeEach(async () => {
     ERC721Instance = await ERC721.new("foo", "bar");
+    TitleEscrowCreatorInstance = ERC721Instance
     ERC721Address = ERC721Instance.address;
   });
 

@@ -1,10 +1,27 @@
 pragma solidity ^0.5.16;
 
 import "./ERC721.sol";
+import "./TitleEscrow.sol";
+import "./ITitleEscrowCreator.sol";
 
 // Everything above is imported from OpenZeppelin ERC721 implementation
+contract TitleEscrowCreator is ITitleEscrowCreator {
+  event TitleEscrowDeployed(
+    address indexed escrowAddress,
+    address indexed tokenRegistry,
+    address beneficiary,
+    address holder
+  );
 
-contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
+  function deployNewTitleEscrow(address tokenRegistry, address beneficiary, address holder) external returns (address) {
+    TitleEscrow newEscrow = new TitleEscrow(ERC721(tokenRegistry), beneficiary, holder, address(this));
+    emit TitleEscrowDeployed(address(newEscrow), tokenRegistry, beneficiary, holder);
+    return address(newEscrow);
+  }
+}
+
+
+contract TradeTrustERC721 is TitleEscrowCreator,ERC721MintableFull, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
@@ -32,6 +49,12 @@ contract TradeTrustERC721 is ERC721MintableFull, IERC721Receiver {
     emit TokenBurnt(_tokenId);
   }
 
+  function sendtoNewTitleEscrow(uint256 _tokenId, address beneficiary, address holder) public onlyMinter {
+    require(ownerOf(_tokenId) == address(this), "Cannot send token: Token not owned by token registry");
+    address newTitleEscrow = this.deployNewTitleEscrow(address(this), beneficiary, holder);
+    _safeTransferFrom(address(this), newTitleEscrow, _tokenId, "");
+  }
+
   function sendToken(address to, uint256 _tokenId) public onlyMinter {
     require(ownerOf(_tokenId) == address(this), "Cannot send token: Token not owned by token registry");
     _safeTransferFrom(ownerOf(_tokenId), to, _tokenId, "");
@@ -48,3 +71,7 @@ contract calculateTradeTrustERC721Selector {
       i.sendToken.selector;
   }
 }
+
+
+
+
