@@ -21,6 +21,7 @@ contract("TradeTrustErc721", accounts => {
   const owner1 = accounts[1];
   const owner2 = accounts[2];
   const nonMinter = accounts[3];
+  const holder1 = accounts[4];
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
   const merkleRoot1 = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb4";
@@ -148,6 +149,15 @@ contract("TradeTrustErc721", accounts => {
       const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(owner2, merkleRoot1);
       await expect(attemptSendToken).to.be.rejectedWith(
         /VM Exception while processing transaction: revert Cannot send token: Token not owned by token registry/
+      );
+    });
+
+    it("non-minter should not be able to send token to new title escrow", async () => {
+      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToNewTitleEscrow(owner1, holder1, merkleRoot, {
+        from: nonMinter
+      });
+      await expect(attemptSendToken).to.be.rejectedWith(
+        /VM Exception while processing transaction: revert MinterRole: caller does not have the Minter role/
       );
     });
   });
