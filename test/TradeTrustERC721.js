@@ -152,6 +152,15 @@ contract("TradeTrustErc721", accounts => {
       );
     });
 
+    it("should be able to send token to new title escrow", async () => {
+      const currentTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+      expect(currentTokenOwner).to.deep.equal(tokenRegistryAddress);
+
+      await tokenRegistryInstanceWithShippingLineWallet.sendToNewTitleEscrow(owner1, holder1, merkleRoot, {from: shippingLine})
+      const nextTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+      expect(nextTokenOwner).to.not.deep.equal(currentTokenOwner);
+    });
+
     it("non-minter should not be able to send token to new title escrow", async () => {
       const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToNewTitleEscrow(owner1, holder1, merkleRoot, {
         from: nonMinter
