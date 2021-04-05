@@ -1,6 +1,7 @@
 const {expect} = require("chai").use(require("chai-as-promised"));
 const ethers = require("ethers");
 
+const TitleEscrow = artifacts.require("TitleEscrow");
 const Erc721 = artifacts.require("TradeTrustERC721");
 
 const assertDestroyBurntLog = (logs, tokenId) => {
@@ -159,6 +160,14 @@ contract("TradeTrustErc721", accounts => {
       await tokenRegistryInstanceWithShippingLineWallet.sendToNewTitleEscrow(owner1, holder1, merkleRoot, {from: shippingLine})
       const nextTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(nextTokenOwner).to.not.deep.equal(currentTokenOwner);
+
+      const newEscrowInstance = await TitleEscrow.at(nextTokenOwner);
+      const escrowBeneficiary = await newEscrowInstance.beneficiary();
+      const escrowHolder = await newEscrowInstance.holder();
+      const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
+      expect(escrowBeneficiary).to.be.equal(owner1);
+      expect(escrowHolder).to.be.equal(holder1);
+      expect(escrowTokenRegistry).to.be.equal(tokenRegistryAddress);
     });
 
     it("non-minter should not be able to send token to new title escrow", async () => {

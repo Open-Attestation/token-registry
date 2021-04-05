@@ -20,12 +20,11 @@ contract TitleEscrowCreator is ITitleEscrowCreator {
   }
 }
 
-
-contract TradeTrustERC721 is TitleEscrowCreator,ERC721MintableFull, IERC721Receiver {
+contract TradeTrustERC721 is TitleEscrowCreator, ERC721MintableFull, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
-  // ERC165: Interface for this contract, can be calculated by calculateTradeTrustERC721Selector()
+  // ERC165: Interface for this contract, can be calculated by CalculateTradeTrustERC721Selector()
   // Only append new interface id for backward compatibility
   bytes4 private constant _INTERFACE_ID_TRADETRUST_ERC721 = 0xde500ce7;
   
@@ -50,7 +49,7 @@ contract TradeTrustERC721 is TitleEscrowCreator,ERC721MintableFull, IERC721Recei
   }
 
   function sendToNewTitleEscrow(address beneficiary, address holder, uint256 _tokenId) public onlyMinter {
-    require(ownerOf(_tokenId) == address(this), "Cannot send token: Token not owned by token registry");
+    // require(ownerOf(_tokenId) == address(this), "Cannot send token: Token not owned by token registry");
     address newTitleEscrow = this.deployNewTitleEscrow(address(this), beneficiary, holder);
     _safeTransferFrom(address(this), newTitleEscrow, _tokenId, "");
   }
@@ -62,7 +61,7 @@ contract TradeTrustERC721 is TitleEscrowCreator,ERC721MintableFull, IERC721Recei
 
 }
 
-contract calculateTradeTrustERC721Selector {
+contract CalculateTradeTrustERC721Selector {
   function calculateSelector() public pure returns (bytes4) {
     TradeTrustERC721 i;
     return
@@ -71,7 +70,3 @@ contract calculateTradeTrustERC721Selector {
       i.sendToken.selector;
   }
 }
-
-
-
-
