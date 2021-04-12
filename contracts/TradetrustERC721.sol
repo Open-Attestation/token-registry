@@ -49,7 +49,6 @@ contract TradeTrustERC721 is TitleEscrowCreator, ERC721MintableFull, IERC721Rece
   }
 
   function sendToNewTitleEscrow(address beneficiary, address holder, uint256 _tokenId) public onlyMinter {
-    // require(ownerOf(_tokenId) == address(this), "Cannot send token: Token not owned by token registry");
     address newTitleEscrow = this.deployNewTitleEscrow(address(this), beneficiary, holder);
     _safeTransferFrom(address(this), newTitleEscrow, _tokenId, "");
   }
