@@ -12,11 +12,6 @@ contract("TitleEscrowCreator", accounts => {
 
   let ERC721Address = "";
   let ERC721Instance;
-  let TitleEscrowCreatorInstance;
-
-  before(async () => {
-    TitleEscrowCreatorInstance = await TitleEscrowCreator.new();
-  });
 
   beforeEach(async () => {
     ERC721Instance = await ERC721.new("foo", "bar");
@@ -24,7 +19,7 @@ contract("TitleEscrowCreator", accounts => {
   });
 
   it("should deploy new instance of TitleEscrow", async () => {
-    const {logs} = await TitleEscrowCreatorInstance.deployNewTitleEscrow(ERC721Address, beneficiary1, beneficiary1, {
+    const {logs} = await ERC721Instance.deployNewTitleEscrow(ERC721Address, beneficiary1, beneficiary1, {
       from: beneficiary1
     });
     const escrowInstance = await TitleEscrow.at(logs[0].args.escrowAddress);
@@ -37,7 +32,7 @@ contract("TitleEscrowCreator", accounts => {
   });
 
   it("should allow instances of TitleEscrow to have the function transferToNewEscrow", async () => {
-    const {logs} = await TitleEscrowCreatorInstance.deployNewTitleEscrow(ERC721Address, beneficiary1, beneficiary1, {
+    const {logs} = await ERC721Instance.deployNewTitleEscrow(ERC721Address, beneficiary1, beneficiary1, {
       from: beneficiary1
     });
 

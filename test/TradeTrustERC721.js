@@ -1,6 +1,7 @@
 const {expect} = require("chai").use(require("chai-as-promised"));
 const ethers = require("ethers");
 
+const TitleEscrow = artifacts.require("TitleEscrow");
 const Erc721 = artifacts.require("TradeTrustERC721");
 
 const assertDestroyBurntLog = (logs, tokenId) => {
@@ -21,6 +22,7 @@ contract("TradeTrustErc721", accounts => {
   const owner1 = accounts[1];
   const owner2 = accounts[2];
   const nonMinter = accounts[3];
+  const holder1 = accounts[4];
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
   const merkleRoot1 = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb4";
@@ -148,6 +150,32 @@ contract("TradeTrustErc721", accounts => {
       const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToken(owner2, merkleRoot1);
       await expect(attemptSendToken).to.be.rejectedWith(
         /VM Exception while processing transaction: revert Cannot send token: Token not owned by token registry/
+      );
+    });
+
+    it("should be able to send token to new title escrow", async () => {
+      const currentTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+      expect(currentTokenOwner).to.deep.equal(tokenRegistryAddress);
+
+      await tokenRegistryInstanceWithShippingLineWallet.sendToNewTitleEscrow(owner1, holder1, merkleRoot, {from: shippingLine})
+      const nextTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+      expect(nextTokenOwner).to.not.deep.equal(currentTokenOwner);
+
+      const newEscrowInstance = await TitleEscrow.at(nextTokenOwner);
+      const escrowBeneficiary = await newEscrowInstance.beneficiary();
+      const escrowHolder = await newEscrowInstance.holder();
+      const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
+      expect(escrowBeneficiary).to.be.equal(owner1);
+      expect(escrowHolder).to.be.equal(holder1);
+      expect(escrowTokenRegistry).to.be.equal(tokenRegistryAddress);
+    });
+
+    it("non-minter should not be able to send token to new title escrow", async () => {
+      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.sendToNewTitleEscrow(owner1, holder1, merkleRoot, {
+        from: nonMinter
+      });
+      await expect(attemptSendToken).to.be.rejectedWith(
+        /VM Exception while processing transaction: revert MinterRole: caller does not have the Minter role/
       );
     });
   });
