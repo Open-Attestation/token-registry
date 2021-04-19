@@ -3,6 +3,7 @@ const ethers = require("ethers");
 
 const TitleEscrow = artifacts.require("TitleEscrow");
 const Erc721 = artifacts.require("TradeTrustERC721");
+const CalculateSelector = artifacts.require("CalculateTradeTrustERC721Selector");
 
 const assertDestroyBurntLog = (logs, tokenId) => {
   expect(logs.event).to.deep.equal("TokenBurnt");
@@ -28,6 +29,14 @@ contract("TradeTrustErc721", accounts => {
   const merkleRoot1 = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb4";
   const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
   const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
+
+  it("should have the correct ERC165 interface support", async () => {
+    const tradeTrustERC721Instance = await Erc721.new("foo", "bar");
+    const calculatorInstance = await CalculateSelector.new();
+    const expectedInterface = await calculatorInstance.calculateSelector();
+    const interfaceSupported = await tradeTrustERC721Instance.supportsInterface(expectedInterface);
+    expect(interfaceSupported).to.be.equal(true, `Expected selector: ${expectedInterface}`);
+  });
 
   it("should work without a wallet for read operations", async () => {
     const tokenRegistryInstanceWithShippingLine = await Erc721.new("foo", "bar");
