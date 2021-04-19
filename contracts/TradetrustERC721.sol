@@ -26,7 +26,7 @@ contract TradeTrustERC721 is TitleEscrowCreator, ERC721MintableFull, IERC721Rece
 
   // ERC165: Interface for this contract, can be calculated by CalculateTradeTrustERC721Selector()
   // Only append new interface id for backward compatibility
-  bytes4 private constant _INTERFACE_ID_TRADETRUST_ERC721 = 0xde500ce7;
+  bytes4 private constant _INTERFACE_ID_TRADETRUST_ERC721 = 0x9f9e69f3;
   
   constructor(string memory name, string memory symbol) public ERC721MintableFull(name, symbol) {
     // register the supported interface to conform to TradeTrustERC721 via ERC165
@@ -66,6 +66,7 @@ contract CalculateTradeTrustERC721Selector {
     return
       i.onERC721Received.selector ^
       i.destroyToken.selector ^
+      i.sendToNewTitleEscrow.selector ^
       i.sendToken.selector;
   }
 }
