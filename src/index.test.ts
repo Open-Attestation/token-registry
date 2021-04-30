@@ -1,7 +1,7 @@
-import {providers} from "ethers";
-import {TitleEscrowFactory, TradeTrustErc721Factory, TitleEscrowCreatorFactory} from "./index";
-import {TradeTrustErc721} from "../types/TradeTrustErc721";
-import {TitleEscrowCreator} from "../types/TitleEscrowCreator";
+import { providers } from "ethers";
+import { TitleEscrowFactory, TradeTrustErc721Factory, TitleEscrowCreatorFactory } from "./index";
+import { TradeTrustERC721 } from "../types/TradeTrustERC721";
+import { TitleEscrowCreator } from "../types/TitleEscrowCreator";
 
 const provider = new providers.JsonRpcProvider();
 const signer1 = provider.getSigner(0);
@@ -16,7 +16,7 @@ beforeAll(async () => {
 });
 
 describe("TitleEscrowCreatorFactory", () => {
-  let tokenRegistry: TradeTrustErc721;
+  let tokenRegistry: TradeTrustERC721;
   let titleEscrowFactory: TitleEscrowCreator;
 
   beforeEach(async () => {
@@ -42,7 +42,7 @@ describe("TitleEscrowCreatorFactory", () => {
 });
 
 describe("TitleEscrowFactory", () => {
-  let tokenRegistry: TradeTrustErc721;
+  let tokenRegistry: TradeTrustERC721;
 
   beforeEach(async () => {
     const tokenRegistryFactory = new TradeTrustErc721Factory(signer1);
