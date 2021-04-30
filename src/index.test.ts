@@ -34,7 +34,7 @@ describe("TitleEscrowCreatorFactory", () => {
     const connectedCreator = TitleEscrowCreatorFactory.connect(titleEscrowFactory.address, signer1);
     const receipt = await connectedCreator.deployNewTitleEscrow(tokenRegistry.address, account1, account2);
     const tx = await receipt.wait();
-    const deployedEventArgs = tx.events?.find(evt => evt.event === "TitleEscrowDeployed")?.args as any;
+    const deployedEventArgs = tx.events?.find((evt) => evt.event === "TitleEscrowDeployed")?.args as any;
     expect(deployedEventArgs.tokenRegistry).toBe(tokenRegistry.address);
     expect(deployedEventArgs.beneficiary).toBe(account1);
     expect(deployedEventArgs.holder).toBe(account2);
