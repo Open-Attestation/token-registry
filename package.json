@@ -60,7 +60,7 @@
     "@commitlint/config-conventional": "^12.1.1",
     "@commitlint/prompt": "^12.1.1",
     "@ls-age/commitlint-circle": "1.0.0",
-    "@typechain/ethers-v5": "^6.0.5",
+    "@typechain/ethers-v5": "^5.0.0",
     "@types/jest": "^26.0.23",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
