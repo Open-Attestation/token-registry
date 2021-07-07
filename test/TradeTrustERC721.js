@@ -24,14 +24,11 @@ describe("TradeTrustErc721", async () => {
   let holder1;
   let TitleEscrow;
   let Erc721;
-  let CalculateSelector;
 
-  before("", async () => {
-    const accounts = await ethers.getSigners();
-    [carrier1, owner1, owner2, nonMinter, holder1] = accounts;
+  before("Initialising contract factories and accounts for TradeTrustErc721 tests", async () => {
+    [carrier1, owner1, owner2, nonMinter, holder1] = await ethers.getSigners();
     TitleEscrow = await ethers.getContractFactory("TitleEscrow");
     Erc721 = await ethers.getContractFactory("TradeTrustERC721");
-    CalculateSelector = await ethers.getContractFactory("CalculateTradeTrustERC721Selector");
   });
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
@@ -40,11 +37,18 @@ describe("TradeTrustErc721", async () => {
   const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
   it("should have the correct ERC165 interface support", async () => {
+    // should support
+    // 1. ITradeTrustERC721 (so the extra stuff we tacked on to ERC721 to handle surrender)
+    // 2. ITitleEscrowCreator (to act as a TE factory)
+    // 3. IERC721 (basic so that someone expecting a token registry knows how to work with it)
+
     const tradeTrustERC721Instance = await Erc721.connect(carrier1).deploy("foo", "bar");
-    const calculatorInstance = await CalculateSelector.deploy();
-    const expectedInterface = await calculatorInstance.calculateSelector();
-    const interfaceSupported = await tradeTrustERC721Instance.supportsInterface(expectedInterface);
-    expect(interfaceSupported).to.be.equal(true, `Expected selector: ${expectedInterface}`);
+    const ITradeTrustERC721InterfaceId = "0x8a9513f1";
+    const IERC721InterfaceId = "0x80ac58cd";
+    const ITitleEscrowCreatorInterfaceId = "0xfcd7c1df";
+    expect(await tradeTrustERC721Instance.supportsInterface(ITradeTrustERC721InterfaceId)).to.be.true;
+    expect(await tradeTrustERC721Instance.supportsInterface(IERC721InterfaceId)).to.be.true;
+    expect(await tradeTrustERC721Instance.supportsInterface(ITitleEscrowCreatorInterfaceId)).to.be.true;
   });
 
   it("should work without a wallet for read operations", async () => {
@@ -119,7 +123,7 @@ describe("TradeTrustErc721", async () => {
     let tokenRegistryInstanceWithShippingLineWallet;
     let tokenRegistryAddress;
 
-    beforeEach(async () => {
+    beforeEach("Initialising fresh Token Registry and minting token for each test", async () => {
       // Starting test after the point of surrendering ERC721 Token
       tokenRegistryInstanceWithShippingLineWallet = await Erc721.connect(carrier1).deploy("foo", "bar");
       tokenRegistryAddress = tokenRegistryInstanceWithShippingLineWallet.address;

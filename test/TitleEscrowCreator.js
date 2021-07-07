@@ -11,19 +11,19 @@ describe("TitleEscrowCreator", async () => {
   let beneficiary1;
   let beneficiary2;
   let holder2;
-  let TitleEscrowFactory;
+  let TitleEscrow;
   let ERC721;
-  before("", async () => {
-    const accounts = await ethers.getSigners();
-    [carrier1, beneficiary1, beneficiary2, holder2] = accounts;
-    TitleEscrowFactory = await ethers.getContractFactory("TitleEscrow");
+
+  before("Initialising contract factories and accounts for TitleEscrowCreator tests", async () => {
+    [carrier1, beneficiary1, beneficiary2, holder2] = await ethers.getSigners();
+    TitleEscrow = await ethers.getContractFactory("TitleEscrow");
     ERC721 = await ethers.getContractFactory("TradeTrustERC721");
   });
 
   let ERC721Address = "";
   let ERC721Instance;
 
-  beforeEach(async () => {
+  beforeEach("Initialising fresh Token Registry for each test", async () => {
     ERC721Instance = await ERC721.connect(carrier1).deploy("foo", "bar");
     ERC721Address = ERC721Instance.address;
   });
@@ -32,7 +32,7 @@ describe("TitleEscrowCreator", async () => {
     const { events } = await (
       await ERC721Instance.deployNewTitleEscrow(ERC721Address, beneficiary1.address, beneficiary1.address)
     ).wait();
-    const escrowInstance = await TitleEscrowFactory.attach(events[1].args.escrowAddress);
+    const escrowInstance = await TitleEscrow.attach(events[1].args.escrowAddress);
     const escrowBeneficiary = await escrowInstance.beneficiary();
     const escrowHolder = await escrowInstance.holder();
     const escrowTokenRegistry = await escrowInstance.tokenRegistry();
@@ -49,7 +49,7 @@ describe("TitleEscrowCreator", async () => {
 
     await ERC721Instance["safeMint(address,uint256)"](escrowAddress, SAMPLE_TOKEN_ID);
 
-    const escrowInstance = await TitleEscrowFactory.attach(escrowAddress);
+    const escrowInstance = await TitleEscrow.attach(escrowAddress);
     const receipt = await (
       await escrowInstance.connect(beneficiary1).transferToNewEscrow(beneficiary2.address, holder2.address)
     ).wait();
@@ -60,7 +60,7 @@ describe("TitleEscrowCreator", async () => {
     expect(escrowAddress).not.to.be.equal(newAddress);
     expect(newAddress).to.be.equal(ownerOnRegistry);
 
-    const newEscrowInstance = await TitleEscrowFactory.attach(ownerOnRegistry);
+    const newEscrowInstance = await TitleEscrow.attach(ownerOnRegistry);
     const escrowBeneficiary = await newEscrowInstance.beneficiary();
     const escrowHolder = await newEscrowInstance.holder();
     const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();

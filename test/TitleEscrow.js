@@ -1,10 +1,8 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
 
 describe("TitleEscrow", async () => {
-  let accounts;
   let TitleEscrowFactory;
   let ERC721Factory;
-  let CalculateSelectorFactory;
   let TitleEscrowCreatorFactory;
 
   let carrier1;
@@ -13,13 +11,11 @@ describe("TitleEscrow", async () => {
   let holder1;
   let holder2;
 
-  before("", async () => {
-    accounts = await ethers.getSigners();
+  before("Initialising contract factories and accounts for TitleEscrow tests", async () => {
+    [carrier1, beneficiary1, beneficiary2, holder1, holder2] = await ethers.getSigners();
     TitleEscrowFactory = await ethers.getContractFactory("TitleEscrow");
     ERC721Factory = await ethers.getContractFactory("TradeTrustERC721");
-    CalculateSelectorFactory = await ethers.getContractFactory("CalculateSelector");
     TitleEscrowCreatorFactory = await ethers.getContractFactory("TitleEscrowCreator");
-    [carrier1, beneficiary1, beneficiary2, holder1, holder2] = accounts;
   });
 
   const SAMPLE_TOKEN_ID = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
@@ -29,11 +25,6 @@ describe("TitleEscrow", async () => {
     expect(logs.event).to.deep.equal("Transfer");
     expect(logs.args[0]).to.deep.equal(from);
     expect(logs.args[1]).to.deep.equal(to);
-  };
-  const assertTitleReceivedLog = (log, tokenRegistry, sender) => {
-    expect(log.event).to.deep.equal("TitleReceived");
-    expect(log.args[0]).to.deep.equal(tokenRegistry);
-    expect(log.args[1]).to.deep.equal(sender);
   };
   const assertTitleCededLog = (log, tokenRegistry, receiver) => {
     expect(log.event).to.deep.equal("TitleCeded");
@@ -54,7 +45,7 @@ describe("TitleEscrow", async () => {
   let ERC721Address = "";
   let ERC721Instance;
 
-  beforeEach("doot", async () => {
+  beforeEach("Initialising fresh Token Registry for each test", async () => {
     ERC721Instance = await ERC721Factory.connect(carrier1).deploy("foo", "bar");
     ERC721Address = ERC721Instance.address;
   });
@@ -82,10 +73,9 @@ describe("TitleEscrow", async () => {
       beneficiary1.address,
       ZERO_ADDRESS
     );
-    const calculatorInstance = await CalculateSelectorFactory.connect(beneficiary1).deploy();
-    const expectedInterface = await calculatorInstance.calculateSelector();
-    const interfaceSupported = await escrowInstance.supportsInterface(expectedInterface);
-    expect(interfaceSupported).to.be.equal(true, `Expected selector: ${expectedInterface}`);
+    const ITitleEscrowInterfaceId = "0x015509a1";
+    const interfaceSupported = await escrowInstance.supportsInterface(ITitleEscrowInterfaceId);
+    expect(interfaceSupported).to.be.equal(true, `Expected selector: ${ITitleEscrowInterfaceId}`);
   });
 
   it("should be instantiated correctly when deployed by 3rd party to be held by beneficiary1", async () => {
@@ -130,13 +120,13 @@ describe("TitleEscrow", async () => {
 
     const approveNewOwnerTx = escrowInstance.connect(beneficiary1).approveNewOwner(beneficiary2.address);
 
-    await expect(approveNewOwnerTx).to.be.rejectedWith(/TitleEscrow: Contract is not holding a token/);
+    await expect(approveNewOwnerTx).to.be.revertedWith("TitleEscrow: Contract is not holding a token");
     const changeHolderTx = escrowInstance.connect(holder1).changeHolder(holder2.address);
 
-    await expect(changeHolderTx).to.be.rejectedWith(/TitleEscrow: Contract is not holding a token/);
+    await expect(changeHolderTx).to.be.revertedWith("TitleEscrow: Contract is not holding a token");
     const transferTx = escrowInstance.connect(holder1).transferTo(beneficiary2.address);
 
-    await expect(transferTx).to.be.rejectedWith(/TitleEscrow: Contract is not holding a token/);
+    await expect(transferTx).to.be.revertedWith("TitleEscrow: Contract is not holding a token");
     const status = await escrowInstance.status();
     expect(status.toString()).to.equal("0");
   });
@@ -170,7 +160,7 @@ describe("TitleEscrow", async () => {
     );
     const mintTx = ERC721Instance["safeMint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID);
 
-    await expect(mintTx).to.be.rejectedWith(/TitleEscrow: Only tokens from predefined token registry can be accepted/);
+    await expect(mintTx).to.be.revertedWith("TitleEscrow: Only tokens from predefined token registry can be accepted");
   });
 
   it("should allow exit to another title escrow", async () => {
@@ -285,7 +275,7 @@ describe("TitleEscrow", async () => {
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
     const attemptToTransferTx = escrowInstance.connect(beneficiary1).transferTo(ZERO_ADDRESS);
-    await expect(attemptToTransferTx).to.be.rejectedWith(/TitleEscrow: Transferring to 0x0 is not allowed/);
+    await expect(attemptToTransferTx).to.be.revertedWith("TitleEscrow: Transferring to 0x0 is not allowed");
   });
   it("should not allow holder to transfer to new beneficiary without endorsement", async () => {
     const escrowInstance = await TitleEscrowFactory.connect(beneficiary1).deploy(
@@ -303,8 +293,8 @@ describe("TitleEscrow", async () => {
 
     const attemptToTransferOwnerTx = escrowInstance.connect(holder1).transferTo(beneficiary2.address);
 
-    await expect(attemptToTransferOwnerTx).to.be.rejectedWith(
-      /TitleEscrow: New owner has not been approved by beneficiary/
+    await expect(attemptToTransferOwnerTx).to.be.revertedWith(
+      "TitleEscrow: New owner has not been approved by beneficiary"
     );
   });
   it("should not allow unauthorised party to execute any state change", async () => {
@@ -321,14 +311,14 @@ describe("TitleEscrow", async () => {
 
     const attemptToTransferOwnerTx = escrowInstance.connect(beneficiary2).transferTo(holder2.address);
 
-    await expect(attemptToTransferOwnerTx).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
+    await expect(attemptToTransferOwnerTx).to.be.revertedWith("HasHolder: only the holder may invoke this function");
     const attemptToTransferHolderTx = escrowInstance.connect(beneficiary2).changeHolder(holder2.address);
 
-    await expect(attemptToTransferHolderTx).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
+    await expect(attemptToTransferHolderTx).to.be.revertedWith("HasHolder: only the holder may invoke this function");
     const attemptToapproveNewOwnerTx = escrowInstance.connect(beneficiary2).approveNewOwner(holder2.address);
 
-    await expect(attemptToapproveNewOwnerTx).to.be.rejectedWith(
-      /HasNamedBeneficiary: only the beneficiary may invoke this function/
+    await expect(attemptToapproveNewOwnerTx).to.be.revertedWith(
+      "HasNamedBeneficiary: only the beneficiary may invoke this function"
     );
   });
 
@@ -352,16 +342,20 @@ describe("TitleEscrow", async () => {
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance1.address);
 
-    const transferTx = await (await escrowInstance1.transferTo(escrowInstance2.address)).wait();
-    assertTitleCededLog(transferTx.events[0], ERC721Address, escrowInstance2.address);
-    assertTitleReceivedLog(transferTx.events[2], ERC721Address, escrowInstance1.address);
+    const transferTx = escrowInstance1.transferTo(escrowInstance2.address);
+    await expect(transferTx)
+      .to.emit(escrowInstance1, "TitleCeded")
+      .withArgs(ERC721Address, escrowInstance2.address, SAMPLE_TOKEN_ID);
+    await expect(transferTx)
+      .to.emit(escrowInstance2, "TitleReceived")
+      .withArgs(ERC721Address, escrowInstance1.address, SAMPLE_TOKEN_ID);
 
     const newOwner = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
     expect(newOwner).to.be.equal(escrowInstance2.address);
 
     const changeHolderTx = escrowInstance1.connect(beneficiary1).changeHolder(holder1.address);
 
-    await expect(changeHolderTx).to.be.rejectedWith(/TitleEscrow: Contract is not in use/);
+    await expect(changeHolderTx).to.be.revertedWith("TitleEscrow: Contract is not in use");
   });
   it("should not accept a token after it has been used", async () => {
     const escrowInstance1 = await TitleEscrowFactory.connect(beneficiary1).deploy(
@@ -383,15 +377,20 @@ describe("TitleEscrow", async () => {
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance1.address);
 
-    const transferTx = await (await escrowInstance1.connect(beneficiary1).transferTo(escrowInstance2.address)).wait();
-    assertTitleCededLog(transferTx.events[0], ERC721Address, escrowInstance2.address);
-    assertTitleReceivedLog(transferTx.events[2], ERC721Address, escrowInstance1.address);
+    const transferTx = escrowInstance1.connect(beneficiary1).transferTo(escrowInstance2.address);
+    await expect(transferTx)
+      .to.emit(escrowInstance1, "TitleCeded")
+      .withArgs(ERC721Address, escrowInstance2.address, SAMPLE_TOKEN_ID);
+    await expect(transferTx)
+      .to.emit(escrowInstance2, "TitleReceived")
+      .withArgs(ERC721Address, escrowInstance1.address, SAMPLE_TOKEN_ID);
+
     const newOwner = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
     expect(newOwner).to.be.equal(escrowInstance2.address);
 
     const transferTx2 = escrowInstance2.connect(beneficiary2).transferTo(escrowInstance1.address);
 
-    await expect(transferTx2).to.be.rejectedWith(/TitleEscrow: Contract has been used before/);
+    await expect(transferTx2).to.be.revertedWith("TitleEscrow: Contract has been used before");
   });
 
   it("should be able to transfer to a new beneficiary and holder instantly", async () => {
@@ -466,7 +465,7 @@ describe("TitleEscrow", async () => {
       .connect(beneficiary1)
       .approveNewTransferTargets(beneficiary2.address, holder2.address);
 
-    await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Contract is not holding a token/);
+    await expect(attemptToTransfer).to.be.revertedWith("TitleEscrow: Contract is not holding a token");
   });
 
   it("should not allow user to appoint new beneficiary and holder when user is not the beneficiary", async () => {
@@ -484,8 +483,8 @@ describe("TitleEscrow", async () => {
       .connect(carrier1)
       .approveNewTransferTargets(beneficiary2.address, holder2.address);
 
-    await expect(attemptToAppoint).to.be.rejectedWith(
-      /HasNamedBeneficiary: only the beneficiary may invoke this function/
+    await expect(attemptToAppoint).to.be.revertedWith(
+      "HasNamedBeneficiary: only the beneficiary may invoke this function"
     );
   });
 
@@ -532,7 +531,7 @@ describe("TitleEscrow", async () => {
       .connect(holder1)
       .transferToNewEscrow(beneficiary2.address, holder2.address);
 
-    await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
+    await expect(attemptToTransfer).to.be.revertedWith("TitleEscrow: Beneficiary has not been endorsed by beneficiary");
   });
 
   it("should not allow anyone else (esp beneficiary) to execute transferToNewEscrow when new beneficiary and holder has been appointed", async () => {
@@ -549,14 +548,14 @@ describe("TitleEscrow", async () => {
     const attemptToTransferByBeneficiay = escrowInstance
       .connect(beneficiary1)
       .transferToNewEscrow(beneficiary2.address, holder2.address);
-    await expect(attemptToTransferByBeneficiay).to.be.rejectedWith(
-      /HasHolder: only the holder may invoke this function/
+    await expect(attemptToTransferByBeneficiay).to.be.revertedWith(
+      "HasHolder: only the holder may invoke this function"
     );
 
     const attemptToTransferByCarrier = escrowInstance
       .connect(carrier1)
       .transferToNewEscrow(beneficiary2.address, holder2.address);
-    await expect(attemptToTransferByCarrier).to.be.rejectedWith(/HasHolder: only the holder may invoke this function/);
+    await expect(attemptToTransferByCarrier).to.be.revertedWith("HasHolder: only the holder may invoke this function");
   });
 
   it("should not allow holder to execute transferToNewEscrow to other targets not appointed by beneficiary", async () => {
@@ -576,7 +575,7 @@ describe("TitleEscrow", async () => {
 
     const attemptToTransfer = escrowInstance.connect(holder1).transferToNewEscrow(carrier1.address, carrier1.address);
 
-    await expect(attemptToTransfer).to.be.rejectedWith(/TitleEscrow: Beneficiary has not been endorsed by beneficiary/);
+    await expect(attemptToTransfer).to.be.revertedWith("TitleEscrow: Beneficiary has not been endorsed by beneficiary");
   });
 
   it("should not allow _transferTo to be called by any user", async () => {

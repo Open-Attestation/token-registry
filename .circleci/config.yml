@@ -3,7 +3,6 @@ jobs:
   build:
     docker:
       - image: 'circleci/node:14'
-      # if need to wait .. => https://support.circleci.com/hc/en-us/articles/360006773953-Race-Conditions-Wait-For-Database
     steps:
       - checkout
       - run:

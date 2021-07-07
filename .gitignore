@@ -10,3 +10,5 @@ yarn-error.log
 /types
 /cache
 /artifacts
+/contracts/artifacts
+/contracts/.deps

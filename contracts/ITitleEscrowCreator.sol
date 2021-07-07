@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.0;
 
 /// @title Title Escrow for Transferable Records
 interface ITitleEscrowCreator {

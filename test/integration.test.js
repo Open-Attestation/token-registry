@@ -14,7 +14,7 @@ describe("TradeTrustErc721", async () => {
     let tokenRegistryInstanceWithShippingLineWallet;
     let tokenRegistryAddress;
 
-    beforeEach(async () => {
+    beforeEach("Initialising fresh Token Registry for each test", async () => {
       tokenRegistryInstanceWithShippingLineWallet = await Erc721.connect(shippingLine).deploy("foo", "bar");
       tokenRegistryAddress = tokenRegistryInstanceWithShippingLineWallet.address;
     });

@@ -1,13 +1,14 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.0;
 
-import "./ERC721.sol";
 import "./ITitleEscrow.sol";
 import "./ITitleEscrowCreator.sol";
+import "./ERC721.sol";
 
-contract HasNamedBeneficiary is Context {
-  address public beneficiary;
+abstract contract HasNamedBeneficiary is Context, IHasBeneficiary {
+  address public override beneficiary;
 
-  constructor(address _beneficiary) internal {
+  constructor(address _beneficiary) {
     beneficiary = _beneficiary;
   }
 
@@ -21,12 +22,11 @@ contract HasNamedBeneficiary is Context {
   }
 }
 
-contract HasHolder is Context {
-  address public holder;
+abstract contract HasHolder is Context, IHasHolder {
+  address public override holder;
 
-  event HolderChanged(address indexed previousHolder, address indexed newHolder);
-
-  constructor(address _holder) internal {
+  //   event HolderChanged(address indexed previousHolder, address indexed newHolder);
+  constructor(address _holder) {
     holder = _holder;
     emit HolderChanged(address(0), _holder);
   }
@@ -47,43 +47,35 @@ contract HasHolder is Context {
   }
 }
 
-contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, ERC165 {
-  event TitleReceived(address indexed _tokenRegistry, address indexed _from, uint256 indexed _id);
-  event TitleCeded(address indexed _tokenRegistry, address indexed _to, uint256 indexed _id);
-  event TransferOwnerApproval(uint256 indexed _tokenid, address indexed _from, address indexed _to);
-  event TransferTitleEscrowApproval(address indexed newBeneficiary, address indexed newHolder);
-
-  // ERC165: Interface for this contract, can be calculated by calculateSelector()
-  // Only append new interface id for backward compatibility
-  bytes4 private constant _INTERFACE_ID_TITLEESCROW = 0xdcce2211;
-
-  enum StatusTypes {Uninitialised, InUse, Exited}
-  StatusTypes public status = StatusTypes.Uninitialised;
+contract TitleEscrow is Context, ITitleEscrow, HasHolder, HasNamedBeneficiary, ERC165 {
+  StatusTypes public override status = StatusTypes.Uninitialised;
 
   // Information on token held
-  ERC721 public tokenRegistry;
+  ERC721 public override tokenRegistry;
   uint256 public _tokenId;
 
   // Factory to clone this title escrow
   ITitleEscrowCreator public titleEscrowFactory;
 
   // For exiting into title escrow contracts
-  address public approvedBeneficiary;
-  address public approvedHolder;
+  address public override approvedBeneficiary;
+  address public override approvedHolder;
 
   // For exiting into non-title escrow contracts
-  address public approvedOwner;
+  address public override approvedOwner;
 
-  //TODO: change ERC721 to address so that external contracts don't need to import ERC721 to use this
   constructor(
-    ERC721 _tokenRegistry,
+    address _tokenRegistry,
     address _beneficiary,
     address _holder,
     address _titleEscrowFactoryAddress
-  ) public HasNamedBeneficiary(_beneficiary) HasHolder(_holder) {
+  ) HasNamedBeneficiary(_beneficiary) HasHolder(_holder) {
     tokenRegistry = ERC721(_tokenRegistry);
     titleEscrowFactory = ITitleEscrowCreator(_titleEscrowFactoryAddress);
-    _registerInterface(_INTERFACE_ID_TITLEESCROW);
+  }
+
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+    return interfaceId == type(ITitleEscrow).interfaceId;
   }
 
   function onERC721Received(
@@ -91,7 +83,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     address from,
     uint256 tokenId,
     bytes calldata data
-  ) external returns (bytes4) {
+  ) external override returns (bytes4) {
     require(status == StatusTypes.Uninitialised, "TitleEscrow: Contract has been used before");
     require(
       _msgSender() == address(tokenRegistry),
@@ -103,7 +95,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
   }
 
-  function changeHolder(address newHolder) public isHoldingToken onlyHolder {
+  function changeHolder(address newHolder) public override isHoldingToken onlyHolder {
     _changeHolder(newHolder);
   }
 
@@ -132,7 +124,7 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     _;
   }
 
-  function approveNewOwner(address newOwner) public isHoldingToken onlyBeneficiary {
+  function approveNewOwner(address newOwner) public override isHoldingToken onlyBeneficiary {
     emit TransferOwnerApproval(_tokenId, beneficiary, newOwner);
     approvedOwner = newOwner;
   }
@@ -143,22 +135,31 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     tokenRegistry.safeTransferFrom(address(this), address(newOwner), _tokenId);
   }
 
-  function transferTo(address newOwner) public isHoldingToken onlyHolder allowTransferOwner(newOwner) {
+  function transferTo(address newOwner) public override isHoldingToken onlyHolder allowTransferOwner(newOwner) {
     _transferTo(newOwner);
   }
 
   function transferToNewEscrow(address newBeneficiary, address newHolder)
     public
+    override
     isHoldingToken
     onlyHolder
     allowTransferTitleEscrow(newBeneficiary, newHolder)
   {
-    address newTitleEscrowAddress =
-      titleEscrowFactory.deployNewTitleEscrow(address(tokenRegistry), newBeneficiary, newHolder);
+    address newTitleEscrowAddress = titleEscrowFactory.deployNewTitleEscrow(
+      address(tokenRegistry),
+      newBeneficiary,
+      newHolder
+    );
     _transferTo(newTitleEscrowAddress);
   }
 
-  function approveNewTransferTargets(address newBeneficiary, address newHolder) public onlyBeneficiary isHoldingToken {
+  function approveNewTransferTargets(address newBeneficiary, address newHolder)
+    public
+    override
+    onlyBeneficiary
+    isHoldingToken
+  {
     require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
     require(newHolder != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
 
