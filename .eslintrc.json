@@ -12,10 +12,7 @@
     }
   },
   "globals": {
-    "artifacts": "readonly",
-    "contract": "readonly",
-    "assert": "readonly",
-    "web3": "writable"
+    "ethers": "writable"
   },
   "rules": {
     "import/extensions": "off",

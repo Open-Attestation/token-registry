@@ -1,8 +1,9 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
-const Erc721 = artifacts.require("TradeTrustERC721");
-const TitleEscrow = artifacts.require("TitleEscrow");
 
-contract("TradeTrustErc721", (accounts) => {
+describe("TradeTrustErc721", async () => {
+  const accounts = await ethers.getSigners();
+  const Erc721 = await ethers.getContractFactory("TradeTrustERC721");
+  const TitleEscrow = await ethers.getContractFactory("TitleEscrow");
   const shippingLine = accounts[0];
   const beneficiary1 = accounts[1];
 
@@ -14,21 +15,22 @@ contract("TradeTrustErc721", (accounts) => {
     let tokenRegistryAddress;
 
     beforeEach(async () => {
-      tokenRegistryInstanceWithShippingLineWallet = await Erc721.new("foo", "bar", { from: shippingLine });
+      tokenRegistryInstanceWithShippingLineWallet = await Erc721.connect(shippingLine).deploy("foo", "bar");
       tokenRegistryAddress = tokenRegistryInstanceWithShippingLineWallet.address;
     });
 
     it("should be able to surrender token", async () => {
-      escrowInstance = await TitleEscrow.new(tokenRegistryAddress, beneficiary1, beneficiary1, ZERO_ADDRESS, {
-        from: beneficiary1,
-      });
-      escrowInstanceAddress = escrowInstance.address;
-      await tokenRegistryInstanceWithShippingLineWallet.safeMint(escrowInstanceAddress, merkleRoot);
+      const escrowInstance = await TitleEscrow.connect(beneficiary1).deploy(
+        tokenRegistryAddress,
+        beneficiary1.address,
+        beneficiary1.address,
+        ZERO_ADDRESS
+      );
+      const escrowInstanceAddress = escrowInstance.address;
+      await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](escrowInstanceAddress, merkleRoot);
       const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(currentOwner).to.deep.equal(escrowInstanceAddress);
-      await escrowInstance.transferTo(tokenRegistryAddress, {
-        from: beneficiary1,
-      });
+      await escrowInstance.transferTo(tokenRegistryAddress);
       const nextOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(nextOwner).to.deep.equal(tokenRegistryAddress);
     });

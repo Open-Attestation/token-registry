@@ -21,9 +21,12 @@ interface ITitleEscrow {
   /// @param data Additional data with no specified format
   /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
   /// unless throwing
-  function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data)
-    external
-    returns (bytes4);
+  function onERC721Received(
+    address operator,
+    address from,
+    uint256 tokenId,
+    bytes calldata data
+  ) external returns (bytes4);
 
   /// @notice Handle the change of holdership by current holder
   /// @param newHolder The address of the new holder

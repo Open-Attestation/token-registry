@@ -25,6 +25,7 @@ contract HasHolder is Context {
   address public holder;
 
   event HolderChanged(address indexed previousHolder, address indexed newHolder);
+
   constructor(address _holder) internal {
     holder = _holder;
     emit HolderChanged(address(0), _holder);
@@ -74,20 +75,23 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
   address public approvedOwner;
 
   //TODO: change ERC721 to address so that external contracts don't need to import ERC721 to use this
-  constructor(ERC721 _tokenRegistry, address _beneficiary, address _holder, address _titleEscrowFactoryAddress)
-    public
-    HasNamedBeneficiary(_beneficiary)
-    HasHolder(_holder)
-  {
+  constructor(
+    ERC721 _tokenRegistry,
+    address _beneficiary,
+    address _holder,
+    address _titleEscrowFactoryAddress
+  ) public HasNamedBeneficiary(_beneficiary) HasHolder(_holder) {
     tokenRegistry = ERC721(_tokenRegistry);
     titleEscrowFactory = ITitleEscrowCreator(_titleEscrowFactoryAddress);
     _registerInterface(_INTERFACE_ID_TITLEESCROW);
   }
 
-  function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data)
-    external
-    returns (bytes4)
-  {
+  function onERC721Received(
+    address operator,
+    address from,
+    uint256 tokenId,
+    bytes calldata data
+  ) external returns (bytes4) {
     require(status == StatusTypes.Uninitialised, "TitleEscrow: Contract has been used before");
     require(
       _msgSender() == address(tokenRegistry),
@@ -149,11 +153,8 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
     onlyHolder
     allowTransferTitleEscrow(newBeneficiary, newHolder)
   {
-    address newTitleEscrowAddress = titleEscrowFactory.deployNewTitleEscrow(
-      address(tokenRegistry),
-      newBeneficiary,
-      newHolder
-    );
+    address newTitleEscrowAddress =
+      titleEscrowFactory.deployNewTitleEscrow(address(tokenRegistry), newBeneficiary, newHolder);
     _transferTo(newTitleEscrowAddress);
   }
 
@@ -165,6 +166,5 @@ contract TitleEscrow is Context, ITitleEscrow, HasNamedBeneficiary, HasHolder, E
 
     approvedBeneficiary = newBeneficiary;
     approvedHolder = newHolder;
-
   }
 }
