@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
+import "./Initializable.sol";
+import "./Clones.sol";
 import "./ITitleEscrow.sol";
 import "./ITitleEscrowCreator.sol";
 import "./ERC721.sol";
 
-abstract contract HasNamedBeneficiary is Context, IHasBeneficiary {
+abstract contract HasNamedBeneficiaryInitializable is Context, IHasBeneficiary, Initializable {
   address public override beneficiary;
 
-  constructor(address _beneficiary) {
-    beneficiary = _beneficiary;
-  }
+    function __initialize__beneficiary(address _beneficiary) internal {
+        beneficiary = _beneficiary;
+    }
 
   modifier onlyBeneficiary() {
     require(isBeneficiary(), "HasNamedBeneficiary: only the beneficiary may invoke this function");
@@ -22,10 +24,10 @@ abstract contract HasNamedBeneficiary is Context, IHasBeneficiary {
   }
 }
 
-abstract contract HasHolder is Context, IHasHolder {
+abstract contract HasHolderInitializable is Context, IHasHolder, Initializable {
   address public override holder;
 
-  constructor(address _holder) {
+  function __initialize__holder(address _holder) internal {
     holder = _holder;
     emit HolderChanged(address(0), _holder);
   }
@@ -47,10 +49,10 @@ abstract contract HasHolder is Context, IHasHolder {
 }
 
 
-// TODO: remove this if not needed anymore - tried deleting it but it looks like
-// it's still used in a bunch of tests, might be possible to rewrite them
-contract TitleEscrow is Context, ITitleEscrow, HasHolder, HasNamedBeneficiary, ERC165 {
-  StatusTypes public override status = StatusTypes.Uninitialised;
+contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolderInitializable, HasNamedBeneficiaryInitializable, ERC165  {
+  // Documentation on how this smart contract works: https://docs.tradetrust.io/docs/overview/title-transfer
+
+  StatusTypes public override status;
 
   // Information on token held
   ERC721 public override tokenRegistry;
@@ -66,14 +68,17 @@ contract TitleEscrow is Context, ITitleEscrow, HasHolder, HasNamedBeneficiary, E
   // For exiting into non-title escrow contracts
   address public override approvedOwner;
 
-  constructor(
+  function initialize(
     address _tokenRegistry,
     address _beneficiary,
     address _holder,
     address _titleEscrowFactoryAddress
-  ) HasNamedBeneficiary(_beneficiary) HasHolder(_holder) {
+  ) public initializer {
+      __initialize__holder(_holder);
+      __initialize__beneficiary(_beneficiary);
     tokenRegistry = ERC721(_tokenRegistry);
     titleEscrowFactory = ITitleEscrowCreator(_titleEscrowFactoryAddress);
+    status  = StatusTypes.Uninitialised;
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {

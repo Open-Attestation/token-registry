@@ -1,6 +1,8 @@
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-watcher");
 require("hardhat-typechain");
+require("hardhat-gas-reporter");
+
 
 
 /**
@@ -25,4 +27,9 @@ require("hardhat-typechain");
       files: ["./contracts", "./test"],
     },
   },
+  gasReporter: {
+    coinmarketcap: "e3dd106b-9644-45ac-8f61-98614b973bca",
+    currency: 'USD',
+    gasPrice: 21
+  }
 }

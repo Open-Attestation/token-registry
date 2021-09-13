@@ -4,15 +4,9 @@ pragma solidity ^0.8.0;
 import "./ERC721.sol";
 import "./TitleEscrow.sol";
 import "./ITitleEscrowCreator.sol";
+import "./TitleEscrowCloneable.sol";
 
 contract TitleEscrowCreator is ITitleEscrowCreator {
-  event TitleEscrowDeployed(
-    address indexed escrowAddress,
-    address indexed tokenRegistry,
-    address beneficiary,
-    address holder
-  );
-
   function deployNewTitleEscrow(
     address tokenRegistry,
     address beneficiary,
@@ -22,6 +16,26 @@ contract TitleEscrowCreator is ITitleEscrowCreator {
     emit TitleEscrowDeployed(address(newEscrow), tokenRegistry, beneficiary, holder);
     return address(newEscrow);
   }
+}
+
+contract TitleEscrowCloner is ITitleEscrowCreator {
+  address public  titleEscrowImplementation;
+
+  constructor() { 
+    titleEscrowImplementation = address(new TitleEscrowCloneable());
+  }
+
+
+  function deployNewTitleEscrow(
+    address tokenRegistry,
+    address beneficiary,
+    address holder
+  ) external override returns (address) {
+    address clone = Clones.clone(titleEscrowImplementation);
+    TitleEscrowCloneable(clone).initialize(tokenRegistry, beneficiary, holder, address(this));
+    emit TitleEscrowDeployed(address(clone), tokenRegistry, beneficiary, holder);
+    return address(clone);
+    }
 }
 
 interface ITradeTrustERC721 is IERC721Receiver {
@@ -37,7 +51,7 @@ interface ITradeTrustERC721 is IERC721Receiver {
   function sendToken(address to, uint256 _tokenId) external;
 }
 
-contract TradeTrustERC721 is TitleEscrowCreator, ERC721Mintable, IERC721Receiver {
+contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
@@ -67,6 +81,10 @@ contract TradeTrustERC721 is TitleEscrowCreator, ERC721Mintable, IERC721Receiver
     this.safeTransferFrom(ownerOf(_tokenId), 0x000000000000000000000000000000000000dEaD, _tokenId, "");
   }
 
+  // TODO: modify this to mint a new token if it doesn't exist, and send a token if it is owned by address(this)
+  // rationale for this is that we currently also have a need for a method that performs the action for
+  // minting to a new title escrow directly, which has a large overlap with this function
+  // make sure to write tests for this and check for access controls
   function sendToNewTitleEscrow(
     address beneficiary,
     address holder,
