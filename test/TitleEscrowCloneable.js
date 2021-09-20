@@ -1,6 +1,6 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
 
-describe("TitleEscrow", async () => {
+describe("TitleEscrowCloneable", async () => {
   let TitleEscrowFactory;
   let ERC721Factory;
   let TitleEscrowCreatorFactory;

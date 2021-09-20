@@ -75,4 +75,12 @@ describe("TitleEscrowCloner", async () => {
   });
 
   // TODO: test that implementation's onERC721Received cannot be called
+  it("should not be able to call onERC721Received on the implementation", async () => {
+    const implAddr = await cloner.titleEscrowImplementation();
+    const implInstance = await TitleEscrowFactory.attach(implAddr);
+
+    const onReceived = implInstance.onERC721Received(implAddr, implAddr, SAMPLE_TOKEN_ID, "0x");
+
+    await expect(onReceived).to.be.revertedWith("Only tokens from predefined token registry can be accepted");
+  });
 });
