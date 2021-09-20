@@ -1,9 +1,9 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
 
 describe("TitleEscrowCloneable", async () => {
-  let TitleEscrowFactory;
+  let TitleEscrowCloneableFactory;
   let ERC721Factory;
-  let TitleEscrowCreatorFactory;
+  let TitleEscrowClonerFactory;
   let TitleEscrowCloner;
 
   let carrier1;
@@ -14,11 +14,11 @@ describe("TitleEscrowCloneable", async () => {
 
   before("Initialising contract factories and accounts for TitleEscrow tests", async () => {
     [carrier1, beneficiary1, beneficiary2, holder1, holder2] = await ethers.getSigners();
-    TitleEscrowFactory = await ethers.getContractFactory("TitleEscrow");
+    TitleEscrowCloneableFactory = await ethers.getContractFactory("TitleEscrowCloneable");
     ERC721Factory = await ethers.getContractFactory("TradeTrustERC721");
-    TitleEscrowCreatorFactory = await ethers.getContractFactory("TitleEscrowCloner");
+    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowCloner");
 
-    TitleEscrowCloner = await TitleEscrowCreatorFactory.connect(carrier1).deploy();
+    TitleEscrowCloner = await TitleEscrowClonerFactory.connect(carrier1).deploy();
   });
 
   const SAMPLE_TOKEN_ID = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
@@ -54,15 +54,15 @@ describe("TitleEscrowCloneable", async () => {
   });
 
 
-  const makeTitleEscrow = async (beneficiary, holder) => {
+  const makeTitleEscrow = async (beneficiary, holder, registry = ERC721Address) => {
     const tx = await (await TitleEscrowCloner.deployNewTitleEscrow(
-      ERC721Address,
+      registry,
       beneficiary,
       holder
     )).wait()
-    const teLog = tx.events.find(e => e.event == 'TitleEscrowDeployed')
+    const teLog = tx.events.find(e => e.event === 'TitleEscrowDeployed')
     const teAddr = teLog.args['escrowAddress']
-    return TitleEscrowFactory.attach(teAddr);
+    return TitleEscrowCloneableFactory.attach(teAddr);
   }
   it("should be instantiated correctly when deployed by beneficiary", async () => {
     const escrowInstance = await makeTitleEscrow(
@@ -154,11 +154,10 @@ describe("TitleEscrowCloneable", async () => {
   it("should should fail to receive ERC721 if its from a different registry", async () => {
     const newERC721Instance = await ERC721Factory.connect(beneficiary1).deploy("foo", "bar");
 
-    const escrowInstance = await TitleEscrowFactory.connect(beneficiary1).deploy(
-      newERC721Instance.address,
+    const escrowInstance = await makeTitleEscrow(
       beneficiary1.address,
-      holder1.address,
-      ZERO_ADDRESS
+      beneficiary1.address,
+      newERC721Instance.address
     );
     const mintTx = ERC721Instance["safeMint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID);
 
@@ -389,7 +388,7 @@ describe("TitleEscrowCloneable", async () => {
     expect(escrowInstance.address).not.to.be.equal(newAddress);
     expect(newAddress).to.be.equal(ownerOnRegistry);
 
-    const newEscrowInstance = await TitleEscrowFactory.attach(ownerOnRegistry);
+    const newEscrowInstance = await TitleEscrowCloneableFactory.attach(ownerOnRegistry);
     const escrowBeneficiary = await newEscrowInstance.beneficiary();
     const escrowHolder = await newEscrowInstance.holder();
     const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
@@ -470,7 +469,7 @@ describe("TitleEscrowCloneable", async () => {
 
     // Make sure the transfer really has happened
     const ownerOnRegistry = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
-    const newEscrowInstance = await TitleEscrowFactory.attach(ownerOnRegistry);
+    const newEscrowInstance = await TitleEscrowCloneableFactory.attach(ownerOnRegistry);
     const escrowBeneficiary = await newEscrowInstance.beneficiary();
     const escrowHolder = await newEscrowInstance.holder();
     const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();

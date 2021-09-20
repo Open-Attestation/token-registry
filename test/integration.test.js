@@ -3,7 +3,7 @@ const { expect } = require("chai").use(require("chai-as-promised"));
 describe("TradeTrustErc721", async () => {
   const accounts = await ethers.getSigners();
   const Erc721 = await ethers.getContractFactory("TradeTrustERC721");
-  const TitleEscrow = await ethers.getContractFactory("TitleEscrow");
+  const TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneable");
   const shippingLine = accounts[0];
   const beneficiary1 = accounts[1];
 
@@ -20,17 +20,19 @@ describe("TradeTrustErc721", async () => {
     });
 
     it("should be able to surrender token", async () => {
-      const escrowInstance = await TitleEscrow.connect(beneficiary1).deploy(
-        tokenRegistryAddress,
-        beneficiary1.address,
-        beneficiary1.address,
-        ZERO_ADDRESS
-      );
+      const titleEscrowTx = await tokenRegistryInstanceWithShippingLineWallet
+        .connect(beneficiary1)
+        .deployNewTitleEscrow(tokenRegistryAddress, beneficiary1.address, beneficiary1.address);
+      const titleEscrowReceipt = await titleEscrowTx.wait();
+      const event = titleEscrowReceipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
+      const escrowInstance = TitleEscrow.connect(beneficiary1).attach(event.args.escrowAddress);
+
       const escrowInstanceAddress = escrowInstance.address;
       await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](escrowInstanceAddress, merkleRoot);
       const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(currentOwner).to.deep.equal(escrowInstanceAddress);
       await escrowInstance.transferTo(tokenRegistryAddress);
+
       const nextOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(nextOwner).to.deep.equal(tokenRegistryAddress);
     });

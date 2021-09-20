@@ -2,21 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "./ERC721.sol";
-import "./TitleEscrow.sol";
 import "./ITitleEscrowCreator.sol";
 import "./TitleEscrowCloneable.sol";
-
-contract TitleEscrowCreator is ITitleEscrowCreator {
-  function deployNewTitleEscrow(
-    address tokenRegistry,
-    address beneficiary,
-    address holder
-  ) external override returns (address) {
-    TitleEscrow newEscrow = new TitleEscrow(tokenRegistry, beneficiary, holder, address(this));
-    emit TitleEscrowDeployed(address(newEscrow), tokenRegistry, beneficiary, holder);
-    return address(newEscrow);
-  }
-}
 
 contract TitleEscrowCloner is ITitleEscrowCreator {
   address public  titleEscrowImplementation;
@@ -40,7 +27,7 @@ contract TitleEscrowCloner is ITitleEscrowCreator {
     address tokenRegistry,
     address beneficiary,
     address holder
-  ) external virtual override returns (address) {
+  ) external override returns (address) {
     return _deployNewTitleEscrow(tokenRegistry, beneficiary, holder);
   }
 }
