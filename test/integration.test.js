@@ -8,7 +8,6 @@ describe("TradeTrustErc721", async () => {
   const beneficiary1 = accounts[1];
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
-  const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
   describe("TradeTrustERC721 Surrender Flow", () => {
     let tokenRegistryInstanceWithShippingLineWallet;
