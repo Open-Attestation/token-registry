@@ -51,7 +51,12 @@ describe("TitleEscrowCloneableFactory", () => {
 
   const deployTitleEscrow = async () => {
     const factory = new TitleEscrowCloneableFactory(signer1);
-    const escrowInstance = await factory.deploy(tokenRegistry.address, account1, account2, account1);
+    const titleEscrowTx = await tokenRegistry.deployNewTitleEscrow(tokenRegistry.address, account1, account2);
+
+    const titleEscrowReceipt = await titleEscrowTx.wait();
+    const event = titleEscrowReceipt.events?.find((evt) => evt.event === "TitleEscrowDeployed");
+    const escrowInstance = factory.attach(event?.args?.escrowAddress);
+
     return escrowInstance;
   };
 
