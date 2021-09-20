@@ -21,26 +21,35 @@ contract TitleEscrowCreator is ITitleEscrowCreator {
 contract TitleEscrowCloner is ITitleEscrowCreator {
   address public  titleEscrowImplementation;
 
-  constructor() { 
+  constructor() {
     titleEscrowImplementation = address(new TitleEscrowCloneable());
   }
 
+  function _deployNewTitleEscrow(
+    address tokenRegistry,
+    address beneficiary,
+    address holder
+  ) internal returns (address) {
+    address clone = Clones.clone(titleEscrowImplementation);
+    TitleEscrowCloneable(clone).initialize(tokenRegistry, beneficiary, holder, address(this));
+    emit TitleEscrowDeployed(address(clone), tokenRegistry, beneficiary, holder);
+    return address(clone);
+  }
 
   function deployNewTitleEscrow(
     address tokenRegistry,
     address beneficiary,
     address holder
-  ) external override returns (address) {
-    address clone = Clones.clone(titleEscrowImplementation);
-    TitleEscrowCloneable(clone).initialize(tokenRegistry, beneficiary, holder, address(this));
-    emit TitleEscrowDeployed(address(clone), tokenRegistry, beneficiary, holder);
-    return address(clone);
-    }
+  ) external virtual override returns (address) {
+    return _deployNewTitleEscrow(tokenRegistry, beneficiary, holder);
+  }
 }
 
 interface ITradeTrustERC721 is IERC721Receiver {
   // TODO: rename these to the appropriate names
-  function destroyToken(uint256 _tokenId) external;
+  function acceptSurrender(
+    uint256 _tokenId
+  ) external;
 
   function sendToNewTitleEscrow(
     address beneficiary,
@@ -48,20 +57,36 @@ interface ITradeTrustERC721 is IERC721Receiver {
     uint256 _tokenId
   ) external;
 
-  function sendToken(address to, uint256 _tokenId) external;
+  function restoreTitle(
+    address beneficiary,
+    address holder,
+    uint256 _tokenId
+  ) external returns (address);
+
+  function mintTitle(
+    address beneficiary,
+    address holder,
+    uint256 _tokenId
+  ) external returns (address);
+
+  function transferTitle(
+    address to, uint256 _tokenId
+  ) external;
 }
 
 contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
-  constructor(string memory name, string memory symbol) ERC721Mintable(name, symbol) { return; }
+  bytes4 public tempInterfaceId;
+
+  constructor(string memory name, string memory symbol) ERC721Mintable(name, symbol) {return;}
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Mintable) returns (bool) {
     return
-      interfaceId == type(ITitleEscrowCreator).interfaceId ||
-      interfaceId == type(ITradeTrustERC721).interfaceId ||
-      ERC721Mintable.supportsInterface(interfaceId);
+    interfaceId == type(ITitleEscrowCreator).interfaceId ||
+    interfaceId == type(ITradeTrustERC721).interfaceId ||
+    ERC721Mintable.supportsInterface(interfaceId);
   }
 
   function onERC721Received(
@@ -74,28 +99,67 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     return this.onERC721Received.selector;
   }
 
-  function destroyToken(uint256 _tokenId) public onlyMinter {
-    require(ownerOf(_tokenId) == address(this), "Cannot destroy token: Token not owned by token registry");
+  function _burnToken(uint256 _tokenId) internal onlyMinter {
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
     emit TokenBurnt(_tokenId);
     this.safeTransferFrom(ownerOf(_tokenId), 0x000000000000000000000000000000000000dEaD, _tokenId, "");
+  }
+
+  function acceptSurrender(uint256 tokenId) external onlyMinter {
+    require(ownerOf(tokenId) == address(this), "TokenRegistry: Token has not been surrendered");
+    _burnToken(tokenId);
   }
 
   // TODO: modify this to mint a new token if it doesn't exist, and send a token if it is owned by address(this)
   // rationale for this is that we currently also have a need for a method that performs the action for
   // minting to a new title escrow directly, which has a large overlap with this function
   // make sure to write tests for this and check for access controls
+  // Question: Should we combine the 2 actions into a single function or split them into their own functions instead?
   function sendToNewTitleEscrow(
     address beneficiary,
     address holder,
     uint256 _tokenId
   ) public onlyMinter {
-    address newTitleEscrow = this.deployNewTitleEscrow(address(this), beneficiary, holder);
-    this.safeTransferFrom(address(this), newTitleEscrow, _tokenId, "");
+    if (_exists(_tokenId)) {
+      require(ownerOf(_tokenId) == address(this), "Cannot send to new title escrow: Token is not owned by registry");
+
+      address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+      this.safeTransferFrom(address(this), newTitleEscrow, _tokenId, "");
+    } else {
+      address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+      _safeMint(newTitleEscrow, _tokenId);
+    }
   }
 
-  function sendToken(address to, uint256 _tokenId) public onlyMinter {
-    require(ownerOf(_tokenId) == address(this), "Cannot send token: Token not owned by token registry");
-    this.safeTransferFrom(ownerOf(_tokenId), to, _tokenId, "");
+  function restoreTitle(
+    address beneficiary,
+    address holder,
+    uint256 tokenId
+  ) external onlyMinter returns (address) {
+    require(_exists(tokenId), "TokenRegistry: Token does not exist for transfer");
+    require(ownerOf(tokenId) == address(this), "TokenRegistry: Token is not owned by registry");
+
+    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+    transferTitle(newTitleEscrow, tokenId);
+
+    return newTitleEscrow;
+  }
+
+  function mintTitle(
+    address beneficiary,
+    address holder,
+    uint256 tokenId
+  ) external onlyMinter returns (address) {
+    require(!_exists(tokenId), "Cannot mint title: Token already exists");
+
+    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+    _safeMint(newTitleEscrow, tokenId);
+
+    return newTitleEscrow;
+  }
+
+  function transferTitle(address to, uint256 _tokenId) public onlyMinter {
+    require(ownerOf(_tokenId) == address(this), "TokenRegistry: Token not owned by token registry");
+    this.safeTransferFrom(address(this), to, _tokenId, "");
   }
 }

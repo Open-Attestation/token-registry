@@ -14,6 +14,9 @@ describe("TitleEscrowCloner", async () => {
   let TitleEscrow;
   let ERC721;
 
+  let TitleEscrowClonerFactory;
+  let TitleEscrowFactory;
+
   before("Initialising contract factories and accounts for TitleEscrowCreator tests", async () => {
     [carrier1, beneficiary1, beneficiary2, holder2] = await ethers.getSigners();
     TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowCloner");
@@ -69,8 +72,6 @@ describe("TitleEscrowCloner", async () => {
     expect(escrow2Beneficiary).to.be.equal(beneficiary2.address);
     expect(escrow2Holder).to.be.equal(beneficiary2.address);
     expect(escrow2TokenRegistry).to.be.equal(ERC721Address);
-
-
   });
 
   // TODO: test that implementation's onERC721Received cannot be called
