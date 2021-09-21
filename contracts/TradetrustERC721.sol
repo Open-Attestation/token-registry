@@ -108,7 +108,7 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     uint256 _tokenId
   ) public onlyMinter {
     if (_exists(_tokenId)) {
-      require(ownerOf(_tokenId) == address(this), "Cannot send to new title escrow: Token is not owned by registry");
+      require(ownerOf(_tokenId) == address(this), "TokenRegistry: Token is not owned by registry");
 
       address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
       this.safeTransferFrom(address(this), newTitleEscrow, _tokenId, "");
