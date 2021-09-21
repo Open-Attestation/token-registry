@@ -127,7 +127,7 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     require(ownerOf(tokenId) == address(this), "TokenRegistry: Token is not owned by registry");
 
     address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
-    transferTitle(newTitleEscrow, tokenId);
+    _registrySafeTransformFrom(address(this), newTitleEscrow, tokenId);
 
     return newTitleEscrow;
   }
@@ -145,8 +145,28 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     return newTitleEscrow;
   }
 
-  function transferTitle(address to, uint256 _tokenId) public onlyMinter {
+  function transferTitle(
+    address to,
+    uint256 _tokenId
+  ) public onlyMinter {
     require(ownerOf(_tokenId) == address(this), "TokenRegistry: Token not owned by token registry");
-    this.safeTransferFrom(address(this), to, _tokenId, "");
+    _registrySafeTransformFrom(address(this), to, _tokenId);
+  }
+
+  function _registrySafeTransformFrom(
+    address from,
+    address to,
+    uint256 tokenId
+  ) internal {
+    _registrySafeTransformFrom(from, to, tokenId, "");
+  }
+
+  function _registrySafeTransformFrom(
+    address from,
+    address to,
+    uint256 tokenId,
+    bytes memory data
+  ) internal {
+    this.safeTransferFrom(from, to, tokenId, data);
   }
 }
