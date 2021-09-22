@@ -1,23 +1,23 @@
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-watcher");
 require("hardhat-typechain");
-
+require("hardhat-gas-reporter");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
- module.exports = {
+module.exports = {
   solidity: {
     version: "0.5.16",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   typechain: {
-    outDir: "src/contracts"
+    outDir: "src/contracts",
   },
   watcher: {
     test: {
@@ -25,4 +25,8 @@ require("hardhat-typechain");
       files: ["./contracts", "./test"],
     },
   },
-}
+  gasReporter: {
+    coinmarketcap: "e3dd106b-9644-45ac-8f61-98614b973bca",
+    currency: "USD",
+  },
+};
