@@ -171,6 +171,107 @@ describe("TradeTrustErc721", async () => {
       await expect(attemptSendToken).to.be.revertedWith("Token not owned by token registry");
     });
 
+    describe("Title Restoration", () => {
+      let beneficiary;
+      let holder;
+
+      beforeEach(async () => {
+        beneficiary = owner1;
+        holder = holder1;
+      });
+
+      it("should allow a minter to restore title owned by registry", async () => {
+        const tx = await tokenRegistryInstanceWithShippingLineWallet.restoreTitle(
+          beneficiary.address,
+          holder.address,
+          merkleRoot
+        );
+        const receipt = await tx.wait();
+        const event = receipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
+        const titleEscrowAddr = event.args.escrowAddress;
+
+        const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+        expect(currentOwner).to.deep.equal(titleEscrowAddr);
+      });
+
+      it("should not allow a minter to restore a title not owned by registry", async () => {
+        await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](owner1.address, merkleRoot1);
+
+        const tx = tokenRegistryInstanceWithShippingLineWallet.restoreTitle(
+          beneficiary.address,
+          holder.address,
+          merkleRoot1
+        );
+
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token is not owned by registry");
+      });
+
+      it("should revert when the token does not exist", async () => {
+        const tx = tokenRegistryInstanceWithShippingLineWallet.restoreTitle(
+          beneficiary.address,
+          holder.address,
+          merkleRoot1
+        );
+
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist for transfer");
+      });
+
+      it("should revert when a non-minter attempts to restore title", async () => {
+        const tx = tokenRegistryInstanceWithShippingLineWallet
+          .connect(nonMinter)
+          .restoreTitle(beneficiary.address, holder.address, merkleRoot1);
+
+        await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+      });
+    });
+
+    describe("Title Minting", () => {
+      let beneficiary;
+      let holder;
+
+      beforeEach(async () => {
+        beneficiary = owner1;
+        holder = holder1;
+        tokenRegistryInstanceWithShippingLineWallet = await Erc721.connect(carrier1).deploy("foo", "bar");
+      });
+
+      it("should mint a new title by a minter", async () => {
+        const tx = await tokenRegistryInstanceWithShippingLineWallet.mintTitle(
+          beneficiary.address,
+          holder.address,
+          merkleRoot
+        );
+        const receipt = await tx.wait();
+        const event = receipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
+        const titleEscrowAddr = event.args.escrowAddress;
+
+        const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+        expect(currentOwner).to.deep.equal(titleEscrowAddr);
+      });
+
+      it("should revert if the title already exists", async () => {
+        await (
+          await tokenRegistryInstanceWithShippingLineWallet.mintTitle(beneficiary.address, holder.address, merkleRoot)
+        ).wait();
+
+        const tx = tokenRegistryInstanceWithShippingLineWallet.mintTitle(
+          beneficiary.address,
+          holder.address,
+          merkleRoot
+        );
+
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
+      });
+
+      it("should revert when a non-minter attempts to mint a new title", async () => {
+        const tx = tokenRegistryInstanceWithShippingLineWallet
+          .connect(nonMinter)
+          .mintTitle(beneficiary.address, holder.address, merkleRoot);
+
+        await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+      });
+    });
+
     describe("Sending to a new title escrow", () => {
       describe("Sending as a minter", () => {
         let currentTokenOwner;
