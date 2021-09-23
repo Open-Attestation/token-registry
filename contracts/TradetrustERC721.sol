@@ -38,12 +38,6 @@ interface ITradeTrustERC721 is IERC721Receiver {
     uint256 _tokenId
   ) external;
 
-  function sendToNewTitleEscrow(
-    address beneficiary,
-    address holder,
-    uint256 _tokenId
-  ) external;
-
   function restoreTitle(
     address beneficiary,
     address holder,
@@ -92,27 +86,6 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
     emit TokenBurnt(tokenId);
     _registrySafeTransformFrom(ownerOf(tokenId), 0x000000000000000000000000000000000000dEaD, tokenId);
-  }
-
-  // TODO: modify this to mint a new token if it doesn't exist, and send a token if it is owned by address(this)
-  // rationale for this is that we currently also have a need for a method that performs the action for
-  // minting to a new title escrow directly, which has a large overlap with this function
-  // make sure to write tests for this and check for access controls
-  // Question: Should we combine the 2 actions into a single function or split them into their own functions instead?
-  function sendToNewTitleEscrow(
-    address beneficiary,
-    address holder,
-    uint256 _tokenId
-  ) public onlyMinter {
-    if (_exists(_tokenId)) {
-      require(ownerOf(_tokenId) == address(this), "TokenRegistry: Token is not owned by registry");
-
-      address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
-      this.safeTransferFrom(address(this), newTitleEscrow, _tokenId, "");
-    } else {
-      address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
-      _safeMint(newTitleEscrow, _tokenId);
-    }
   }
 
   function restoreTitle(

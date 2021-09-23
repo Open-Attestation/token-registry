@@ -44,7 +44,7 @@ describe("TradeTrustErc721", async () => {
 
     const tradeTrustERC721Instance = await Erc721.connect(carrier1).deploy("foo", "bar");
     // const ITradeTrustERC721InterfaceId = "0x8a9513f1";
-    const ITradeTrustERC721InterfaceId = "0xb6621993";
+    const ITradeTrustERC721InterfaceId = "0xf7ac7c87";
     const IERC721InterfaceId = "0x80ac58cd";
     const ITitleEscrowCreatorInterfaceId = "0xfcd7c1df";
     expect(await tradeTrustERC721Instance.supportsInterface(ITradeTrustERC721InterfaceId)).to.be.true;
@@ -194,6 +194,26 @@ describe("TradeTrustErc721", async () => {
         expect(currentOwner).to.deep.equal(titleEscrowAddr);
       });
 
+      it("should restore title escrow with the correct details", async () => {
+        const tx = await tokenRegistryInstanceWithShippingLineWallet.restoreTitle(
+          beneficiary.address,
+          holder.address,
+          merkleRoot
+        );
+        const receipt = await tx.wait();
+        const event = receipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
+        const titleEscrowAddr = event.args.escrowAddress;
+
+        const newEscrowInstance = await TitleEscrow.attach(titleEscrowAddr);
+        const escrowBeneficiary = await newEscrowInstance.beneficiary();
+        const escrowHolder = await newEscrowInstance.holder();
+        const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
+
+        expect(escrowBeneficiary).to.be.equal(beneficiary.address);
+        expect(escrowHolder).to.be.equal(holder.address);
+        expect(escrowTokenRegistry).to.be.equal(tokenRegistryInstanceWithShippingLineWallet.address);
+      });
+
       it("should not allow a minter to restore a title not owned by registry", async () => {
         await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](owner1.address, merkleRoot1);
 
@@ -249,6 +269,26 @@ describe("TradeTrustErc721", async () => {
         expect(currentOwner).to.deep.equal(titleEscrowAddr);
       });
 
+      it("should mint with the correct details in title escrow", async () => {
+        const tx = await tokenRegistryInstanceWithShippingLineWallet.mintTitle(
+          beneficiary.address,
+          holder.address,
+          merkleRoot
+        );
+        const receipt = await tx.wait();
+        const event = receipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
+        const titleEscrowAddr = event.args.escrowAddress;
+
+        const newEscrowInstance = await TitleEscrow.attach(titleEscrowAddr);
+        const escrowBeneficiary = await newEscrowInstance.beneficiary();
+        const escrowHolder = await newEscrowInstance.holder();
+        const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
+
+        expect(escrowBeneficiary).to.be.equal(beneficiary.address);
+        expect(escrowHolder).to.be.equal(holder.address);
+        expect(escrowTokenRegistry).to.be.equal(tokenRegistryInstanceWithShippingLineWallet.address);
+      });
+
       it("should revert if the title already exists", async () => {
         await (
           await tokenRegistryInstanceWithShippingLineWallet.mintTitle(beneficiary.address, holder.address, merkleRoot)
@@ -269,82 +309,6 @@ describe("TradeTrustErc721", async () => {
           .mintTitle(beneficiary.address, holder.address, merkleRoot);
 
         await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
-      });
-    });
-
-    describe("Sending to a new title escrow", () => {
-      describe("Sending as a minter", () => {
-        let currentTokenOwner;
-
-        beforeEach(async () => {
-          currentTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
-        });
-
-        describe("Token ID exists", () => {
-          it("should be able to send token to a new title escrow when token is owned by registry", async () => {
-            expect(currentTokenOwner).to.deep.equal(tokenRegistryAddress);
-
-            await tokenRegistryInstanceWithShippingLineWallet
-              .connect(carrier1)
-              .sendToNewTitleEscrow(owner1.address, holder1.address, merkleRoot);
-            const nextTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
-
-            expect(nextTokenOwner).to.not.deep.equal(currentTokenOwner);
-          });
-
-          it("should be able to send token to a new title escrow with correct details when token is owned by registry", async () => {
-            expect(currentTokenOwner).to.deep.equal(tokenRegistryAddress);
-
-            await tokenRegistryInstanceWithShippingLineWallet
-              .connect(carrier1)
-              .sendToNewTitleEscrow(owner1.address, holder1.address, merkleRoot);
-            const nextTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
-
-            const newEscrowInstance = await TitleEscrow.attach(nextTokenOwner);
-            const escrowBeneficiary = await newEscrowInstance.beneficiary();
-            const escrowHolder = await newEscrowInstance.holder();
-            const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
-            expect(escrowBeneficiary).to.be.equal(owner1.address);
-            expect(escrowHolder).to.be.equal(holder1.address);
-            expect(escrowTokenRegistry).to.be.equal(tokenRegistryAddress);
-          });
-
-          it("should revert if the registry is not the owner of token", async () => {
-            await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](owner2.address, merkleRoot1);
-
-            const tx = tokenRegistryInstanceWithShippingLineWallet
-              .connect(carrier1)
-              .sendToNewTitleEscrow(owner1.address, holder1.address, merkleRoot1);
-
-            await expect(tx).to.be.revertedWith("not owned by registry");
-          });
-        });
-
-        describe("Token ID does not exist", () => {
-          it("should mint a new token", async () => {
-            currentTokenOwner = tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot1);
-            await expect(currentTokenOwner).to.be.reverted;
-
-            const titleEscrowTx = await tokenRegistryInstanceWithShippingLineWallet
-              .connect(carrier1)
-              .sendToNewTitleEscrow(owner1.address, holder1.address, merkleRoot1);
-            const titleEscrowReceipt = await titleEscrowTx.wait();
-            const event = titleEscrowReceipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
-            const titleEscrowAddr = event.args.escrowAddress;
-
-            const newTokenOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot1);
-            expect(newTokenOwner).to.equal(titleEscrowAddr);
-          });
-        });
-      });
-
-      describe("Sending as a non-minter", () => {
-        it("should not be able to send token to a new title escrow", async () => {
-          const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet
-            .connect(nonMinter)
-            .sendToNewTitleEscrow(owner1.address, holder1.address, merkleRoot);
-          await expect(attemptSendToken).to.be.revertedWith("MinterRole: caller does not have the Minter role");
-        });
       });
     });
   });
