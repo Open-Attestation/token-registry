@@ -37,7 +37,6 @@ describe("TitleEscrowCloner", async () => {
     const txReceipt = await (
       await cloner.deployNewTitleEscrow(ERC721Address, beneficiary1.address, beneficiary1.address)
     ).wait();
-    console.log(txReceipt.events[1].args.escrowAddress);
     const escrowInstance = await TitleEscrowCloneableFactory.attach(txReceipt.events[1].args.escrowAddress);
     const escrowBeneficiary = await escrowInstance.beneficiary();
     const escrowHolder = await escrowInstance.holder();
@@ -51,7 +50,6 @@ describe("TitleEscrowCloner", async () => {
     const escrow1Receipt = await (
       await cloner.deployNewTitleEscrow(ERC721Address, beneficiary1.address, beneficiary1.address)
     ).wait();
-    console.log(escrow1Receipt.events[1].args.escrowAddress);
     const escrow1Instance = await TitleEscrowCloneableFactory.attach(escrow1Receipt.events[1].args.escrowAddress);
     const escrow1Beneficiary = await escrow1Instance.beneficiary();
     const escrow1Holder = await escrow1Instance.holder();
@@ -63,7 +61,6 @@ describe("TitleEscrowCloner", async () => {
     const escrow2Receipt = await (
       await cloner.deployNewTitleEscrow(ERC721Address, beneficiary2.address, beneficiary2.address)
     ).wait();
-    console.log(escrow2Receipt.events[1].args.escrowAddress);
     const escrow2Instance = await TitleEscrowCloneableFactory.attach(escrow2Receipt.events[1].args.escrowAddress);
     const escrow2Beneficiary = await escrow2Instance.beneficiary();
     const escrow2Holder = await escrow2Instance.holder();
