@@ -44,7 +44,7 @@ describe("TradeTrustErc721", async () => {
 
     const tradeTrustERC721Instance = await Erc721.connect(carrier1).deploy("foo", "bar");
     // const ITradeTrustERC721InterfaceId = "0x8a9513f1";
-    const ITradeTrustERC721InterfaceId = "0xf7ac7c87";
+    const ITradeTrustERC721InterfaceId = "0x14ac11d9";
     const IERC721InterfaceId = "0x80ac58cd";
     const ITitleEscrowCreatorInterfaceId = "0xfcd7c1df";
     expect(await tradeTrustERC721Instance.supportsInterface(ITradeTrustERC721InterfaceId)).to.be.true;
@@ -150,25 +150,6 @@ describe("TradeTrustErc721", async () => {
       await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](owner1.address, merkleRoot1);
       const attemptDestroyToken = tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot1);
       await expect(attemptDestroyToken).to.be.revertedWith("Token has not been surrendered");
-    });
-
-    it("should be able to send token owned by registry", async () => {
-      await tokenRegistryInstanceWithShippingLineWallet.transferTitle(owner1.address, merkleRoot);
-      const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
-      expect(currentOwner).to.deep.equal(owner1.address);
-    });
-
-    it("non-minter should not be able to send token", async () => {
-      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet
-        .connect(nonMinter)
-        .transferTitle(owner1.address, merkleRoot);
-      await expect(attemptSendToken).to.be.revertedWith("MinterRole: caller does not have the Minter role");
-    });
-
-    it("minter should not be able to send token not owned by registry", async () => {
-      await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](owner1.address, merkleRoot1);
-      const attemptSendToken = tokenRegistryInstanceWithShippingLineWallet.transferTitle(owner2.address, merkleRoot1);
-      await expect(attemptSendToken).to.be.revertedWith("Token not owned by token registry");
     });
 
     describe("Title Restoration", () => {

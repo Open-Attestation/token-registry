@@ -49,10 +49,6 @@ interface ITradeTrustERC721 is IERC721Receiver {
     address holder,
     uint256 _tokenId
   ) external returns (address);
-
-  function transferTitle(
-    address to, uint256 _tokenId
-  ) external;
 }
 
 contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver {
@@ -113,14 +109,6 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     _safeMint(newTitleEscrow, tokenId);
 
     return newTitleEscrow;
-  }
-
-  function transferTitle(
-    address to,
-    uint256 _tokenId
-  ) public onlyMinter {
-    require(ownerOf(_tokenId) == address(this), "TokenRegistry: Token not owned by token registry");
-    _registrySafeTransformFrom(address(this), to, _tokenId);
   }
 
   function _registrySafeTransformFrom(
