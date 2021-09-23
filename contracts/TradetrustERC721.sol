@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./ERC721.sol";
 import "./ITitleEscrowCreator.sol";
 import "./TitleEscrowCloneable.sol";
+import "hardhat/console.sol";
 
 contract TitleEscrowCloner is ITitleEscrowCreator {
   address public  titleEscrowImplementation;
@@ -33,8 +34,7 @@ contract TitleEscrowCloner is ITitleEscrowCreator {
 }
 
 interface ITradeTrustERC721 is IERC721Receiver {
-  // TODO: rename these to the appropriate names
-  function acceptSurrender(
+  function destroyToken(
     uint256 _tokenId
   ) external;
 
@@ -86,15 +86,12 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     return this.onERC721Received.selector;
   }
 
-  function _burnToken(uint256 _tokenId) internal onlyMinter {
-    // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
-    emit TokenBurnt(_tokenId);
-    this.safeTransferFrom(ownerOf(_tokenId), 0x000000000000000000000000000000000000dEaD, _tokenId, "");
-  }
-
-  function acceptSurrender(uint256 tokenId) external onlyMinter {
+  function destroyToken(uint256 tokenId) external onlyMinter {
     require(ownerOf(tokenId) == address(this), "TokenRegistry: Token has not been surrendered");
-    _burnToken(tokenId);
+
+    // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
+    emit TokenBurnt(tokenId);
+    _registrySafeTransformFrom(ownerOf(tokenId), 0x000000000000000000000000000000000000dEaD, tokenId);
   }
 
   // TODO: modify this to mint a new token if it doesn't exist, and send a token if it is owned by address(this)

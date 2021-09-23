@@ -44,7 +44,7 @@ describe("TradeTrustErc721", async () => {
 
     const tradeTrustERC721Instance = await Erc721.connect(carrier1).deploy("foo", "bar");
     // const ITradeTrustERC721InterfaceId = "0x8a9513f1";
-    const ITradeTrustERC721InterfaceId = "0x6477b3df";
+    const ITradeTrustERC721InterfaceId = "0xb6621993";
     const IERC721InterfaceId = "0x80ac58cd";
     const ITitleEscrowCreatorInterfaceId = "0xfcd7c1df";
     expect(await tradeTrustERC721Instance.supportsInterface(ITradeTrustERC721InterfaceId)).to.be.true;
@@ -132,7 +132,7 @@ describe("TradeTrustErc721", async () => {
     });
 
     it("should be able to destroy token", async () => {
-      const destroyTx = await (await tokenRegistryInstanceWithShippingLineWallet.acceptSurrender(merkleRoot)).wait();
+      const destroyTx = await (await tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot)).wait();
       const burntTokenLog = destroyTx.events.find((log) => log.event === "TokenBurnt");
       assertDestroyBurntLog(burntTokenLog, merkleRoot);
       const currentOwner = tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
@@ -142,13 +142,13 @@ describe("TradeTrustErc721", async () => {
     it("non-minter should not be able to destroy token", async () => {
       const attemptDestroyToken = tokenRegistryInstanceWithShippingLineWallet
         .connect(nonMinter)
-        .acceptSurrender(merkleRoot);
+        .destroyToken(merkleRoot);
       await expect(attemptDestroyToken).to.be.revertedWith("MinterRole: caller does not have the Minter role");
     });
 
     it("token cannot be destroyed if not owned by registry", async () => {
       await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](owner1.address, merkleRoot1);
-      const attemptDestroyToken = tokenRegistryInstanceWithShippingLineWallet.acceptSurrender(merkleRoot1);
+      const attemptDestroyToken = tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot1);
       await expect(attemptDestroyToken).to.be.revertedWith("Token has not been surrendered");
     });
 
