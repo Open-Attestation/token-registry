@@ -28,6 +28,5 @@ module.exports = {
   gasReporter: {
     coinmarketcap: "e3dd106b-9644-45ac-8f61-98614b973bca",
     currency: "USD",
-    gasPrice: 21,
   },
 };
