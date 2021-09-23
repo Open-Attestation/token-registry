@@ -4,4 +4,3 @@ export {
   TitleEscrowCloner__factory as TitleEscrowClonerFactory,
   TradeTrustERC721__factory as TradeTrustErc721Factory,
 } from "./contracts";
-export { getTitleEscrowCreatorAddress } from "./config";
