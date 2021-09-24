@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "./ERC721.sol";
 import "./ITitleEscrowCreator.sol";
 import "./TitleEscrowCloneable.sol";
-import "hardhat/console.sol";
 
 contract TitleEscrowCloner is ITitleEscrowCreator {
   address public  titleEscrowImplementation;
