@@ -213,7 +213,7 @@ describe("TradeTrustErc721", async () => {
           merkleRoot1
         );
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist for transfer");
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
       });
 
       it("should revert when a non-minter attempts to restore title", async () => {

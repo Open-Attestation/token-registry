@@ -86,7 +86,7 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     address holder,
     uint256 tokenId
   ) external onlyMinter returns (address) {
-    require(_exists(tokenId), "TokenRegistry: Token does not exist for transfer");
+    require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(ownerOf(tokenId) == address(this), "TokenRegistry: Token is not owned by registry");
 
     address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
