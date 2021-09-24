@@ -37,22 +37,23 @@ The contract supports [all ERC721 methods](http://erc721.org/)
 
 ### TitleEscrow
 
-Deploying new TitleEscrow using TradeTrustErc721 Token Registry Contract
+The TradeTrustErc721 Token Registry will clone a new TitleEscrow internally when minting or restoring titles.
 
+#### Minting Title Escrow
 ```ts
-import {TradeTrustErc721Factory} from "@govtechsg/token-registry";
+import { TradeTrustErc721Factory } from "@govtechsg/token-registry";
 
-const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer1);
-const escrowInstance = await connectedRegistry.deployNewTitleEscrow(connectedRegistry.address, account1, account2);
-```
+const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer);
+const tx = await connectedRegistry.mintTitle(beneficiaryAddress, holderAddress, tokenId);
+````
 
-Connecting to existing TitleEscrow on Ethereum
-
+#### Restoring Title Escrow
 ```ts
-import {TitleEscrowFactory} from "@govtechsg/token-registry";
+import { TradeTrustErc721Factory } from "@govtechsg/token-registry";
 
-const connectedEscrow = TitleEscrowFactory.connect(existingTitleEscrowAddress, signer1);
-```
+const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer);
+const tx = await connectedRegistry.restoreTitle(beneficiaryAddress, holderAddress, existingTokenId);
+````
 
 For list of available functions on TitleEscrow simply check the type definitions as they are automatically generated using typechain.
 
