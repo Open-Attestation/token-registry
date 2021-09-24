@@ -1,54 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./ERC721.sol";
-import "./ITitleEscrowCreator.sol";
 import "./TitleEscrowCloneable.sol";
-
-contract TitleEscrowCloner is ITitleEscrowCreator {
-  address public  titleEscrowImplementation;
-
-  constructor() {
-    titleEscrowImplementation = address(new TitleEscrowCloneable());
-  }
-
-  function _deployNewTitleEscrow(
-    address tokenRegistry,
-    address beneficiary,
-    address holder
-  ) internal returns (address) {
-    address clone = Clones.clone(titleEscrowImplementation);
-    TitleEscrowCloneable(clone).initialize(tokenRegistry, beneficiary, holder, address(this));
-    emit TitleEscrowDeployed(address(clone), tokenRegistry, beneficiary, holder);
-    return address(clone);
-  }
-
-  function deployNewTitleEscrow(
-    address tokenRegistry,
-    address beneficiary,
-    address holder
-  ) external override returns (address) {
-    return _deployNewTitleEscrow(tokenRegistry, beneficiary, holder);
-  }
-}
-
-interface ITradeTrustERC721 is IERC721Receiver {
-  function destroyToken(
-    uint256 _tokenId
-  ) external;
-
-  function restoreTitle(
-    address beneficiary,
-    address holder,
-    uint256 _tokenId
-  ) external returns (address);
-
-  function mintTitle(
-    address beneficiary,
-    address holder,
-    uint256 _tokenId
-  ) external returns (address);
-}
+import "./TitleEscrowCloner.sol";
+import "./interfaces/ITitleEscrowCreator.sol";
+import "./interfaces/ITitleEscrow.sol";
+import "./interfaces/ITradeTrustERC721.sol";
+import { ERC721Mintable, IERC721Receiver } from "./lib/ERC721.sol";
 
 contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
