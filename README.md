@@ -55,6 +55,14 @@ const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address,
 const tx = await connectedRegistry.restoreTitle(beneficiaryAddress, holderAddress, existingTokenId);
 ````
 
+#### Connecting to an existing TitleEscrow on Ethereum
+
+```ts
+import {TitleEscrowFactory} from "@govtechsg/token-registry";
+
+const connectedEscrow = TitleEscrowFactory.connect(existingTitleEscrowAddress, signer1);
+```
+
 For list of available functions on TitleEscrow simply check the type definitions as they are automatically generated using typechain.
 
 ## Provider & Signer
