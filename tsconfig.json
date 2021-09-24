@@ -13,8 +13,9 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "stripInternal": true
+    "stripInternal": true,
+    "skipLibCheck": true
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "./test/**/*"],
   "exclude": ["./src/contracts/**/*"]
 }

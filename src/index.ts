@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 export {
-  TitleEscrow__factory as TitleEscrowFactory,
-  TitleEscrowCreator__factory as TitleEscrowCreatorFactory,
+  TitleEscrowCloneable__factory as TitleEscrowCloneableFactory,
+  TitleEscrowCloner__factory as TitleEscrowClonerFactory,
   TradeTrustERC721__factory as TradeTrustErc721Factory,
 } from "./contracts";
-export { getTitleEscrowCreatorAddress } from "./config";
