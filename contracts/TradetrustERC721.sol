@@ -55,8 +55,6 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
-  bytes4 public tempInterfaceId;
-
   constructor(string memory name, string memory symbol) ERC721Mintable(name, symbol) {return;}
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Mintable) returns (bool) {
