@@ -2,8 +2,6 @@
   "extends": ["solhint:recommended"],
   "plugins": ["prettier"],
   "rules": {
-    "indent": ["error", 2],
-    "compiler-version": ["error", "^0.8.0"],
-    "func-visibility": ["warn",{"ignoreConstructors": true}]
+    "indent": ["error", 2]
   }
 }
