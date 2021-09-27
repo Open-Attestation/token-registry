@@ -1,7 +1,7 @@
 import { providers } from "ethers";
-import { TitleEscrowCloneableFactory, TradeTrustErc721Factory, TitleEscrowClonerFactory } from "./index";
+import { TitleEscrowFactory, TradeTrustErc721Factory, TitleEscrowCreatorFactory } from "./index";
 import { TradeTrustERC721 } from "../types/TradeTrustERC721";
-import { TitleEscrowCloner } from "../types/TitleEscrowCloner";
+import { TitleEscrowCreator } from "../types/TitleEscrowCreator";
 
 const provider = new providers.JsonRpcProvider();
 const signer1 = provider.getSigner(0);
@@ -15,12 +15,12 @@ beforeAll(async () => {
   account2 = await signer2.getAddress();
 });
 
-describe("TitleEscrowClonerFactory", () => {
+describe("TitleEscrowCreatorFactory", () => {
   let tokenRegistry: TradeTrustERC721;
-  let titleEscrowFactory: TitleEscrowCloner;
+  let titleEscrowFactory: TitleEscrowCreator;
 
   beforeEach(async () => {
-    const factory = new TitleEscrowClonerFactory(signer1);
+    const factory = new TitleEscrowCreatorFactory(signer1);
     titleEscrowFactory = await factory.deploy();
     const tokenRegistryFactory = new TradeTrustErc721Factory(signer1);
     tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
@@ -31,7 +31,7 @@ describe("TitleEscrowClonerFactory", () => {
   });
 
   it("should be able to connect to an existing TitleEscrowCreator and write to it", async () => {
-    const connectedCreator = TitleEscrowClonerFactory.connect(titleEscrowFactory.address, signer1);
+    const connectedCreator = TitleEscrowCreatorFactory.connect(titleEscrowFactory.address, signer1);
     const receipt = await connectedCreator.deployNewTitleEscrow(tokenRegistry.address, account1, account2);
     const tx = await receipt.wait();
     const deployedEventArgs = tx.events?.find((evt) => evt.event === "TitleEscrowDeployed")?.args as any;
@@ -41,7 +41,7 @@ describe("TitleEscrowClonerFactory", () => {
   });
 });
 
-describe("TitleEscrowCloneableFactory", () => {
+describe("TitleEscrowFactory", () => {
   let tokenRegistry: TradeTrustERC721;
 
   beforeEach(async () => {
@@ -50,13 +50,8 @@ describe("TitleEscrowCloneableFactory", () => {
   });
 
   const deployTitleEscrow = async () => {
-    const factory = new TitleEscrowCloneableFactory(signer1);
-    const titleEscrowTx = await tokenRegistry.deployNewTitleEscrow(tokenRegistry.address, account1, account2);
-
-    const titleEscrowReceipt = await titleEscrowTx.wait();
-    const event = titleEscrowReceipt.events?.find((evt) => evt.event === "TitleEscrowDeployed");
-    const escrowInstance = factory.attach(event?.args?.escrowAddress);
-
+    const factory = new TitleEscrowFactory(signer1);
+    const escrowInstance = await factory.deploy(tokenRegistry.address, account1, account2, account1);
     return escrowInstance;
   };
 
@@ -71,7 +66,7 @@ describe("TitleEscrowCloneableFactory", () => {
   it("should be able to connect to an existing TitleEscrow", async () => {
     const escrowInstance = await deployTitleEscrow();
     const existingTitleEscrowAddress = escrowInstance.address;
-    const connectedEscrow = TitleEscrowCloneableFactory.connect(existingTitleEscrowAddress, signer1);
+    const connectedEscrow = TitleEscrowFactory.connect(existingTitleEscrowAddress, signer1);
     const beneficiary = await connectedEscrow.beneficiary();
     const holder = await connectedEscrow.holder();
     expect(beneficiary).toBe(account1);

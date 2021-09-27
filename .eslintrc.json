@@ -1,5 +1,5 @@
 {
-  "parser": "@babel/eslint-parser",
+  "parser": "babel-eslint",
   "extends": ["airbnb-base", "plugin:prettier/recommended"],
   "env": {
     "jest": true
@@ -12,7 +12,10 @@
     }
   },
   "globals": {
-    "ethers": "writable"
+    "artifacts": "readonly",
+    "contract": "readonly",
+    "assert": "readonly",
+    "web3": "writable"
   },
   "rules": {
     "import/extensions": "off",

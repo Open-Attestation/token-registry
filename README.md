@@ -37,25 +37,16 @@ The contract supports [all ERC721 methods](http://erc721.org/)
 
 ### TitleEscrow
 
-The TradeTrustErc721 Token Registry will clone a new TitleEscrow internally when minting or restoring titles.
+Deploying new TitleEscrow
 
-#### Minting Title Escrow
 ```ts
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry";
+import {TitleEscrowFactory} from "@govtechsg/token-registry";
 
-const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer);
-const tx = await connectedRegistry.mintTitle(beneficiaryAddress, holderAddress, tokenId);
-````
+const factory = new TitleEscrowFactory(signer1);
+const escrowInstance = await factory.deploy(tokenRegistry.address, account1, account2);
+```
 
-#### Restoring Title Escrow
-```ts
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry";
-
-const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer);
-const tx = await connectedRegistry.restoreTitle(beneficiaryAddress, holderAddress, existingTokenId);
-````
-
-#### Connecting to an existing TitleEscrow on Ethereum
+Connecting to existing TitleEscrow on Ethereum
 
 ```ts
 import {TitleEscrowFactory} from "@govtechsg/token-registry";
@@ -63,7 +54,20 @@ import {TitleEscrowFactory} from "@govtechsg/token-registry";
 const connectedEscrow = TitleEscrowFactory.connect(existingTitleEscrowAddress, signer1);
 ```
 
-For list of available functions on TitleEscrow simply check the type definitions as they are automatically generated using typechain.
+List of available functions on TitleEscrow
+
+```text
+_tokenId
+approvedTransferTarget
+beneficiary
+holder
+status
+supportsInterface
+tokenRegistry
+changeHolder
+endorseTransfer
+transferTo
+```
 
 ## Provider & Signer
 
@@ -85,16 +89,25 @@ const signerFromMnemonic = Wallet.fromMnemonic("MNEMONIC-HERE");
 signerFromMnemonic.connect(provider);
 ```
 
-
-# Development
-This repository's development framework uses (HardHat)[https://hardhat.org/getting-started/].
-
-Tests are run using `npm run test`, more development tasks can be found in the package.json scripts.
 ## Setup
 
 ```sh
 npm install
 npm lint
 npm test
-npx hardhat <command>
+npm truffle <command>
 ```
+
+## Notes
+
+If you are using vscode, you may need to link the openzeppelin libraries. See https://github.com/juanfranblanco/vscode-solidity#openzeppelin
+
+if you are trying to run tests locally, install truffle globally and then do execute these commands within the project dir.
+```sh
+truffle develop
+```
+once the development blockchain is spun up, the interactive console should look like this:
+```
+truffle(develop)>
+```
+at the prompt type test
