@@ -8,7 +8,6 @@ import "./interfaces/ITitleEscrow.sol";
 import "./lib/Initializable.sol";
 import { ERC721, ERC165 } from "./lib/ERC721.sol";
 
-
 contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolderInitializable, HasNamedBeneficiaryInitializable, ERC165  {
   // Documentation on how this smart contract works: https://docs.tradetrust.io/docs/overview/title-transfer
 
@@ -104,6 +103,10 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
 
   function transferTo(address newOwner) public override isHoldingToken onlyHolder allowTransferOwner(newOwner) {
     _transferTo(newOwner);
+  }
+
+  function surrender() external isHoldingToken onlyBeneficiary onlyHolder {
+    _transferTo(address(tokenRegistry));
   }
 
   function transferToNewEscrow(address newBeneficiary, address newHolder)
