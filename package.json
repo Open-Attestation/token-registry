@@ -17,7 +17,7 @@
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src",
     "build:js:copy-types": "mkdir -p ./dist/types && cp ./src/contracts/*.d.ts ./dist/types/contracts",
     "build": "npm run clean:build && npm run build:sol && npm run build:js && npm run build:js:copy-types",
-    "clean:build": "rm -rf ./dist && rm -rf build && rm -rf ./src/contracts",
+    "clean:build": "hardhat clean && rm -rf ./dist && rm -rf ./src/contracts",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
     "lint:js": "eslint test src --ext .js --ext .ts",
@@ -62,11 +62,11 @@
     "@ls-age/commitlint-circle": "1.0.0",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@typechain/ethers-v5": "^5.0.0",
-    "@typechain/hardhat": "^2.0.2",
+    "@typechain/ethers-v5": "^7.1.2",
+    "@typechain/hardhat": "^2.3.0",
     "@types/jest": "^26.0.23",
-    "@typescript-eslint/eslint-plugin": "^4.22.0",
-    "@typescript-eslint/parser": "^4.22.0",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
     "babel-jest": "^26.6.3",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
@@ -80,24 +80,21 @@
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-prettier": "^3.1.2",
     "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.3.1",
-    "ganache-cli": "^6.12.2",
+    "ethers": "^5.4.7",
     "git-cz": "^4.7.6",
-    "hardhat": "^2.4.1",
+    "hardhat": "^2.6.4",
     "hardhat-gas-reporter": "^1.0.4",
-    "hardhat-typechain": "^0.3.5",
     "hardhat-watcher": "^2.1.1",
-    "jest": "^26.6.3",
-    "prettier": "^2.2.1",
+    "jest": "^27.2.4",
+    "prettier": "^2.4.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "semantic-release": "^17.4.2",
-    "solhint": "^3.3.4",
-    "solhint-plugin-prettier": "0.0.5",
+    "solhint": "^3.3.6",
+    "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.17",
     "solium": "^1.2.5",
-    "ts-generator": "^0.1.1",
-    "typechain": "^4.0.3",
-    "typescript": "^4.2.4"
+    "typechain": "^5.1.2",
+    "typescript": "^4.4.3"
   },
   "config": {
     "commitizen": {
@@ -106,8 +103,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^4.2.0"
   }
 }
