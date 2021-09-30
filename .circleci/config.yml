@@ -1,11 +1,15 @@
 version: 2.1
 
+orbs:
+  codecov: codecov/codecov@3.1.0
+
 workflows:
   build-workflow:
     jobs:
       - build:
           context:
             - deployment
+      - coverage
 
 jobs:
   build:
@@ -15,7 +19,7 @@ jobs:
       - checkout
       - run:
           name: install
-          command: npm install
+          command: npm ci
       - run:
           name: commitlint
           command: npx --no-install commitlint-circle
@@ -31,3 +35,16 @@ jobs:
       - run:
           name: release
           command: npm run semantic-release
+  coverage:
+    docker:
+      - image: 'circleci/node:14'
+    steps:
+      - checkout
+      - run:
+          name: install
+          command: npm ci
+      - run:
+          name: coverage
+          command: npm run coverage
+      - codecov/upload
+

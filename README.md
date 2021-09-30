@@ -1,4 +1,6 @@
 # Token Registry
+[![CircleCI](https://circleci.com/gh/Open-Attestation/token-registry/tree/master.svg?style=svg)](https://circleci.com/gh/Open-Attestation/token-registry/tree/master)
+[![codecov](https://codecov.io/gh/Open-Attestation/token-registry/branch/master/graph/badge.svg?token=Y4R9SWXATG)](https://codecov.io/gh/Open-Attestation/token-registry)
 
 This repository contains both the smart contract code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
 
