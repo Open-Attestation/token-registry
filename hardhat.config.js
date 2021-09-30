@@ -19,6 +19,7 @@ module.exports = {
   },
   typechain: {
     outDir: "src/contracts",
+    alwaysGenerateOverloads: true,
   },
   watcher: {
     test: {
