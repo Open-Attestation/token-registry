@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require("hardhat-watcher");
 require("hardhat-typechain");
 require("hardhat-gas-reporter");
+require("solidity-coverage");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
