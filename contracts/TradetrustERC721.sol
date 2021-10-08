@@ -6,14 +6,16 @@ import "./TitleEscrowCloner.sol";
 import "./interfaces/ITitleEscrowCreator.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
-import { ERC721Mintable, IERC721Receiver } from "./lib/ERC721.sol";
+import { ERC721Mintable, IERC721Receiver, Address } from "./lib/ERC721.sol";
 
 contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver {
+  using Address for address;
+
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
   // Mapping from token ID to previously surrendered title escrow address
-  mapping(uint => address) private _surrenderedOwners;
+  mapping(uint => address) internal _surrenderedOwners;
 
   constructor(string memory name, string memory symbol) ERC721Mintable(name, symbol) {return;}
 
@@ -49,20 +51,40 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
   function restoreTitle(
     uint256 tokenId
   ) external onlyMinter returns (address) {
+    address previousOwner = _surrenderedOwners[tokenId];
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
-    require(ownerOf(tokenId) == address(this) && _surrenderedOwners[tokenId] != address(0), "TokenRegistry: Token is not surrendered");
-
-    ITitleEscrow titleEscrow = ITitleEscrow(_surrenderedOwners[tokenId]);
-    address beneficiary = titleEscrow.beneficiary();
-    address holder = titleEscrow.holder();
-    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+    require(ownerOf(tokenId) == address(this) && previousOwner != address(0), "TokenRegistry: Token is not surrendered");
 
     // Remove the last surrendered token owner
     delete _surrenderedOwners[tokenId];
 
+    address beneficiary = address(0);
+    address holder = address(0);
+
+    if (previousOwner.isContract()) {
+      try IERC165(previousOwner).supportsInterface(type(ITitleEscrow).interfaceId) returns (bool retval) {
+        require(retval, "TokenRegistry: Previous owner is an unsupported Title Escrow");
+
+        ITitleEscrow titleEscrow = ITitleEscrow(previousOwner);
+        beneficiary = titleEscrow.beneficiary();
+        holder = titleEscrow.holder();
+      } catch (bytes memory reason) {
+        if (reason.length == 0) {
+          revert("TokenRegistry: Receiving address is not a TitleEscrow implementer");
+        } else {
+          assembly {
+            revert(add(32, reason), mload(reason))
+          }
+        }
+      }
+    } else {
+      beneficiary = previousOwner;
+      holder = previousOwner;
+    }
+    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
     _registrySafeTransformFrom(address(this), newTitleEscrow, tokenId);
 
-    return newTitleEscrow;
+    return ownerOf(tokenId);
   }
 
   function mintTitle(
