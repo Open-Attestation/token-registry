@@ -12,11 +12,14 @@
     }
   },
   "globals": {
-    "ethers": "writable"
+    "ethers": "writable",
+    "expect": "readonly"
   },
   "rules": {
     "import/extensions": "off",
-    "import/no-unresolved": "off"
+    "import/no-unresolved": "off",
+    "no-unused-expressions": 0,
+    "@typescript-eslint/no-var-requires": 0
   },
   "overrides": [
     {
@@ -27,11 +30,9 @@
       },
       "plugins": ["@typescript-eslint"],
       "rules": {
-        "no-undef": "off",
-        "no-unused-vars": "off",
         "no-restricted-globals": "off",
         "import/prefer-default-export": "off",
-        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.*", "./hardhat.config.*"]}]
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.*", "./hardhat.config.*", "./test/**/*.js"]}]
       }
     },
     {
