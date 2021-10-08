@@ -1,14 +1,12 @@
-require("@typechain/hardhat");
-require("@nomiclabs/hardhat-ethers");
-require("@nomiclabs/hardhat-waffle");
-require("hardhat-watcher");
-require("hardhat-gas-reporter");
-require("solidity-coverage");
+import "@typechain/hardhat";
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-waffle";
+import "hardhat-watcher";
+import "hardhat-gas-reporter";
+import "solidity-coverage";
+import { HardhatUserConfig } from "hardhat/types";
 
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
-module.exports = {
+const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.4",
     settings: {
@@ -29,7 +27,9 @@ module.exports = {
     },
   },
   gasReporter: {
-    coinmarketcap: "e3dd106b-9644-45ac-8f61-98614b973bca",
+    coinmarketcap: process.env.COINMARKETCAP_TOKEN,
     currency: "USD",
   },
 };
+
+export default config;

@@ -14,8 +14,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "stripInternal": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "include": ["./src/**/*", "./test/**/*"],
+  "files": ["./hardhat.config.ts"],
   "exclude": ["./src/contracts/**/*"]
 }
