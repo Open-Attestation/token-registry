@@ -16,7 +16,10 @@
     "stripInternal": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types"]
+    "baseUrl": "src",
+    "paths": {
+      "@tradetrust/contracts": ["contracts/index.ts"]
+    }
   },
   "ts-node": {
     "files": true

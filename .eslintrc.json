@@ -32,7 +32,7 @@
       "rules": {
         "no-restricted-globals": "off",
         "import/prefer-default-export": "off",
-        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.*", "./hardhat.config.*", "./test/**/*.js"]}]
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.*", "./hardhat.config.*", "./test/**/*.js", "./test/**/*.ts"]}]
       }
     },
     {
