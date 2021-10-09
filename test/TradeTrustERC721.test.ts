@@ -24,6 +24,8 @@ const { loadFixture } = waffle;
  */
 
 describe("TradeTrustERC721 (TS Migration)", async () => {
+  const burnAddress = "0x000000000000000000000000000000000000dEaD";
+
   let users: TestUsers;
   let tradeTrustERC721Mock: TradeTrustERC721Mock;
 
@@ -291,7 +293,6 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
   });
 
   describe("Token Transfer Behaviour", () => {
-    const burnAddress = "0x000000000000000000000000000000000000dEaD";
     let tokenId: number;
 
     beforeEach(async () => {
@@ -335,6 +336,87 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         const previousOwner = await tradeTrustERC721Mock.surrenderedOwnersInternal(tokenId);
 
         expect(previousOwner).to.equal(users.beneficiary.address);
+      });
+    });
+  });
+
+  describe("Accepting and Burning of Surrendered token", () => {
+    let tokenId: string;
+
+    beforeEach(async () => {
+      tokenId = faker.datatype.hexaDecimal(64);
+
+      await tradeTrustERC721Mock
+        .connect(users.carrier)
+        ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+    });
+
+    describe("When a token has been surrendered", () => {
+      beforeEach(async () => {
+        // Manual surrendering from beneficiary
+        await tradeTrustERC721Mock
+          .connect(users.beneficiary)
+          ["safeTransferFrom(address,address,uint256)"](
+            users.beneficiary.address,
+            tradeTrustERC721Mock.address,
+            tokenId
+          );
+      });
+
+      describe("When caller to burn token is minter", () => {
+        let tradeTrustERC721MockAsMinter: TradeTrustERC721Mock;
+
+        beforeEach(async () => {
+          tradeTrustERC721MockAsMinter = tradeTrustERC721Mock.connect(users.carrier);
+        });
+
+        it("should allow a minter to burn the token", async () => {
+          const tx = tradeTrustERC721MockAsMinter.destroyToken(tokenId);
+
+          await expect(tx).to.be.not.reverted;
+        });
+
+        it("should emit TokenBurnt event on burning of token", async () => {
+          const tx = await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
+
+          expect(tx).to.emit(tradeTrustERC721Mock, "TokenBurnt").withArgs(tokenId);
+        });
+
+        it("should transfer token to burn address", async () => {
+          await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
+
+          const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
+
+          expect(newOwner).to.equal(burnAddress);
+        });
+
+        it("should remove previous owner of token record", async () => {
+          await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
+
+          const previousOwner = await tradeTrustERC721Mock.surrenderedOwnersInternal(tokenId);
+
+          expect(previousOwner).to.equal(ethers.constants.AddressZero);
+        });
+      });
+
+      it("should not allow a non-minter to burn the token", async () => {
+        const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
+
+        await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+      });
+    });
+
+    describe("When a token has not been surrendered", () => {
+      it("should not allow a minter to burn the token", async () => {
+        const tx = tradeTrustERC721Mock.connect(users.carrier).destroyToken(tokenId);
+
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered");
+      });
+
+      it("should not allow a non-minter to burn the token", async () => {
+        const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
+
+        await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
       });
     });
   });
