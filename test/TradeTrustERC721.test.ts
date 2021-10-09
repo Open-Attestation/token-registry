@@ -10,8 +10,8 @@ import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
-import { deployTokenFixture, TestUsers } from "./fixtures/deployTokenFixture";
-import { mintTokenFixture } from "./fixtures/mintToken";
+import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
+import { mintTokenFixture } from "./fixtures/mint-token.fixture";
 
 const { loadFixture } = waffle;
 
