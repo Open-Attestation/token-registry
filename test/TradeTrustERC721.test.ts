@@ -17,9 +17,9 @@ const { loadFixture } = waffle;
 
 /*
  * This is a partial test file for TradeTrustERC721.
- * As we plan to move this repository and all of its test files to Typescript,
+ * As we plan to migrate this repository and all of its test files to be fully in Typescript,
  * this will be carried out part by part through a gradual process.
- * All new test cases should be added into this file.
+ * All new test cases for TradeTrustERC721 should be added into this file.
  */
 
 describe("TradeTrustERC721 (TS Migration)", async () => {
