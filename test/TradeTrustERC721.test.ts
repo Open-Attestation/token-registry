@@ -1,6 +1,11 @@
+/* eslint-disable camelcase */
 import hre, { ethers, waffle } from "hardhat";
-// eslint-disable-next-line camelcase
-import { TitleEscrowCloneable, TradeTrustERC721, TitleEscrowCloneable__factory } from "@tradetrust/contracts";
+import {
+  TitleEscrowCloneable,
+  TradeTrustERC721,
+  TitleEscrowCloneable__factory,
+  TradeTrustERC721__factory
+} from "@tradetrust/contracts";
 import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -54,7 +59,6 @@ describe.only("TradeTrustERC721 (Partial)", async () => {
 
           describe("Interface checking", () => {
             beforeEach(async () => {
-              // eslint-disable-next-line camelcase
               const mockTitleEscrowFactory = await smock.mock<TitleEscrowCloneable__factory>("TitleEscrowCloneable");
               mockTitleEscrow = await mockTitleEscrowFactory.deploy();
               await mockTitleEscrow.initialize(
@@ -219,15 +223,60 @@ describe.only("TradeTrustERC721 (Partial)", async () => {
         });
       });
 
-      describe("When token has not been surrendered", () => {});
+      describe("When token has not been surrendered", () => {
+        let mockTradeTrustERC721: MockContract<TradeTrustERC721>;
+        let tokenId: string;
+
+        beforeEach(async () => {
+          tokenId = faker.datatype.hexaDecimal(2);
+
+          const mockTradeTrustERC721Factory = await smock.mock<TradeTrustERC721__factory>("TradeTrustERC721");
+          mockTradeTrustERC721 = await mockTradeTrustERC721Factory.deploy("Mock Shipper", "MSC");
+          await mockTradeTrustERC721
+            .connect(users.carrier)
+            .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+        });
+
+        it("should revert when restoring token", async () => {
+          const tx = mockTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
+
+          await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
+        });
+
+        describe("When _owners and _surrenderedOwners are out of sync", () => {
+          // This scenario should never happen unless something bad has really gone wrong in the transfer.
+          beforeEach(async () => {
+            const titleEscrowAddress = await mockTradeTrustERC721.ownerOf(tokenId);
+            const titleEscrowFactory = await ethers.getContractFactory("TitleEscrowCloneable");
+            const titleEscrow = titleEscrowFactory.attach(titleEscrowAddress) as TitleEscrowCloneable;
+            await titleEscrow.connect(users.beneficiary).surrender();
+          });
+
+          it("should revert if owner is not token registry", async () => {
+            await mockTradeTrustERC721.setVariable("_owners", {
+              [tokenId]: faker.finance.ethereumAddress()
+            });
+
+            const tx = mockTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
+
+            await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
+          });
+
+          it("should revert if previous surrendered owner is zero", async () => {
+            await mockTradeTrustERC721.setVariable("_surrenderedOwners", {
+              [ethers.BigNumber.from(tokenId).toNumber()]: ethers.constants.AddressZero
+            });
+
+            const tx = mockTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
+
+            await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
+          });
+        });
+      });
     });
 
     describe("When caller is not a minter", () => {
       describe("When token does not exist", () => {});
     });
-  });
-
-  it("should be successful!!!", async () => {
-    expect(true).to.be.true;
   });
 });
