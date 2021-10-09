@@ -322,6 +322,20 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
         await expect(tx).to.be.revertedWith("ERC721: transfer to the zero address");
       });
+
+      it("should put current owner to surrenderedOwners of token when transferring to token registry", async () => {
+        await tradeTrustERC721Mock
+          .connect(users.beneficiary)
+          ["safeTransferFrom(address,address,uint256)"](
+            users.beneficiary.address,
+            tradeTrustERC721Mock.address,
+            tokenId
+          );
+
+        const previousOwner = await tradeTrustERC721Mock.surrenderedOwnersInternal(tokenId);
+
+        expect(previousOwner).to.equal(users.beneficiary.address);
+      });
     });
   });
 });
