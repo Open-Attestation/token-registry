@@ -70,7 +70,7 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
         holder = titleEscrow.holder();
       } catch (bytes memory reason) {
         if (reason.length == 0) {
-          revert("TokenRegistry: Receiving address is not a TitleEscrow implementer");
+          revert("TokenRegistry: Previous owner is not a TitleEscrow implementer");
         } else {
           assembly {
             revert(add(32, reason), mload(reason))
