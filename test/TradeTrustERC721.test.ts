@@ -3,6 +3,7 @@ import hre, { ethers, waffle } from "hardhat";
 import { TitleEscrowCloneable, TradeTrustERC721, TitleEscrowCloneable__factory } from "@tradetrust/contracts";
 import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { setupFixture, TestUsers } from "./fixtures/setupFixture";
 import { mintTokenFixture } from "./fixtures/mintToken";
@@ -124,10 +125,18 @@ describe.only("TradeTrustERC721 (Partial)", async () => {
             });
 
             it("should restore into a new title escrow contract", async () => {
-              await tradeTrustERC721.restoreTitle(tokenId);
+              const tx = await tradeTrustERC721.restoreTitle(tokenId);
 
               const newTitleEscrowAddress = await tradeTrustERC721.ownerOf(tokenId);
               expect(titleEscrow.address).to.be.not.equal(newTitleEscrowAddress);
+              expect(tx)
+                .to.emit(tradeTrustERC721, "TitleEscrowDeployed")
+                .withArgs(
+                  newTitleEscrowAddress,
+                  tradeTrustERC721.address,
+                  users.beneficiary.address,
+                  users.beneficiary.address
+                );
             });
 
             it("should restore previous ownership correctly", async () => {
@@ -156,7 +165,58 @@ describe.only("TradeTrustERC721 (Partial)", async () => {
           });
         });
 
-        describe("When previous owner is an EOA", () => {});
+        describe("When previous owner is an EOA", () => {
+          let eoa: SignerWithAddress;
+
+          beforeEach(async () => {
+            tokenId = faker.datatype.hexaDecimal(64);
+            eoa = users.beneficiary;
+
+            await tradeTrustERC721
+              .connect(users.carrier)
+              ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+
+            // EOA surrendering
+            await tradeTrustERC721
+              .connect(eoa)
+              ["safeTransferFrom(address,address,uint256)"](eoa.address, tradeTrustERC721.address, tokenId);
+          });
+
+          it("should restore EOA to a new title escrow", async () => {
+            const currentOwner = await tradeTrustERC721.ownerOf(tokenId);
+
+            await tradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
+
+            const newOwner = await tradeTrustERC721.ownerOf(tokenId);
+            expect(newOwner).to.be.not.equal(currentOwner);
+          });
+
+          it("should restore the EOA into a new title escrow", async () => {
+            const currentOwner = await tradeTrustERC721.ownerOf(tokenId);
+
+            const tx = await tradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
+
+            const newOwner = await tradeTrustERC721.ownerOf(tokenId);
+
+            expect(currentOwner).to.be.not.equal(newOwner);
+            expect(tx)
+              .to.emit(tradeTrustERC721, "TitleEscrowDeployed")
+              .withArgs(newOwner, tradeTrustERC721.address, eoa.address, eoa.address);
+          });
+
+          it("should make the EOA as the beneficiary and holder of the restored title escrow", async () => {
+            await tradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
+
+            const newOwner = await tradeTrustERC721.ownerOf(tokenId);
+            const titleEscrowFactory = await ethers.getContractFactory("TitleEscrowCloneable");
+            const titleEscrow = titleEscrowFactory.attach(newOwner) as TitleEscrowCloneable;
+
+            const beneficiary = await titleEscrow.beneficiary();
+            const holder = await titleEscrow.holder();
+            expect(beneficiary).to.be.equal(eoa.address);
+            expect(holder).to.be.equal(eoa.address);
+          });
+        });
       });
 
       describe("When token has not been surrendered", () => {});
