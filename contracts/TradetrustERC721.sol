@@ -14,6 +14,8 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
+  address internal constant _burnAddress = 0x000000000000000000000000000000000000dEaD;
+
   // Mapping from token ID to previously surrendered title escrow address
   mapping(uint => address) internal _surrenderedOwners;
 
@@ -37,7 +39,7 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
   }
 
   function destroyToken(uint256 tokenId) external onlyMinter {
-    require(ownerOf(tokenId) == address(this), "TokenRegistry: Token has not been surrendered");
+    require(isSurrendered(tokenId), "TokenRegistry: Token has not been surrendered");
 
     emit TokenBurnt(tokenId);
 
@@ -53,7 +55,7 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
   ) external onlyMinter returns (address) {
     address previousOwner = _surrenderedOwners[tokenId];
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
-    require(ownerOf(tokenId) == address(this) && previousOwner != address(0), "TokenRegistry: Token is not surrendered");
+    require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
 
     // Remove the last surrendered token owner
     delete _surrenderedOwners[tokenId];

@@ -213,7 +213,7 @@ describe("TradeTrustErc721", async () => {
     });
 
     describe("Accepting surrendered token", () => {
-      it("should be able to destroy token", async () => {
+      it.skip("should be able to destroy token", async () => {
         const destroyTx = await (await tokenRegistryInstanceWithShippingLineWallet.destroyToken(merkleRoot)).wait();
         const burntTokenLog = destroyTx.events.find((log) => log.event === "TokenBurnt");
         assertDestroyBurntLog(burntTokenLog, merkleRoot);

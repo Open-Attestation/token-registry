@@ -288,4 +288,37 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       });
     });
   });
+
+  describe.only("Token Transfer Behaviour", () => {
+    const burnAddress = "0x000000000000000000000000000000000000dEaD";
+    let tokenId: number;
+
+    beforeEach(async () => {
+      tokenId = faker.datatype.number();
+
+      await tradeTrustERC721.connect(users.carrier)["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+    });
+
+    describe("Transferring of unsurrendered token", () => {
+      it("should not allow transfer to burn address", async () => {
+        const tx = tradeTrustERC721
+          .connect(users.beneficiary)
+          ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, burnAddress, tokenId);
+
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered for burning");
+      });
+
+      it("should not allow transfer to zero address", async () => {
+        const tx = tradeTrustERC721
+          .connect(users.beneficiary)
+          ["safeTransferFrom(address,address,uint256)"](
+            users.beneficiary.address,
+            ethers.constants.AddressZero,
+            tokenId
+          );
+
+        await expect(tx).to.be.revertedWith("ERC721: transfer to the zero address");
+      });
+    });
+  });
 });
