@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import hre, { ethers, waffle } from "hardhat";
+import { ethers, waffle } from "hardhat";
 import {
   TitleEscrowCloneable,
   TradeTrustERC721,
@@ -10,7 +10,7 @@ import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
-import { setupFixture, TestUsers } from "./fixtures/setupFixture";
+import { deployTokenFixture, TestUsers } from "./fixtures/deployTokenFixture";
 import { mintTokenFixture } from "./fixtures/mintToken";
 
 const { loadFixture } = waffle;
@@ -27,7 +27,12 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
   let tradeTrustERC721: TradeTrustERC721;
 
   beforeEach(async () => {
-    const setupData = await loadFixture(setupFixture(hre));
+    const setupData = await loadFixture(
+      deployTokenFixture({
+        tokenName: "The Great Shipping Company",
+        tokenInitials: "GSC"
+      })
+    );
     users = setupData.users;
     tradeTrustERC721 = setupData.token;
   });
