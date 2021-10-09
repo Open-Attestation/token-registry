@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { TradeTrustERC721 } from "@tradetrust/contracts";
+import { TradeTrustERC721Mock } from "@tradetrust/contracts";
 import { ethers } from "hardhat";
 
 export type TestUsers = {
@@ -12,12 +12,12 @@ export type TestUsers = {
 export const deployTokenFixture =
   ({ tokenName, tokenInitials }: { tokenName: string; tokenInitials: string }) =>
   async () => {
-    const tradeTrustERC721Factory = await ethers.getContractFactory("TradeTrustERC721");
+    const tradeTrustERC721MockFactory = await ethers.getContractFactory("TradeTrustERC721Mock");
     const [carrier, beneficiary, holder, ...others] = await ethers.getSigners();
     const users: TestUsers = { carrier, beneficiary, holder, others };
-    const token = (await tradeTrustERC721Factory
+    const token = (await tradeTrustERC721MockFactory
       .connect(users.carrier)
-      .deploy(tokenName, tokenInitials)) as TradeTrustERC721;
+      .deploy(tokenName, tokenInitials)) as TradeTrustERC721Mock;
 
     return { token, users };
   };
