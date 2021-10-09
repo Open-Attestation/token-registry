@@ -22,7 +22,7 @@ const { loadFixture } = waffle;
  * All new test cases should be added into this file.
  */
 
-describe("TradeTrustERC721 (Partial)", async () => {
+describe("TradeTrustERC721 (TS Migration)", async () => {
   let users: TestUsers;
   let tradeTrustERC721: TradeTrustERC721;
 
