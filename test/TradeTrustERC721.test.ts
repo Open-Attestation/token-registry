@@ -33,6 +33,12 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
   });
 
   describe("Restore Surrendered Token", () => {
+    let tokenId: string;
+
+    beforeEach(async () => {
+      tokenId = faker.datatype.hexaDecimal(64);
+    });
+
     describe("When caller is a minter", () => {
       beforeEach(async () => {
         // Connect to minter who is the carrier
@@ -40,20 +46,12 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       });
 
       it("should revert when token does not exist", async () => {
-        const fakeTokenId = faker.datatype.hexaDecimal();
-
-        const tx = tradeTrustERC721.restoreTitle(fakeTokenId);
+        const tx = tradeTrustERC721.restoreTitle(tokenId);
 
         await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
       });
 
       describe("When token has been surrendered", () => {
-        let tokenId: string;
-
-        beforeEach(async () => {
-          tokenId = faker.datatype.hexaDecimal(64);
-        });
-
         describe("When previous owner is a Title Escrow", () => {
           let mockTitleEscrow: MockContract<TitleEscrowCloneable>;
 
@@ -173,7 +171,6 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
           let eoa: SignerWithAddress;
 
           beforeEach(async () => {
-            tokenId = faker.datatype.hexaDecimal(64);
             eoa = users.beneficiary;
 
             await tradeTrustERC721
@@ -225,7 +222,6 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
       describe("When token has not been surrendered", () => {
         let mockTradeTrustERC721: MockContract<TradeTrustERC721>;
-        let tokenId: string;
 
         beforeEach(async () => {
           tokenId = faker.datatype.hexaDecimal(2);
