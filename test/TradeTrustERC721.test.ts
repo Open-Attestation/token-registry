@@ -22,7 +22,7 @@ const { loadFixture } = waffle;
  * All new test cases should be added into this file.
  */
 
-describe.only("TradeTrustERC721 (Partial)", async () => {
+describe("TradeTrustERC721 (Partial)", async () => {
   let users: TestUsers;
   let tradeTrustERC721: TradeTrustERC721;
 
@@ -276,7 +276,15 @@ describe.only("TradeTrustERC721 (Partial)", async () => {
     });
 
     describe("When caller is not a minter", () => {
-      describe("When token does not exist", () => {});
+      describe("When token does not exist", () => {
+        it("should revert when restoring a token that does not exist", async () => {
+          const nonExistentTokenId = faker.datatype.hexaDecimal(64);
+
+          const tx = tradeTrustERC721.connect(users.carrier).restoreTitle(nonExistentTokenId);
+
+          await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
+        });
+      });
     });
   });
 });
