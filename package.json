@@ -4,11 +4,10 @@
   "files": [
     "dist",
     "src",
-    "scripts",
-    "types"
+    "scripts"
   ],
   "main": "dist/index.js",
-  "types": "dist/ts/index.d.ts",
+  "types": "dist/types/index.d.ts",
   "repository": "git@github.com:Open-Attestation/token-registry.git",
   "author": "GovTech",
   "license": "Apache-2.0",
@@ -16,8 +15,9 @@
     "build:sol": "hardhat compile",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src",
-    "build": "npm run build:sol && npm run copy-types && npm run build:js",
-    "copy-types": "rm -rf types && mkdir -p types && cp src/contracts/*.d.ts types/ && mkdir -p dist/ts/contracts && cp src/contracts/*.d.ts dist/ts/contracts",
+    "build:js:copy-types": "mkdir -p ./dist/types && cp ./src/contracts/*.d.ts ./dist/types/contracts",
+    "build": "npm run clean:build && npm run build:sol && npm run build:js && npm run build:js:copy-types",
+    "clean:build": "rm -rf ./dist && rm -rf build && rm -rf ./src/contracts",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
     "lint:js": "eslint test src --ext .js --ext .ts",

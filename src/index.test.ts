@@ -1,7 +1,11 @@
 import { providers } from "ethers";
-import { TitleEscrowCloneableFactory, TradeTrustErc721Factory, TitleEscrowClonerFactory } from "./index";
-import { TradeTrustERC721 } from "../types/TradeTrustERC721";
-import { TitleEscrowCloner } from "../types/TitleEscrowCloner";
+import {
+  TitleEscrowCloneable__factory as TitleEscrowCloneableFactory,
+  TradeTrustERC721__factory as TradeTrustERC721Factory,
+  TitleEscrowCloner__factory as TitleEscrowClonerFactory,
+  TradeTrustERC721,
+  TitleEscrowCloner,
+} from "./contracts";
 
 const provider = new providers.JsonRpcProvider();
 const signer1 = provider.getSigner(0);
@@ -22,7 +26,7 @@ describe("TitleEscrowClonerFactory", () => {
   beforeEach(async () => {
     const factory = new TitleEscrowClonerFactory(signer1);
     titleEscrowFactory = await factory.deploy();
-    const tokenRegistryFactory = new TradeTrustErc721Factory(signer1);
+    const tokenRegistryFactory = new TradeTrustERC721Factory(signer1);
     tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
   });
 
@@ -45,7 +49,7 @@ describe("TitleEscrowCloneableFactory", () => {
   let tokenRegistry: TradeTrustERC721;
 
   beforeEach(async () => {
-    const tokenRegistryFactory = new TradeTrustErc721Factory(signer1);
+    const tokenRegistryFactory = new TradeTrustERC721Factory(signer1);
     tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
   });
 
@@ -89,7 +93,7 @@ describe("TitleEscrowCloneableFactory", () => {
 
 describe("TradeTrustErc721Factory", () => {
   const deployTradeTrustERC721 = async () => {
-    const factory = new TradeTrustErc721Factory(signer1);
+    const factory = new TradeTrustERC721Factory(signer1);
     const registryInstance = await factory.deploy("TOKEN_REGISTRY_NAME", "TKN");
     return registryInstance;
   };
@@ -101,7 +105,7 @@ describe("TradeTrustErc721Factory", () => {
   });
   it("should be able to connect to an existing TradeTrustERC721", async () => {
     const deployedInstance = await deployTradeTrustERC721();
-    const instance = await TradeTrustErc721Factory.connect(deployedInstance.address, signer1);
+    const instance = await TradeTrustERC721Factory.connect(deployedInstance.address, signer1);
     const sym = await instance.symbol();
     expect(sym).toBe("TKN");
   });
