@@ -39,11 +39,11 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
 
     emit TokenBurnt(tokenId);
 
-    // Remove the last surrendered token owner
-    delete _surrenderedOwners[tokenId];
-
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
     _registrySafeTransformFrom(ownerOf(tokenId), 0x000000000000000000000000000000000000dEaD, tokenId);
+
+    // Remove the last surrendered token owner
+    delete _surrenderedOwners[tokenId];
   }
 
   function restoreTitle(
@@ -78,14 +78,28 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     return newTitleEscrow;
   }
 
+  function isSurrendered(
+    uint256 tokenId
+  ) public view returns (bool) {
+    if (_exists(tokenId)) {
+      return ownerOf(tokenId) == address(this) && _surrenderedOwners[tokenId] != address(0);
+    }
+    return false;
+  }
+
   function _beforeTokenTransfer(
     address from,
     address to,
     uint256 tokenId
   ) internal virtual override {
-    if (to == address(this)) {
-      // Surrendering, hence, store the current owner
-      _surrenderedOwners[tokenId] = from;
+    if (to == 0x000000000000000000000000000000000000dEaD) {
+      require(isSurrendered(tokenId), "TokenRegistry: Token has not been surrendered for burning");
+    } else {
+      require(!isSurrendered(tokenId), "TokenRegistry: Token has already been surrendered");
+      if (to == address(this)) {
+        // Surrendering, hence, store the current owner
+        _surrenderedOwners[tokenId] = from;
+      }
     }
     super._beforeTokenTransfer(from, to, tokenId);
   }
