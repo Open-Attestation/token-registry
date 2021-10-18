@@ -1,6 +1,7 @@
+require("@typechain/hardhat");
+require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-watcher");
-require("hardhat-typechain");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 
