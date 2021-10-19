@@ -1,58 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./Initializable.sol";
-import "./Clones.sol";
-import "./ITitleEscrow.sol";
-import "./ITitleEscrowCreator.sol";
-import "./ERC721.sol";
-
-abstract contract HasNamedBeneficiaryInitializable is Context, IHasBeneficiary, Initializable {
-  address public override beneficiary;
-
-    function __initialize__beneficiary(address _beneficiary) internal {
-        beneficiary = _beneficiary;
-    }
-
-  modifier onlyBeneficiary() {
-    require(isBeneficiary(), "HasNamedBeneficiary: only the beneficiary may invoke this function");
-    _;
-  }
-
-  function isBeneficiary() internal view returns (bool) {
-    return _msgSender() == beneficiary;
-  }
-}
-
-abstract contract HasHolderInitializable is Context, IHasHolder, Initializable {
-  address public override holder;
-
-  function __initialize__holder(address _holder) internal {
-    holder = _holder;
-    emit HolderChanged(address(0), _holder);
-  }
-
-  modifier onlyHolder() {
-    require(isHolder(), "HasHolder: only the holder may invoke this function");
-    _;
-  }
-
-  function isHolder() internal view returns (bool) {
-    return _msgSender() == holder;
-  }
-
-  function _changeHolder(address newHolder) internal {
-    require(newHolder != address(0), "HasHolder: new holder is the zero address");
-    emit HolderChanged(holder, newHolder);
-    holder = newHolder;
-  }
-}
+import "./access/HasNamedBeneficiaryInitializable.sol";
+import "./access/HasHolderInitializable.sol";
+import "./interfaces/ITitleEscrowCreator.sol";
+import "./interfaces/ITitleEscrow.sol";
+import "./lib/Initializable.sol";
+import { ERC721, ERC165 } from "./lib/ERC721.sol";
 
 
 contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolderInitializable, HasNamedBeneficiaryInitializable, ERC165  {
   // Documentation on how this smart contract works: https://docs.tradetrust.io/docs/overview/title-transfer
 
-  StatusTypes public override status;
+  ITitleEscrow.StatusTypes public override status;
 
   // Information on token held
   ERC721 public override tokenRegistry;
