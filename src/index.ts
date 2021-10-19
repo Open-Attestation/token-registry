@@ -5,5 +5,5 @@ export {
   TradeTrustERC721__factory as TradeTrustERC721Factory,
   TitleEscrowCloneable,
   TitleEscrowCloner,
-  TradeTrustERC721,
+  TradeTrustERC721
 } from "./contracts";

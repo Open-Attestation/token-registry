@@ -4,7 +4,7 @@ import {
   TradeTrustERC721__factory as TradeTrustERC721Factory,
   TitleEscrowCloner__factory as TitleEscrowClonerFactory,
   TradeTrustERC721,
-  TitleEscrowCloner,
+  TitleEscrowCloner
 } from "./contracts";
 
 const provider = new providers.JsonRpcProvider();
