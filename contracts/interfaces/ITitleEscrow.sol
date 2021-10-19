@@ -1,24 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./ERC721.sol";
-
-enum StatusTypes {Uninitialised, InUse, Exited}
-
-interface IHasHolder {
-  /// @notice Public getter to access the holder of the Title, who is equivalent to holdership of a physical Title
-  function holder() external returns (address);
-
-  event HolderChanged(address indexed previousHolder, address indexed newHolder);
-}
-
-interface IHasBeneficiary {
-  /// @notice Public getter to access the beneficiary of the Title. The beneficiary is the legal owner of the Title.
-  function beneficiary() external returns (address);
-}
+import "../access/IHasHolder.sol";
+import "../access/IHasBeneficiary.sol";
+import  { ERC721, IERC165, IERC721Receiver } from "../lib/ERC721.sol";
 
 /// @title Title Escrow for Transferable Records
 interface ITitleEscrow is IHasHolder, IHasBeneficiary, IERC165, IERC721Receiver {
+
+  enum StatusTypes {Uninitialised, InUse, Exited}
+
   /// @dev This emits when the escrow contract receives an ERC721 token.
   event TitleReceived(address indexed _tokenRegistry, address indexed _from, uint256 indexed _id);
 
