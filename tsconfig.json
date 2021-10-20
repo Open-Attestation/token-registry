@@ -16,9 +16,9 @@
     "stripInternal": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
-      "@tradetrust/contracts": ["contracts/index.ts"]
+      "@tradetrust/contracts": ["./src/contracts"]
     }
   },
   "ts-node": {
