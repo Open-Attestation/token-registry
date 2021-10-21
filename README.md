@@ -19,18 +19,18 @@ To use the package, you will need to provide your own Web3 [provider](https://do
 Deploying new TradeTrustERC721
 
 ```ts
-import {TradeTrustErc721Factory} from "@govtechsg/token-registry";
+import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
 
-const factory = new TradeTrustErc721Factory(signer1);
+const factory = new TradeTrustERC721Factory(signer1);
 const tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
 ```
 
 Connecting to existing TradeTrustERC721 on Ethereum
 
 ```ts
-import {TradeTrustErc721Factory} from "@govtechsg/token-registry";
+import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
 
-const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer1);
+const connectedRegistry = TradeTrustERC721Factory.connect(existingERC721Address, signer1);
 ```
 
 List of available functions on TradeTrustERC721
@@ -43,24 +43,24 @@ The TradeTrustErc721 Token Registry will clone a new TitleEscrow internally when
 
 #### Minting Title Escrow
 ```ts
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
 
-const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer);
+const connectedRegistry = TradeTrustERC721Factory.connect(existingERC721Address, signer);
 const tx = await connectedRegistry.mintTitle(beneficiaryAddress, holderAddress, tokenId);
 ````
 
 #### Restoring Title Escrow
 ```ts
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
 
-const connectedRegistry = TradeTrustErc721Factory.connect(existingERC721Address, signer);
+const connectedRegistry = TradeTrustERC721Factory.connect(existingERC721Address, signer);
 const tx = await connectedRegistry.restoreTitle(beneficiaryAddress, holderAddress, existingTokenId);
 ````
 
 #### Connecting to an existing TitleEscrow on Ethereum
 
 ```ts
-import {TitleEscrowFactory} from "@govtechsg/token-registry";
+import { TitleEscrowFactory } from "@govtechsg/token-registry";
 
 const connectedEscrow = TitleEscrowFactory.connect(existingTitleEscrowAddress, signer1);
 ```
