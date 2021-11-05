@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 import { ethers } from "hardhat";
-import { utils as ethersUtils } from "ethers";
 import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import {
@@ -11,9 +10,10 @@ import {
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
+import { RoleConstants } from "../../../../src/common/constants";
 
 describe("TradeTrustERC721RootMintable", () => {
-  const CHAIN_MANAGER_ROLE = ethersUtils.id("CHAIN_MANAGER_ROLE");
+  const CHAIN_MANAGER_ROLE = RoleConstants.chainManager;
 
   let users: TestUsers;
   let tokenId: number;

@@ -15,6 +15,7 @@ import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
 import { getTestUsers, impersonateAccount, stopImpersonatingAccount } from "../../../utils";
 import { deployAllMintableFixture } from "../../../fixtures/chains/polygon/deploy-all.fixture";
+import { AddressConstants } from "../../../../src/common/constants";
 
 const abiCoder = new ethersUtils.AbiCoder();
 
@@ -84,8 +85,7 @@ describe("TradeTrustERC721ChildTunnel - Mintable Tokens", () => {
     });
 
     describe("When receiving from StateSender", () => {
-      // Address of StateSender as defined by matic
-      const stateSenderAddress = "0x0000000000000000000000000000000000001001";
+      const stateSenderAddress = AddressConstants.polygon.testnet.stateSender;
       let stateSenderSigner: Signer;
 
       beforeEach(async () => {
