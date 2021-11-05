@@ -84,7 +84,7 @@ describe("TitleEscrowCloneableFactory", () => {
 
   it("should be able to write to TitleEscrow", async () => {
     const escrowInstance = await deployTitleEscrow();
-    await tokenRegistry["safeMint(address,uint256)"](escrowInstance.address, tokenId);
+    await tokenRegistry.mint(escrowInstance.address, tokenId);
     await escrowInstance.approveNewOwner(account2);
     const target = await escrowInstance.approvedOwner();
     expect(target).toBe(account2);
@@ -111,7 +111,7 @@ describe("TradeTrustErc721Factory", () => {
   });
   it("should be able to write to TradeTrustERC721", async () => {
     const instance = await deployTradeTrustERC721();
-    await instance["safeMint(address,uint256)"](account1, tokenId);
+    await instance.mint(account1, tokenId);
     const ownerOfToken = await instance.ownerOf(tokenId);
     expect(ownerOfToken).toBe(account1);
   });
