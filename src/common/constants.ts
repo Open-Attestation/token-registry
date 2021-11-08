@@ -23,4 +23,5 @@ export const EventConstants = {
 
 export const RoleConstants = {
   chainManager: ethers.utils.id("CHAIN_MANAGER_ROLE"),
+  defaultAdmin: "0x0000000000000000000000000000000000000000000000000000000000000000",
 };

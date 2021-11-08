@@ -56,7 +56,7 @@ abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Rece
    *
    * @param tokenId Token ID to be burnt
    */
-  function destroyToken(uint256 tokenId) external onlyMinter {
+  function destroyToken(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) {
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -66,7 +66,7 @@ abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Rece
     delete _surrenderedOwners[tokenId];
   }
 
-  function restoreTitle(uint256 tokenId) external onlyMinter returns (address) {
+  function restoreTitle(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) returns (address) {
     address previousOwner = _surrenderedOwners[tokenId];
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
