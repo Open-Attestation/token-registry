@@ -7,6 +7,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
 import { RoleConstants } from "../../../../src/common/constants";
+import { getTestUsers } from "../../../utils";
 
 describe("TradeTrustERC721ChildMintable", () => {
   const CHAIN_MANAGER_ROLE = RoleConstants.chainManager;
@@ -28,8 +29,7 @@ describe("TradeTrustERC721ChildMintable", () => {
       "GSC"
     );
 
-    const [carrier, beneficiary, holder, ...others] = await ethers.getSigners();
-    users = { carrier, beneficiary, holder, others };
+    users = await getTestUsers();
 
     fakeChainManager = users.others[users.others.length - 1];
 
