@@ -12,12 +12,12 @@
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
-    "build:sol": "hardhat compile",
+    "build:sol": "TS_NODE_TRANSPILE_ONLY=1 hardhat compile",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
-    "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src",
+    "build:js": "tsc && npm run build:js:copy-src",
     "build:js:copy-types": "mkdir -p ./dist/types/contracts && cp ./src/contracts/*.d.ts ./dist/types/contracts",
-    "build": "npm run clean:build && TS_NODE_TRANSPILE_ONLY=1 npm run build:sol && npm run build:js && npm run build:js:copy-types",
-    "clean:build": "hardhat clean && rm -rf ./dist && rm -rf ./src/contracts",
+    "build": "npm run clean:build && npm run build:sol && npm run build:js && npm run build:js:copy-types",
+    "clean:build": "TS_NODE_TRANSPILE_ONLY=1 hardhat clean && rm -rf ./dist && rm -rf ./src/contracts",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
     "lint:js": "eslint test src --ext .js --ext .ts",
@@ -32,7 +32,7 @@
     "test": "npm run test:sol && npm run test:js",
     "prepare": "npm run build",
     "semantic-release": "semantic-release",
-    "precoverage": "hardhat clean && npm run build:sol",
+    "precoverage": "npm run clean:build && npm run build:sol",
     "coverage": "hardhat coverage"
   },
   "jest": {
