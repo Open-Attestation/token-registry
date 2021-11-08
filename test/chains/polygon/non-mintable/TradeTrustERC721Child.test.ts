@@ -5,7 +5,12 @@ import { TradeTrustERC721Child, TradeTrustERC721Child__factory } from "@tradetru
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
-import { getTestUsers, impersonateAccount, stopImpersonatingAccount } from "../../../utils";
+import {
+  getTestUsers,
+  impersonateAccount,
+  stopImpersonatingAccount,
+  toAccessControlRevertMessage
+} from "../../../utils";
 import { RoleConstants } from "../../../../src/common/constants";
 
 describe("TradeTrustERC721Child", () => {
@@ -41,7 +46,9 @@ describe("TradeTrustERC721Child", () => {
       it("should revert if caller is not chain manager", async () => {
         const tx = tradeTrustERC721Child.connect(users.carrier).deposit(users.beneficiary.address, tokenId, "0x");
 
-        await expect(tx).to.be.revertedWith("AccessControl");
+        await expect(tx).to.be.revertedWith(
+          toAccessControlRevertMessage(users.carrier.address, RoleConstants.chainManager)
+        );
       });
 
       it("should mint token with title escrow", async () => {
@@ -67,7 +74,7 @@ describe("TradeTrustERC721Child", () => {
       it("should revert if caller is not chain manager", async () => {
         const tx = tradeTrustERC721Child.connect(users.carrier).withdraw(users.beneficiary.address, tokenId, "0x");
 
-        expect(tx).to.be.revertedWith("AccessControl");
+        expect(tx).to.be.revertedWith(toAccessControlRevertMessage(users.carrier.address, RoleConstants.chainManager));
       });
 
       it("should revert if chain manager is not approved", async () => {

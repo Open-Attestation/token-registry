@@ -7,7 +7,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
 import { RoleConstants } from "../../../../src/common/constants";
-import { getTestUsers } from "../../../utils";
+import { getTestUsers, toAccessControlRevertMessage } from "../../../utils";
 
 describe("TradeTrustERC721ChildMintable", () => {
   const CHAIN_MANAGER_ROLE = RoleConstants.chainManager;
@@ -101,7 +101,9 @@ describe("TradeTrustERC721ChildMintable", () => {
           .connect(users.carrier)
           .deposit(users.beneficiary.address, tokenId, "0x");
 
-        await expect(tx).to.be.revertedWith("AccessControl");
+        await expect(tx).to.be.revertedWith(
+          toAccessControlRevertMessage(users.carrier.address, RoleConstants.chainManager)
+        );
       });
 
       it("should reset withdrawn status of token", async () => {
@@ -140,7 +142,7 @@ describe("TradeTrustERC721ChildMintable", () => {
           .connect(users.carrier)
           .withdraw(users.beneficiary.address, tokenId, "0x");
 
-        expect(tx).to.be.revertedWith("AccessControl");
+        expect(tx).to.be.revertedWith(toAccessControlRevertMessage(users.carrier.address, RoleConstants.chainManager));
       });
 
       it("should revert if chain manager is not approved", async () => {

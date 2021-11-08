@@ -11,7 +11,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
 import { RoleConstants } from "../../../../src/common/constants";
-import { getTestUsers } from "../../../utils";
+import { getTestUsers, toAccessControlRevertMessage } from "../../../utils";
 
 describe("TradeTrustERC721RootMintable", () => {
   const CHAIN_MANAGER_ROLE = RoleConstants.chainManager;
@@ -61,7 +61,9 @@ describe("TradeTrustERC721RootMintable", () => {
         .connect(users.carrier)
         .mintTitle(users.beneficiary.address, users.holder.address, tokenId);
 
-      await expect(tx).to.be.revertedWith("AccessControl");
+      await expect(tx).to.be.revertedWith(
+        toAccessControlRevertMessage(users.carrier.address, RoleConstants.chainManager)
+      );
     });
   });
 
@@ -77,7 +79,9 @@ describe("TradeTrustERC721RootMintable", () => {
     it("should revert if the caller does not have chain manager role", async () => {
       const tx = tradeTrustERC721RootMintable.connect(users.carrier).mint(users.beneficiary.address, tokenId);
 
-      await expect(tx).to.be.revertedWith("AccessControl");
+      await expect(tx).to.be.revertedWith(
+        toAccessControlRevertMessage(users.carrier.address, RoleConstants.chainManager)
+      );
     });
   });
 });
