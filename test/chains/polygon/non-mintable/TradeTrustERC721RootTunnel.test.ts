@@ -154,6 +154,14 @@ describe("TradeTrustERC721RootTunnel - Non-Mintable Tokens", () => {
         await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
       });
 
+      it("should revert when root token does not support ITradeTrustERC721Mintable", async () => {
+        stubRootToken.supportsInterface.returns(false);
+
+        const tx = rootTunnelMockAsBeneficiary.processMessageFromChildInternal(dataFromChild);
+
+        await expect(tx).to.be.revertedWith("TradeTrustERC721RootTunnel: Unsupported root token");
+      });
+
       it("should emit RootTokenWithdrawal event", async () => {
         const tx = rootTunnelMockAsBeneficiary.processMessageFromChildInternal(dataFromChild);
 

@@ -165,6 +165,14 @@ describe("TradeTrustERC721RootTunnel - Mintable Tokens", () => {
         expect(stubRootToken.mintTitle).to.be.calledWith(withdrawer.address, withdrawer.address, nonExistTokenId);
       });
 
+      it("should revert when root token does not support ITradeTrustERC721Mintable", async () => {
+        stubRootToken.supportsInterface.returns(false);
+
+        const tx = rootTunnelMockAsBeneficiary.processMessageFromChildInternal(dataFromChild);
+
+        await expect(tx).to.be.revertedWith("TradeTrustERC721RootTunnel: Unsupported root token");
+      });
+
       it("should emit RootTokenWithdrawal event", async () => {
         const tx = rootTunnelMockAsBeneficiary.processMessageFromChildInternal(dataFromChild);
 

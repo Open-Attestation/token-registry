@@ -7,7 +7,12 @@ import "../../interfaces/ITradeTrustERC721Mintable.sol";
 
 contract TradeTrustERC721RootTunnel is FxBaseRootTunnel, IERC721Receiver {
   event RootTokenDeposit(address indexed rootToken, address indexed depositor, uint256 tokenId);
-  event RootTokenWithdrawal(address indexed rootToken, address indexed childToken, address indexed withdrawer, uint256 tokenId);
+  event RootTokenWithdrawal(
+    address indexed rootToken,
+    address indexed childToken,
+    address indexed withdrawer,
+    uint256 tokenId
+  );
 
   address public rootToken;
 
@@ -39,20 +44,20 @@ contract TradeTrustERC721RootTunnel is FxBaseRootTunnel, IERC721Receiver {
   }
 
   function _processMessageFromChild(bytes memory data) internal virtual override {
+    require(
+      IERC165(rootToken).supportsInterface(type(ITradeTrustERC721Mintable).interfaceId),
+      "TradeTrustERC721RootTunnel: Unsupported root token"
+    );
+
     (address childToken, address withdrawer, uint256 tokenId, bytes memory withdrawalData) = abi.decode(
       data,
       (address, address, uint256, bytes)
     );
-
-    if (IERC165(rootToken).supportsInterface(type(ITradeTrustERC721Mintable).interfaceId)) {
-      ITradeTrustERC721Mintable token = ITradeTrustERC721Mintable(rootToken);
-      if (token.exists(tokenId)) {
-        token.safeTransferFrom(address(this), withdrawer, tokenId, withdrawalData);
-      } else {
-        token.mintTitle(withdrawer, withdrawer, tokenId);
-      }
+    ITradeTrustERC721Mintable token = ITradeTrustERC721Mintable(rootToken);
+    if (token.exists(tokenId)) {
+      token.safeTransferFrom(address(this), withdrawer, tokenId, withdrawalData);
     } else {
-      IERC721(rootToken).safeTransferFrom(address(this), withdrawer, tokenId, withdrawalData);
+      token.mintTitle(withdrawer, withdrawer, tokenId);
     }
 
     emit RootTokenWithdrawal(rootToken, childToken, withdrawer, tokenId);
