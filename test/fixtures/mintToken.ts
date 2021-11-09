@@ -8,7 +8,7 @@ export const mintTokenFixture =
     token,
     beneficiary,
     holder,
-    tokenId,
+    tokenId
   }: {
     token: TradeTrustERC721;
     beneficiary: SignerWithAddress;
@@ -19,7 +19,7 @@ export const mintTokenFixture =
     const tx = await token.mintTitle(beneficiary.address, holder.address, tokenId);
 
     const abi = [
-      "event TitleEscrowDeployed (address indexed escrowAddress, address indexed tokenRegistry, address beneficiary, address holder)",
+      "event TitleEscrowDeployed (address indexed escrowAddress, address indexed tokenRegistry, address beneficiary, address holder)"
     ];
     const event = await getEventFromTransaction(tx, abi, "TitleEscrowDeployed");
     const escrowAddress = event.escrowAddress as string;

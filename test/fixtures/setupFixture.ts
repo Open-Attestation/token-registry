@@ -14,9 +14,10 @@ export const setupFixture = (hre: HardhatRuntimeEnvironment) => async () => {
   const tradeTrustERC721Factory = await ethers.getContractFactory("TradeTrustERC721");
   const [carrier, beneficiary, holder, ...others] = await ethers.getSigners();
   const users: TestUsers = { carrier, beneficiary, holder, others };
-  const token = (await tradeTrustERC721Factory
-    .connect(users.carrier)
-    .deploy("Shipping Company", "GSC")) as TradeTrustERC721;
+  const token = (await tradeTrustERC721Factory.connect(users.carrier).deploy(
+    "Shipping Company",
+    "GSC"
+  )) as TradeTrustERC721;
 
   return { token, users };
 };
