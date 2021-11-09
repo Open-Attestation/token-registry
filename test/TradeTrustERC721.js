@@ -30,9 +30,7 @@ describe("TradeTrustErc721", async () => {
   });
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
-  const merkleRoot1 = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb4";
   const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-  const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
   beforeEach(async () => {
     beneficiary = owner1;
