@@ -303,28 +303,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
     });
 
-    describe("Transferring of unsurrendered token", () => {
-      it("should not allow transfer to burn address", async () => {
-        const tx = tradeTrustERC721Mock
-          .connect(users.beneficiary)
-          ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, burnAddress, tokenId);
-
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered for burning");
-      });
-
-      it("should not allow transfer to zero address", async () => {
-        const tx = tradeTrustERC721Mock
-          .connect(users.beneficiary)
-          ["safeTransferFrom(address,address,uint256)"](
-            users.beneficiary.address,
-            ethers.constants.AddressZero,
-            tokenId
-          );
-
-        await expect(tx).to.be.revertedWith("ERC721: transfer to the zero address");
-      });
-
-      it("should put current owner to surrenderedOwners of token when transferring to token registry", async () => {
+    describe("Transferring of surrendered token to burn/zero addresses", () => {
+      beforeEach(async () => {
+        // Manual surrendering from beneficiary
         await tradeTrustERC721Mock
           .connect(users.beneficiary)
           ["safeTransferFrom(address,address,uint256)"](
@@ -332,15 +313,194 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
             tradeTrustERC721Mock.address,
             tokenId
           );
+      });
 
-        const previousOwner = await tradeTrustERC721Mock.surrenderedOwnersInternal(tokenId);
+      describe("When caller is an approved operator", () => {
+        it("should not be possible for beneficiary to approve an operator after surrendering", async () => {
+          const operator = users.others[users.others.length - 1];
 
-        expect(previousOwner).to.equal(users.beneficiary.address);
+          const tx = tradeTrustERC721Mock.connect(users.beneficiary).approve(operator.address, tokenId);
+
+          await expect(tx).to.be.revertedWith("ERC721: approve caller is not owner nor approved for all");
+        });
+      });
+
+      describe("When caller is an unapproved operator", () => {
+        it("should revert when transferring to burn address", async () => {
+          const unapprovedOperator = users.others[users.others.length - 1];
+
+          const tx = tradeTrustERC721Mock
+            .connect(unapprovedOperator)
+            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, burnAddress, tokenId);
+
+          await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
+        });
+
+        it("should revert when transferring to zero address", async () => {
+          const unapprovedOperator = users.others[users.others.length - 1];
+
+          const tx = tradeTrustERC721Mock
+            .connect(unapprovedOperator)
+            ["safeTransferFrom(address,address,uint256)"](
+              users.beneficiary.address,
+              ethers.constants.AddressZero,
+              tokenId
+            );
+
+          await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
+        });
+      });
+    });
+
+    describe("Transferring of unsurrendered token to burn/zero addresses", () => {
+      describe("When caller is an approved operator", () => {
+        let operator: SignerWithAddress;
+
+        beforeEach(async () => {
+          operator = users.others[users.others.length - 1];
+          await tradeTrustERC721Mock.connect(users.beneficiary).approve(operator.address, tokenId);
+          tradeTrustERC721Mock = tradeTrustERC721Mock.connect(operator);
+        });
+
+        it("should not allow transfer to burn address", async () => {
+          const tx = tradeTrustERC721Mock["safeTransferFrom(address,address,uint256)"](
+            users.beneficiary.address,
+            burnAddress,
+            tokenId
+          );
+
+          await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered for burning");
+        });
+
+        it("should not allow transfer to zero address", async () => {
+          const tx = tradeTrustERC721Mock["safeTransferFrom(address,address,uint256)"](
+            users.beneficiary.address,
+            ethers.constants.AddressZero,
+            tokenId
+          );
+
+          await expect(tx).to.be.revertedWith("ERC721: transfer to the zero address");
+        });
+
+        it("should put current owner to surrenderedOwners of token when transferring to token registry", async () => {
+          await tradeTrustERC721Mock["safeTransferFrom(address,address,uint256)"](
+            users.beneficiary.address,
+            tradeTrustERC721Mock.address,
+            tokenId
+          );
+
+          const previousOwner = await tradeTrustERC721Mock.surrenderedOwnersInternal(tokenId);
+
+          expect(previousOwner).to.equal(users.beneficiary.address);
+        });
+      });
+
+      describe("When caller is an unapproved operator", () => {
+        it("should revert if caller is an unapproved minter", async () => {
+          const unapprovedOperator = users.others[users.others.length - 1];
+
+          const tx = tradeTrustERC721Mock
+            .connect(unapprovedOperator)
+            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, burnAddress, tokenId);
+
+          await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
+        });
       });
     });
   });
 
-  describe("Accepting and Burning of Surrendered token", () => {
+  describe("Impermanent burning of tokens", () => {
+    let tokenId: number;
+
+    beforeEach(async () => {
+      tokenId = faker.datatype.number();
+
+      await tradeTrustERC721Mock
+        .connect(users.carrier)
+        ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+    });
+
+    it("should revert if caller is not a minter", async () => {
+      const tx = tradeTrustERC721Mock.connect(users.holder).burn(tokenId);
+
+      await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+    });
+
+    it("should revert if caller is an unapproved minter", async () => {
+      const tx = tradeTrustERC721Mock.connect(users.carrier).burn(tokenId);
+
+      await expect(tx).to.be.revertedWith("TokenRegistry: Caller is not owner nor approved");
+    });
+
+    describe("When caller is an approved minter", () => {
+      let tradeTrustERC721MockAsApprovedMinter: TradeTrustERC721Mock;
+
+      beforeEach(async () => {
+        await tradeTrustERC721Mock.connect(users.beneficiary).approve(users.carrier.address, tokenId);
+        tradeTrustERC721MockAsApprovedMinter = tradeTrustERC721Mock.connect(users.carrier);
+      });
+
+      describe("When a token has been surrendered", () => {
+        it("should revert when minter burns a token", async () => {
+          await tradeTrustERC721Mock
+            .connect(users.beneficiary)
+            ["safeTransferFrom(address,address,uint256)"](
+              users.beneficiary.address,
+              tradeTrustERC721Mock.address,
+              tokenId
+            );
+
+          const tx = tradeTrustERC721MockAsApprovedMinter.burn(tokenId);
+
+          await expect(tx).to.be.revertedWith("TokenRegistry: Caller is not owner nor approved");
+        });
+      });
+
+      describe("When a token has not been surrendered", () => {
+        it("should burn token to zero address", async () => {
+          await tradeTrustERC721MockAsApprovedMinter.burn(tokenId);
+
+          const tx = tradeTrustERC721MockAsApprovedMinter.ownerOf(tokenId);
+
+          await expect(tx).to.be.revertedWith("ERC721: owner query for nonexistent token");
+        });
+
+        it("should emit TokenBurnt event on burning of token", async () => {
+          const tx = tradeTrustERC721MockAsApprovedMinter.burn(tokenId);
+
+          expect(tx).to.emit(tradeTrustERC721Mock, "TokenBurnt").withArgs(tokenId);
+        });
+      });
+    });
+
+    describe("When a token has been impermanently burnt", () => {
+      let tradeTrustERC721MockAsApprovedMinter: TradeTrustERC721Mock;
+
+      beforeEach(async () => {
+        await tradeTrustERC721Mock.connect(users.beneficiary).approve(users.carrier.address, tokenId);
+        tradeTrustERC721MockAsApprovedMinter = tradeTrustERC721Mock.connect(users.carrier);
+        await tradeTrustERC721MockAsApprovedMinter.burn(tokenId);
+      });
+
+      it("should allow mintTitle on the same token ID again", async () => {
+        await tradeTrustERC721MockAsApprovedMinter.mintTitle(users.beneficiary.address, users.holder.address, tokenId);
+
+        const tx = tradeTrustERC721MockAsApprovedMinter.ownerOf(tokenId);
+
+        await expect(tx).to.not.be.reverted;
+      });
+
+      it("should allow minting of the same token ID to EOA again", async () => {
+        await tradeTrustERC721MockAsApprovedMinter["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+
+        const newOwner = await tradeTrustERC721MockAsApprovedMinter.ownerOf(tokenId);
+
+        await expect(newOwner).to.equal(users.beneficiary.address);
+      });
+    });
+  });
+
+  describe("Permanent burning of tokens", () => {
     let tokenId: string;
 
     beforeEach(async () => {
@@ -370,24 +530,18 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
           tradeTrustERC721MockAsMinter = tradeTrustERC721Mock.connect(users.carrier);
         });
 
-        it("should allow a minter to burn the token", async () => {
-          const tx = tradeTrustERC721MockAsMinter.destroyToken(tokenId);
-
-          await expect(tx).to.be.not.reverted;
-        });
-
-        it("should emit TokenBurnt event on burning of token", async () => {
-          const tx = await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
-
-          expect(tx).to.emit(tradeTrustERC721Mock, "TokenBurnt").withArgs(tokenId);
-        });
-
         it("should transfer token to burn address", async () => {
           await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
 
           const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
 
           expect(newOwner).to.equal(burnAddress);
+        });
+
+        it("should emit TokenBurnt event on burning of token", async () => {
+          const tx = await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
+
+          expect(tx).to.emit(tradeTrustERC721Mock, "TokenBurnt").withArgs(tokenId);
         });
 
         it("should remove previous owner of token record", async () => {
@@ -399,15 +553,19 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         });
       });
 
-      it("should not allow a non-minter to burn the token", async () => {
-        const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
+      describe("When caller to burn token is not a minter", () => {
+        it("should not allow a non-minter to burn the token", async () => {
+          const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
 
-        await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+          await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+        });
       });
     });
 
     describe("When a token has not been surrendered", () => {
-      it("should not allow a minter to burn the token", async () => {
+      it("should not allow to burn the token even if registry is approved", async () => {
+        // Note that this is an edge case and not a normal flow.
+        await tradeTrustERC721Mock.connect(users.beneficiary).approve(tradeTrustERC721Mock.address, tokenId);
         const tx = tradeTrustERC721Mock.connect(users.carrier).destroyToken(tokenId);
 
         await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered");
@@ -417,6 +575,44 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
 
         await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+      });
+
+      it("should allow ERC721 burning of unsurrendered token internally", async () => {
+        await tradeTrustERC721Mock.burnInternal(tokenId);
+        const tx = tradeTrustERC721Mock.ownerOf(tokenId);
+
+        await expect(tx).to.be.revertedWith("ERC721: owner query for nonexistent token");
+      });
+    });
+
+    describe("When a token has been permanently burnt", () => {
+      beforeEach(async () => {
+        // Manual surrendering from beneficiary
+        await tradeTrustERC721Mock
+          .connect(users.beneficiary)
+          ["safeTransferFrom(address,address,uint256)"](
+            users.beneficiary.address,
+            tradeTrustERC721Mock.address,
+            tokenId
+          );
+
+        await tradeTrustERC721Mock.connect(users.carrier).destroyToken(tokenId);
+      });
+
+      it("should not allow mintTitle on the same token ID again", async () => {
+        const tx = tradeTrustERC721Mock
+          .connect(users.carrier)
+          .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
+      });
+
+      it("should not allow minting of the same token ID to EOA again", async () => {
+        const tx = tradeTrustERC721Mock
+          .connect(users.carrier)
+          ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+
+        await expect(tx).to.be.revertedWith("ERC721: token already minted");
       });
     });
   });
