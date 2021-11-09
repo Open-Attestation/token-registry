@@ -238,57 +238,5 @@ describe("TradeTrustErc721", async () => {
         await expect(attemptDestroyToken).to.be.revertedWith("Token has not been surrendered");
       });
     });
-
-    describe("Restoring surrendered token", () => {
-      it("should allow a minter to restore title owned by registry", async () => {
-        const tx = await tokenRegistryInstanceWithShippingLineWallet.restoreTitle(merkleRoot);
-        const receipt = await tx.wait();
-        const event = receipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
-        const titleEscrowAddr = event.args.escrowAddress;
-
-        const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
-        expect(currentOwner).to.deep.equal(titleEscrowAddr);
-      });
-
-      it("should restore title escrow with the correct details", async () => {
-        const tx = await tokenRegistryInstanceWithShippingLineWallet.restoreTitle(merkleRoot);
-        const receipt = await tx.wait();
-        const event = receipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
-        const titleEscrowAddr = event.args.escrowAddress;
-
-        const newEscrowInstance = await TitleEscrow.attach(titleEscrowAddr);
-        const escrowBeneficiary = await newEscrowInstance.beneficiary();
-        const escrowHolder = await newEscrowInstance.holder();
-        const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
-
-        expect(escrowBeneficiary).to.be.equal(beneficiary.address);
-        expect(escrowHolder).to.be.equal(beneficiary.address);
-        expect(escrowTokenRegistry).to.be.equal(tokenRegistryInstanceWithShippingLineWallet.address);
-      });
-
-      it("should not allow a minter to restore a title that has not been surrendered", async () => {
-        await tokenRegistryInstanceWithShippingLineWallet.mintTitle(
-          beneficiary.address,
-          beneficiary.address,
-          merkleRoot1
-        );
-
-        const tx = tokenRegistryInstanceWithShippingLineWallet.restoreTitle(merkleRoot1);
-
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
-      });
-
-      it("should revert when the token does not exist", async () => {
-        const tx = tokenRegistryInstanceWithShippingLineWallet.restoreTitle(merkleRoot1);
-
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
-      });
-
-      it("should revert when a non-minter attempts to restore title", async () => {
-        const tx = tokenRegistryInstanceWithShippingLineWallet.connect(nonMinter).restoreTitle(merkleRoot1);
-
-        await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
-      });
-    });
   });
 });
