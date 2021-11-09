@@ -5,7 +5,7 @@ import {
   TitleEscrowCloneable__factory,
   TradeTrustERC721,
   TradeTrustERC721__factory,
-  TradeTrustERC721Mock,
+  TradeTrustERC721Mock
 } from "@tradetrust/contracts";
 import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
@@ -14,7 +14,7 @@ import { expect } from ".";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { mintTokenFixture } from "./fixtures/mint-token.fixture";
 import { getTestUsers, toAccessControlRevertMessage } from "./utils";
-import { RoleConstants } from "../src/common/constants";
+import { AddressConstants, RoleConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 
@@ -26,8 +26,6 @@ const { loadFixture } = waffle;
  */
 
 describe("TradeTrustERC721 (TS Migration)", async () => {
-  const burnAddress = "0x000000000000000000000000000000000000dEaD";
-
   let users: TestUsers;
   let tradeTrustERC721Mock: TradeTrustERC721Mock;
 
@@ -123,7 +121,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
                     token: tradeTrustERC721Mock,
                     holder: beneficiary,
                     beneficiary,
-                    tokenId,
+                    tokenId
                   })
                 )
               ).titleEscrow;
@@ -262,7 +260,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           it("should revert if owner is not token registry", async () => {
             await stubTradeTrustERC721.setVariable("_owners", {
-              [tokenId]: faker.finance.ethereumAddress(),
+              [tokenId]: faker.finance.ethereumAddress()
             });
 
             const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
@@ -272,7 +270,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           it("should revert if previous surrendered owner is zero", async () => {
             await stubTradeTrustERC721.setVariable("_surrenderedOwners", {
-              [ethers.BigNumber.from(tokenId).toNumber()]: ethers.constants.AddressZero,
+              [ethers.BigNumber.from(tokenId).toNumber()]: ethers.constants.AddressZero
             });
 
             const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
@@ -333,7 +331,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           const tx = tradeTrustERC721Mock
             .connect(unapprovedOperator)
-            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, burnAddress, tokenId);
+            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, AddressConstants.burn, tokenId);
 
           await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
         });
@@ -367,7 +365,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         it("should not allow transfer to burn address", async () => {
           const tx = tradeTrustERC721Mock["safeTransferFrom(address,address,uint256)"](
             users.beneficiary.address,
-            burnAddress,
+            AddressConstants.burn,
             tokenId
           );
 
@@ -403,7 +401,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           const tx = tradeTrustERC721Mock
             .connect(unapprovedOperator)
-            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, burnAddress, tokenId);
+            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, AddressConstants.burn, tokenId);
 
           await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
         });
@@ -444,7 +442,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
 
-          expect(newOwner).to.equal(burnAddress);
+          expect(newOwner).to.equal(AddressConstants.burn);
         });
 
         it("should emit TokenBurnt event on burning of token", async () => {
