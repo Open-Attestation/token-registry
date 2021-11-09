@@ -33,7 +33,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
     const setupData = await loadFixture(
       deployTokenFixture({
         tokenName: "The Great Shipping Company",
-        tokenInitials: "GSC"
+        tokenInitials: "GSC",
       })
     );
     users = setupData.users;
@@ -258,7 +258,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           it("should revert if owner is not token registry", async () => {
             await stubTradeTrustERC721.setVariable("_owners", {
-              [tokenId]: faker.finance.ethereumAddress()
+              [tokenId]: faker.finance.ethereumAddress(),
             });
 
             const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
@@ -268,7 +268,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           it("should revert if previous surrendered owner is zero", async () => {
             await stubTradeTrustERC721.setVariable("_surrenderedOwners", {
-              [ethers.BigNumber.from(tokenId).toNumber()]: ethers.constants.AddressZero
+              [ethers.BigNumber.from(tokenId).toNumber()]: ethers.constants.AddressZero,
             });
 
             const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
