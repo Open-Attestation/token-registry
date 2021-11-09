@@ -27,7 +27,7 @@ describe("TradeTrustErc721", async () => {
       const escrowInstance = TitleEscrow.connect(beneficiary1).attach(event.args.escrowAddress);
 
       const escrowInstanceAddress = escrowInstance.address;
-      await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](escrowInstanceAddress, merkleRoot);
+      await tokenRegistryInstanceWithShippingLineWallet["mint(address,uint256)"](escrowInstanceAddress, merkleRoot);
       const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(currentOwner).to.deep.equal(escrowInstanceAddress);
       await escrowInstance.transferTo(tokenRegistryAddress);

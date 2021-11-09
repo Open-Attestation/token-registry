@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "../TradetrustERC721.sol";
+import "../chains/ethereum/TradeTrustERC721.sol";
 
 contract TradeTrustERC721Mock is TradeTrustERC721 {
 

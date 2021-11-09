@@ -110,11 +110,11 @@ describe("TradeTrustErc721", async () => {
     await expect(transferQuery).to.be.revertedWith("transfer caller is not owner nor approved");
   });
 
-  it("should emit TokenReceive event on safeMint", async () => {
+  it("should emit TokenReceive event on mint", async () => {
     const tokenRegistryInstance = await Erc721.connect(carrier1).deploy("foo", "bar");
     const tokenRegistryInstanceAddress = tokenRegistryInstance.address;
     const mintTx = await (
-      await tokenRegistryInstance["safeMint(address,uint256)"](tokenRegistryInstanceAddress, merkleRoot)
+      await tokenRegistryInstance["mint(address,uint256)"](tokenRegistryInstanceAddress, merkleRoot)
     ).wait();
     const receivedTokenLog = mintTx.events.find((log) => log.event === "TokenReceived");
     assertTokenReceivedLog(receivedTokenLog, carrier1.address, ZERO_ADDRESS, merkleRoot, null);
@@ -172,7 +172,7 @@ describe("TradeTrustErc721", async () => {
 
       const tx = tokenRegistryInstanceWithShippingLineWallet.mintTitle(beneficiary.address, holder.address, merkleRoot);
 
-      await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
+      await expect(tx).to.be.revertedWith("TradeTrustERC721Mintable: Token already exists");
     });
 
     it("should revert when a non-minter attempts to mint a new title", async () => {

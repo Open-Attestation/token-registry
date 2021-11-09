@@ -20,3 +20,5 @@ export const getTestUsers = async () => {
   const users: TestUsers = { carrier, beneficiary, holder, others };
   return users;
 };
+
+export { impersonateAccount, stopImpersonatingAccount } from "./impersonate-account";

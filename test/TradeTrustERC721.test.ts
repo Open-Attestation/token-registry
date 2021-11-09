@@ -31,7 +31,8 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
   beforeEach(async () => {
     const setupData = await loadFixture(
-      deployTokenFixture({
+      deployTokenFixture<TradeTrustERC721Mock>({
+        tokenContractName: "TradeTrustERC721Mock",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
       })
@@ -73,7 +74,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
                 users.beneficiary.address,
                 stubTitleEscrow.address
               );
-              await tradeTrustERC721Mock["safeMint(address,uint256)"](stubTitleEscrow.address, tokenId);
+              await tradeTrustERC721Mock["mint(address,uint256)"](stubTitleEscrow.address, tokenId);
               await stubTitleEscrow.connect(users.beneficiary).surrender();
             });
 
@@ -183,7 +184,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
             await tradeTrustERC721Mock
               .connect(users.carrier)
-              ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+              ["mint(address,uint256)"](users.beneficiary.address, tokenId);
 
             // EOA surrendering
             await tradeTrustERC721Mock
@@ -298,9 +299,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
     beforeEach(async () => {
       tokenId = faker.datatype.number();
 
-      await tradeTrustERC721Mock
-        .connect(users.carrier)
-        ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+      await tradeTrustERC721Mock.connect(users.carrier)["mint(address,uint256)"](users.beneficiary.address, tokenId);
     });
 
     describe("Transferring of surrendered token to burn/zero addresses", () => {
@@ -409,15 +408,13 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
     });
   });
 
-  describe("Impermanent burning of tokens", () => {
+  /* describe("Impermanent burning of tokens", () => {
     let tokenId: number;
 
     beforeEach(async () => {
       tokenId = faker.datatype.number();
 
-      await tradeTrustERC721Mock
-        .connect(users.carrier)
-        ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+      await tradeTrustERC721Mock.connect(users.carrier)["mint(address,uint256)"](users.beneficiary.address, tokenId);
     });
 
     it("should revert if caller is not a minter", async () => {
@@ -491,14 +488,14 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       });
 
       it("should allow minting of the same token ID to EOA again", async () => {
-        await tradeTrustERC721MockAsApprovedMinter["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+        await tradeTrustERC721MockAsApprovedMinter["mint(address,uint256)"](users.beneficiary.address, tokenId);
 
         const newOwner = await tradeTrustERC721MockAsApprovedMinter.ownerOf(tokenId);
 
         await expect(newOwner).to.equal(users.beneficiary.address);
       });
     });
-  });
+  }); */
 
   describe("Permanent burning of tokens", () => {
     let tokenId: string;
@@ -506,9 +503,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
     beforeEach(async () => {
       tokenId = faker.datatype.hexaDecimal(64);
 
-      await tradeTrustERC721Mock
-        .connect(users.carrier)
-        ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+      await tradeTrustERC721Mock.connect(users.carrier)["mint(address,uint256)"](users.beneficiary.address, tokenId);
     });
 
     describe("When a token has been surrendered", () => {
@@ -604,13 +599,13 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
           .connect(users.carrier)
           .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
+        await expect(tx).to.be.revertedWith("TradeTrustERC721Mintable: Token already exists");
       });
 
       it("should not allow minting of the same token ID to EOA again", async () => {
         const tx = tradeTrustERC721Mock
           .connect(users.carrier)
-          ["safeMint(address,uint256)"](users.beneficiary.address, tokenId);
+          ["mint(address,uint256)"](users.beneficiary.address, tokenId);
 
         await expect(tx).to.be.revertedWith("ERC721: token already minted");
       });

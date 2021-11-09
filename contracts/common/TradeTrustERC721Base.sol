@@ -3,13 +3,15 @@ pragma solidity ^0.8.0;
 
 import "./TitleEscrowCloneable.sol";
 import "./TitleEscrowCloner.sol";
-import "./interfaces/ITitleEscrowCreator.sol";
-import "./interfaces/ITitleEscrow.sol";
-import "./interfaces/ITradeTrustERC721.sol";
-import { ERC721Mintable, IERC721Receiver, Address } from "./lib/ERC721.sol";
+import "../interfaces/ITitleEscrowCreator.sol";
+import "../interfaces/ITitleEscrow.sol";
+import "../interfaces/ITradeTrustERC721.sol";
+import {ERC721Mintable, IERC721Receiver, Address, ERC721, MinterRole} from "../lib/ERC721.sol";
 
-contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver {
+abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Receiver, MinterRole {
   using Address for address;
+
+  bytes32 public constant CHAIN_MANAGER_ROLE = keccak256("CHAIN_MANAGER_ROLE");
 
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
@@ -17,15 +19,18 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
   address internal constant _burnAddress = 0x000000000000000000000000000000000000dEaD;
 
   // Mapping from token ID to previously surrendered title escrow address
-  mapping(uint => address) internal _surrenderedOwners;
+  mapping(uint256 => address) internal _surrenderedOwners;
 
-  constructor(string memory name, string memory symbol) ERC721Mintable(name, symbol) {return;}
+  constructor(string memory name, string memory symbol) ERC721(name, symbol) {
+    return;
+  }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Mintable) returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, MinterRole) returns (bool) {
     return
-    interfaceId == type(ITitleEscrowCreator).interfaceId ||
-    interfaceId == type(ITradeTrustERC721).interfaceId ||
-    ERC721Mintable.supportsInterface(interfaceId);
+      interfaceId == type(ITitleEscrowCreator).interfaceId ||
+      interfaceId == type(ITradeTrustERC721).interfaceId ||
+      ERC721.supportsInterface(interfaceId) ||
+      MinterRole.supportsInterface(interfaceId);
   }
 
   function onERC721Received(
@@ -38,9 +43,20 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     return this.onERC721Received.selector;
   }
 
+  /**
+   * @dev Permanently burns a token and does not allow the same ID to be minted again.
+   * This call is meant for a minter to accept a surrendered token. Token will be transferred to 0xdead address.
+   *
+   * Requirements:
+   *
+   * - the caller must be a `minter`.
+   * - the token is surrendered
+   *
+   * Emits a {TokenBurnt} event.
+   *
+   * @param tokenId Token ID to be burnt
+   */
   function destroyToken(uint256 tokenId) external onlyMinter {
-    require(isSurrendered(tokenId), "TokenRegistry: Token has not been surrendered");
-
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -50,9 +66,7 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     delete _surrenderedOwners[tokenId];
   }
 
-  function restoreTitle(
-    uint256 tokenId
-  ) external onlyMinter returns (address) {
+  function restoreTitle(uint256 tokenId) external onlyMinter returns (address) {
     address previousOwner = _surrenderedOwners[tokenId];
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
@@ -89,22 +103,7 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
     return ownerOf(tokenId);
   }
 
-  function mintTitle(
-    address beneficiary,
-    address holder,
-    uint256 tokenId
-  ) external onlyMinter returns (address) {
-    require(!_exists(tokenId), "TokenRegistry: Token already exists");
-
-    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
-    _safeMint(newTitleEscrow, tokenId);
-
-    return newTitleEscrow;
-  }
-
-  function isSurrendered(
-    uint256 tokenId
-  ) public view returns (bool) {
+  function isSurrendered(uint256 tokenId) public view returns (bool) {
     if (_exists(tokenId)) {
       return ownerOf(tokenId) == address(this) && _surrenderedOwners[tokenId] != address(0);
     }
@@ -126,6 +125,17 @@ contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver 
       }
     }
     super._beforeTokenTransfer(from, to, tokenId);
+  }
+
+  function _mintTitle(
+    address beneficiary,
+    address holder,
+    uint256 tokenId
+  ) internal virtual returns (address) {
+    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+    _safeMint(newTitleEscrow, tokenId);
+
+    return newTitleEscrow;
   }
 
   function _registrySafeTransformFrom(
