@@ -8,10 +8,8 @@ import "../interfaces/ITitleEscrow.sol";
 import "../interfaces/ITradeTrustERC721.sol";
 import {ERC721Mintable, IERC721Receiver, Address, ERC721, MinterRole} from "../lib/ERC721.sol";
 
-abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Receiver, MinterRole {
+abstract contract TradeTrustERC721Base is MinterRole, TitleEscrowCloner, IERC721Receiver, ERC721 {
   using Address for address;
-
-  bytes32 public constant CHAIN_MANAGER_ROLE = keccak256("CHAIN_MANAGER_ROLE");
 
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);

@@ -10,12 +10,9 @@ import {
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
-import { RoleConstants } from "../../../../src/common/constants";
-import { getTestUsers, toAccessControlRevertMessage } from "../../../utils";
+import { getTestUsers } from "../../../utils";
 
 describe("TradeTrustERC721RootMintable", () => {
-  const CHAIN_MANAGER_ROLE = RoleConstants.chainManager;
-
   let users: TestUsers;
   let tokenId: number;
   let fakeChainManager: SignerWithAddress;
@@ -37,7 +34,7 @@ describe("TradeTrustERC721RootMintable", () => {
 
     fakeChainManager = users.others[users.others.length - 1];
 
-    await tradeTrustERC721RootMintable.grantRole(CHAIN_MANAGER_ROLE, fakeChainManager.address);
+    await tradeTrustERC721RootMintable.addChainManager(fakeChainManager.address);
   });
 
   describe("When calling mintTitle", () => {
@@ -61,9 +58,7 @@ describe("TradeTrustERC721RootMintable", () => {
         .connect(users.carrier)
         .mintTitle(users.beneficiary.address, users.holder.address, tokenId);
 
-      await expect(tx).to.be.revertedWith(
-        toAccessControlRevertMessage(users.carrier.address, RoleConstants.chainManager)
-      );
+      await expect(tx).to.be.revertedWith("ChainManagerRole: caller is not a chain manager");
     });
   });
 
@@ -79,9 +74,7 @@ describe("TradeTrustERC721RootMintable", () => {
     it("should revert if the caller does not have chain manager role", async () => {
       const tx = tradeTrustERC721RootMintable.connect(users.carrier).mint(users.beneficiary.address, tokenId);
 
-      await expect(tx).to.be.revertedWith(
-        toAccessControlRevertMessage(users.carrier.address, RoleConstants.chainManager)
-      );
+      await expect(tx).to.be.revertedWith("ChainManagerRole: caller is not a chain manager");
     });
   });
 });
