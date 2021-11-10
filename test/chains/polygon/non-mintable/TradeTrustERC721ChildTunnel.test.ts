@@ -6,7 +6,7 @@ import {
   TradeTrustERC721ChildTunnelMock,
   TradeTrustERC721RootTunnelMock,
   TradeTrustERC721,
-  TradeTrustERC721Child
+  TradeTrustERC721Child,
 } from "@tradetrust/contracts";
 import * as faker from "faker";
 import { MockContract } from "@defi-wonderland/smock";
@@ -35,7 +35,7 @@ describe("TradeTrustERC721ChildTunnel - Non-mintable Tokens", () => {
     const fixtures = await loadFixture(
       deployNonMintableFixture({
         checkPointManagerAddress: faker.finance.ethereumAddress(),
-        users
+        users,
       })
     );
 
@@ -100,7 +100,7 @@ describe("TradeTrustERC721ChildTunnel - Non-mintable Tokens", () => {
 
       beforeEach(async () => {
         stateSenderSigner = await impersonateAccount({
-          address: stateSenderAddress
+          address: stateSenderAddress,
         });
       });
 
