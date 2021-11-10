@@ -38,7 +38,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         tokenContractName: "TradeTrustERC721Mock",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
-        users
+        users,
       })
     );
   });
