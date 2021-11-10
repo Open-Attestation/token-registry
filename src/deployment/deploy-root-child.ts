@@ -7,10 +7,10 @@ import {
 } from "@tradetrust/contracts";
 import { task } from "hardhat/config";
 import logger from "consola";
-import { utils as ethersUtils } from "ethers/lib/ethers";
 import { HttpNetworkConfig } from "hardhat/src/types/config";
 import { deployToken } from "./utils/deploy-token";
 import { deployChildChainManager } from "./utils/deploy-child-chain-manager";
+import { RoleConstants } from "../common/constants";
 
 task("deploy:complete")
   .setDescription("Deploys root token and its chain manager")
@@ -47,8 +47,7 @@ task("deploy:complete")
       rootToken: rootToken.address,
     })) as TradeTrustERC721RootTunnel;
 
-    const CHAIN_MANAGER_ROLE = ethersUtils.id("CHAIN_MANAGER_ROLE");
-    const rootRoleTx = await rootToken.grantRole(CHAIN_MANAGER_ROLE, rootChainManager.address);
+    const rootRoleTx = await rootToken.grantRole(RoleConstants.chainManager, rootChainManager.address);
     logger.info(`Granting root chain manager role in transaction ${rootRoleTx.hash}`);
     await rootRoleTx.wait();
     logger.success(`Success! Granted ${rootChainManager.address} root chain manager role!`);
@@ -81,7 +80,7 @@ task("deploy:complete")
       deployer: childDeployer,
     });
 
-    const childRoleTx = await childToken.grantRole(CHAIN_MANAGER_ROLE, childChainManager.address);
+    const childRoleTx = await childToken.grantRole(RoleConstants.chainManager, childChainManager.address);
     logger.info(`Granting child chain manager role in transaction ${childRoleTx.hash}`);
     await childRoleTx.wait();
     logger.success(`Success! Granted ${childChainManager.address} child chain manager role!`);
