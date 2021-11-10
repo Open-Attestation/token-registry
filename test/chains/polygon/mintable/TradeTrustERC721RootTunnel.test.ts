@@ -4,7 +4,7 @@ import {
   FxRootMock,
   TradeTrustERC721RootTunnelMock,
   TradeTrustERC721RootMintable,
-  TradeTrustERC721ChildMintable
+  TradeTrustERC721ChildMintable,
 } from "@tradetrust/contracts";
 import * as faker from "faker";
 import { MockContract } from "@defi-wonderland/smock";
@@ -40,7 +40,7 @@ describe("TradeTrustERC721RootTunnel - Mintable Tokens", () => {
     const mintableFixtures = await loadFixture(
       deployMintableFixture({
         checkPointManagerAddress,
-        users
+        users,
       })
     );
     stubFxRootMock = mintableFixtures.stubFxRootMock;
@@ -48,7 +48,7 @@ describe("TradeTrustERC721RootTunnel - Mintable Tokens", () => {
     stubChildToken = mintableFixtures.stubChildToken;
     tradeTrustERC721RootTunnelMock = mintableFixtures.tradeTrustERC721RootTunnelMock;
     rootChainManagerSigner = await impersonateAccount({
-      address: tradeTrustERC721RootTunnelMock.address
+      address: tradeTrustERC721RootTunnelMock.address,
     });
   });
 

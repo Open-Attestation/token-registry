@@ -4,7 +4,7 @@ import {
   FxRootMock,
   TradeTrustERC721RootTunnelMock,
   TradeTrustERC721,
-  TradeTrustERC721Child
+  TradeTrustERC721Child,
 } from "@tradetrust/contracts";
 import * as faker from "faker";
 import { MockContract } from "@defi-wonderland/smock";
@@ -39,7 +39,7 @@ describe("TradeTrustERC721RootTunnel - Non-Mintable Tokens", () => {
     const nonMintableFixtures = await loadFixture(
       deployNonMintableFixture({
         checkPointManagerAddress,
-        users
+        users,
       })
     );
     stubFxRootMock = nonMintableFixtures.stubFxRootMock;
