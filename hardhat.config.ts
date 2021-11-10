@@ -14,32 +14,32 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 200,
       },
       outputSelection: {
         "*": {
-          "*": ["storageLayout"]
-        }
-      }
-    }
+          "*": ["storageLayout"],
+        },
+      },
+    },
   },
   typechain: {
     outDir: "src/contracts",
-    alwaysGenerateOverloads: true
+    alwaysGenerateOverloads: true,
   },
   watcher: {
     test: {
       tasks: ["compile", "test"],
-      files: ["./contracts", "./test"]
-    }
+      files: ["./contracts", "./test"],
+    },
   },
   gasReporter: {
     coinmarketcap: process.env.COINMARKETCAP_TOKEN,
-    currency: "USD"
+    currency: "USD",
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
-  }
+    apiKey: process.env.ETHERSCAN_API_KEY,
+  },
 };
 
 export default config;
