@@ -10,7 +10,7 @@ import {
   TradeTrustERC721RootMintable,
   TradeTrustERC721RootMintable__factory,
   TradeTrustERC721ChildMintable,
-  TradeTrustERC721ChildMintable__factory
+  TradeTrustERC721ChildMintable__factory,
 } from "@tradetrust/contracts";
 import { ethers } from "hardhat";
 import { utils as ethersUtils } from "ethers/lib/ethers";
@@ -87,6 +87,6 @@ export const deployMintableFixture =
       stubRootToken,
       stubChildToken,
       tradeTrustERC721RootTunnelMock,
-      tradeTrustERC721ChildTunnelMock
+      tradeTrustERC721ChildTunnelMock,
     };
   };

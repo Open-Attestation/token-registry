@@ -10,7 +10,7 @@ import {
   TradeTrustERC721Child,
   TradeTrustERC721ChildTunnelMock,
   FxChildMock,
-  FxChildMock__factory
+  FxChildMock__factory,
 } from "@tradetrust/contracts";
 import { ethers } from "hardhat";
 import { utils as ethersUtils } from "ethers/lib/ethers";
@@ -83,6 +83,6 @@ export const deployNonMintableFixture =
       stubRootToken,
       stubChildToken,
       tradeTrustERC721RootTunnelMock,
-      tradeTrustERC721ChildTunnelMock
+      tradeTrustERC721ChildTunnelMock,
     };
   };
