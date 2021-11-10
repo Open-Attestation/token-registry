@@ -23,10 +23,10 @@ task("deploy:chain-manager:root")
       constructorParams: {
         rootToken,
         fxRoot,
-        checkPointManager
+        checkPointManager,
       },
       hre,
-      deployer
+      deployer,
     });
 
     const token = (await ethers.getContractAt(
@@ -43,7 +43,7 @@ task("deploy:chain-manager:root")
       logger.info("Verifying contract...");
       await hre.run("verify", {
         address: chainManager.address,
-        constructorArgsParams: [checkPointManager, fxRoot, rootToken]
+        constructorArgsParams: [checkPointManager, fxRoot, rootToken],
       });
       logger.info("Done verifying contract!");
     }

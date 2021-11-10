@@ -12,7 +12,7 @@ export const deployToken = async <TToken extends Contract>({
   constructorParams,
   contractName,
   hre,
-  deployer
+  deployer,
 }: {
   constructorParams: DeployTokenConstructorParameters;
   contractName: string;

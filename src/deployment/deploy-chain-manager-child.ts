@@ -17,10 +17,10 @@ task("deploy:chain-manager:child")
     const chainManager = await deployChildChainManager({
       constructorParams: {
         childToken,
-        fxChild
+        fxChild,
       },
       hre,
-      deployer
+      deployer,
     });
 
     const token = (await ethers.getContractAt(
@@ -37,7 +37,7 @@ task("deploy:chain-manager:child")
       logger.info("Verifying contract...");
       await hre.run("verify", {
         address: chainManager.address,
-        constructorArgsParams: [fxChild, childToken]
+        constructorArgsParams: [fxChild, childToken],
       });
       logger.info("Done verifying contract!");
     }

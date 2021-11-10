@@ -19,7 +19,7 @@ subtask("deploy:token:root")
         constructorParams: { name, symbol },
         hre,
         contractName,
-        deployer
+        deployer,
       });
     } else {
       const contractName = "TradeTrustERC721";
@@ -30,7 +30,7 @@ subtask("deploy:token:root")
       logger.info("Verifying contract...");
       await hre.run("verify", {
         address: token.address,
-        constructorArgsParams: [name, symbol]
+        constructorArgsParams: [name, symbol],
       });
       logger.info("Done verifying contract!");
     }

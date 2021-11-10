@@ -25,7 +25,7 @@ subtask("deploy:token:child")
       logger.info("Verifying contract...");
       await hre.run("verify", {
         address: token.address,
-        constructorArgsParams: [name, symbol]
+        constructorArgsParams: [name, symbol],
       });
       logger.info("Done verifying contract!");
     }

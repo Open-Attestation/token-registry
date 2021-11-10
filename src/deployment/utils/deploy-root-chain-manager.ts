@@ -13,7 +13,7 @@ type DeployRootChainManagerConstructorParams = {
 export const deployRootChainManager = async ({
   constructorParams,
   hre,
-  deployer
+  deployer,
 }: {
   constructorParams: DeployRootChainManagerConstructorParams;
   hre: HardhatRuntimeEnvironment;

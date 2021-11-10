@@ -26,6 +26,6 @@ task("deploy:token")
       name,
       symbol,
       mintable,
-      verify
+      verify,
     });
   });

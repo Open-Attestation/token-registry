@@ -3,7 +3,7 @@ import {
   TradeTrustERC721Base,
   TradeTrustERC721Child,
   TradeTrustERC721ChildMintable,
-  TradeTrustERC721RootTunnel
+  TradeTrustERC721RootTunnel,
 } from "@tradetrust/contracts";
 import { task } from "hardhat/config";
 import logger from "consola";
@@ -38,13 +38,13 @@ task("deploy:complete")
     const rootToken = (await hre.run("deploy:token:root", {
       name,
       symbol,
-      mintable
+      mintable,
     })) as TradeTrustERC721Base;
 
     const rootChainManager = (await hre.run("deploy:chain-manager:root", {
       checkPointManager,
       fxRoot,
-      rootToken: rootToken.address
+      rootToken: rootToken.address,
     })) as TradeTrustERC721RootTunnel;
 
     const CHAIN_MANAGER_ROLE = ethersUtils.id("CHAIN_MANAGER_ROLE");
@@ -60,7 +60,7 @@ task("deploy:complete")
         constructorParams: { name, symbol },
         hre,
         contractName,
-        deployer: childDeployer
+        deployer: childDeployer,
       });
     } else {
       const contractName = "TradeTrustERC721Child";
@@ -68,17 +68,17 @@ task("deploy:complete")
         constructorParams: { name, symbol },
         hre,
         contractName,
-        deployer: childDeployer
+        deployer: childDeployer,
       });
     }
 
     const childChainManager = await deployChildChainManager({
       constructorParams: {
         childToken: childToken.address,
-        fxChild
+        fxChild,
       },
       hre,
-      deployer: childDeployer
+      deployer: childDeployer,
     });
 
     const childRoleTx = await childToken.grantRole(CHAIN_MANAGER_ROLE, childChainManager.address);
