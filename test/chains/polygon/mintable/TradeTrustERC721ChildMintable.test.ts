@@ -106,7 +106,7 @@ describe("TradeTrustERC721ChildMintable", () => {
 
       it("should reset withdrawn status of token", async () => {
         await tradeTrustERC721ChildMintableMock.setVariable("_withdrawnTokens", {
-          [tokenId]: true
+          [tokenId]: true,
         });
 
         await mintableTokenAsChainManager.deposit(users.beneficiary.address, tokenId, "0x");
