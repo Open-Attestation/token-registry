@@ -5,7 +5,7 @@ import {
   TitleEscrowCloneable__factory,
   TradeTrustERC721,
   TradeTrustERC721__factory,
-  TradeTrustERC721Mock
+  TradeTrustERC721Mock,
 } from "@tradetrust/contracts";
 import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
@@ -121,7 +121,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
                     token: tradeTrustERC721Mock,
                     holder: beneficiary,
                     beneficiary,
-                    tokenId
+                    tokenId,
                   })
                 )
               ).titleEscrow;
@@ -260,7 +260,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           it("should revert if owner is not token registry", async () => {
             await stubTradeTrustERC721.setVariable("_owners", {
-              [tokenId]: faker.finance.ethereumAddress()
+              [tokenId]: faker.finance.ethereumAddress(),
             });
 
             const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
@@ -270,7 +270,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           it("should revert if previous surrendered owner is zero", async () => {
             await stubTradeTrustERC721.setVariable("_surrenderedOwners", {
-              [ethers.BigNumber.from(tokenId).toNumber()]: ethers.constants.AddressZero
+              [ethers.BigNumber.from(tokenId).toNumber()]: ethers.constants.AddressZero,
             });
 
             const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
