@@ -6,7 +6,7 @@ import { MockContract, smock } from "@defi-wonderland/smock";
 import {
   TitleEscrowCloneable,
   TradeTrustERC721RootMintable,
-  TradeTrustERC721RootMintable__factory
+  TradeTrustERC721RootMintable__factory,
 } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
