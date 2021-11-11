@@ -8,14 +8,14 @@ import { Signer } from "ethers";
  */
 export const impersonateAccount = async ({
   address,
-  balance = 100
+  balance = 100,
 }: {
   address: string;
   balance?: number;
 }): Promise<Signer> => {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
-    params: [address]
+    params: [address],
   });
   const hexBalance = ethers.utils.parseEther(String(balance)).toHexString();
   await network.provider.send("hardhat_setBalance", [address, ethers.utils.hexStripZeros(hexBalance)]);
@@ -25,6 +25,6 @@ export const impersonateAccount = async ({
 export const stopImpersonatingAccount = async ({ address }: { address: string }) => {
   await network.provider.request({
     method: "hardhat_stopImpersonatingAccount",
-    params: [address]
+    params: [address],
   });
 };
