@@ -13,7 +13,7 @@ export const deployTokenFixture =
   <T extends Contract>({
     tokenContractName,
     tokenName,
-    tokenInitials
+    tokenInitials,
   }: {
     tokenContractName: string;
     tokenName: string;
