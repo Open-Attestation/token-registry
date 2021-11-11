@@ -13,7 +13,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { mintTokenFixture } from "./fixtures/mint-token.fixture";
-import { getTestUsers } from "./utils";
+import { getTestUsers, toAccessControlRevertMessage } from "./utils";
+import { RoleConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 
@@ -465,7 +466,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         it("should not allow a non-minter to burn the token", async () => {
           const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
 
-          await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+          await expect(tx).to.be.revertedWith(
+            toAccessControlRevertMessage(users.beneficiary.address, RoleConstants.defaultAdmin)
+          );
         });
       });
     });
@@ -482,7 +485,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       it("should not allow a non-minter to burn the token", async () => {
         const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
 
-        await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+        await expect(tx).to.be.revertedWith(
+          toAccessControlRevertMessage(users.beneficiary.address, RoleConstants.defaultAdmin)
+        );
       });
 
       it("should allow ERC721 burning of unsurrendered token internally", async () => {
