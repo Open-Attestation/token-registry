@@ -16,7 +16,7 @@ abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Rece
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
-  address internal constant _burnAddress = 0x000000000000000000000000000000000000dEaD;
+  address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
   // Mapping from token ID to previously surrendered title escrow address
   mapping(uint256 => address) internal _surrenderedOwners;
@@ -60,7 +60,7 @@ abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Rece
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
-    _registrySafeTransformFrom(ownerOf(tokenId), _burnAddress, tokenId);
+    _registrySafeTransformFrom(ownerOf(tokenId), BURN_ADDRESS, tokenId);
 
     // Remove the last surrendered token owner
     delete _surrenderedOwners[tokenId];
@@ -115,7 +115,7 @@ abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Rece
     address to,
     uint256 tokenId
   ) internal virtual override {
-    if (to == _burnAddress) {
+    if (to == BURN_ADDRESS) {
       require(isSurrendered(tokenId), "TokenRegistry: Token has not been surrendered for burning");
     } else {
       require(!isSurrendered(tokenId), "TokenRegistry: Token has already been surrendered");
