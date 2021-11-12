@@ -14,8 +14,17 @@ import {
 } from "@tradetrust/contracts";
 import { ethers } from "hardhat";
 import { utils as ethersUtils } from "ethers/lib/ethers";
-import { ContractFactory } from "ethers";
+import { BaseContract, ContractFactory } from "ethers";
 import { TestUsers } from "../../deploy-token.fixture";
+
+type AllPolygonFixtures<TRootToken extends BaseContract, TChildToken extends BaseContract> = {
+  stubFxRootMock: MockContract<FxRootMock>;
+  stubFxChildMock: MockContract<FxChildMock>;
+  stubRootToken: MockContract<TRootToken>;
+  stubChildToken: MockContract<TChildToken>;
+  tradeTrustERC721RootTunnelMock: TradeTrustERC721RootTunnelMock;
+  tradeTrustERC721ChildTunnelMock: TradeTrustERC721ChildTunnelMock;
+};
 
 const deployAllFixture = async <
   TRootToken extends TradeTrustERC721RootMintable | TradeTrustERC721,
@@ -30,7 +39,7 @@ const deployAllFixture = async <
   users: TestUsers;
   rootTokenContractName: "TradeTrustERC721RootMintable" | "TradeTrustERC721";
   childTokenContractName: "TradeTrustERC721ChildMintable" | "TradeTrustERC721Child";
-}) => {
+}): Promise<AllPolygonFixtures<TRootToken, TChildToken>> => {
   const CHAIN_MANAGER_ROLE = ethersUtils.id("CHAIN_MANAGER_ROLE");
   const stateSenderAddress = "0x0000000000000000000000000000000000001001";
 
@@ -46,10 +55,7 @@ const deployAllFixture = async <
 
   // Deploy root token
   const stubTradeTrustERC721Factory = await smock.mock<ContractFactory>(rootTokenContractName);
-  const stubRootToken = (await stubTradeTrustERC721Factory.deploy(
-    "The Great Shipping Company",
-    "GSC"
-  )) as MockContract<TRootToken>;
+  const stubRootToken = (await stubTradeTrustERC721Factory.deploy("The Great Shipping Company", "GSC")) as any;
 
   // Deploy root chain manager
   const tradeTrustERC721RootTunnelMockFactory = await ethers.getContractFactory("TradeTrustERC721RootTunnelMock");
@@ -66,10 +72,7 @@ const deployAllFixture = async <
 
   // Deploy child token
   const stubTradeTrustERC721ChildFactory = await smock.mock<ContractFactory>(childTokenContractName);
-  const stubChildToken = (await stubTradeTrustERC721ChildFactory.deploy(
-    "The Great Shipping Company",
-    "GSC"
-  )) as MockContract<TChildToken>;
+  const stubChildToken = (await stubTradeTrustERC721ChildFactory.deploy("The Great Shipping Company", "GSC")) as any;
 
   // Deploy child chain manager
   const tradeTrustERC721ChildTunnelMockFactory = await ethers.getContractFactory("TradeTrustERC721ChildTunnelMock");
