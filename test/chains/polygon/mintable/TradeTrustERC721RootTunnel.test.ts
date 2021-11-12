@@ -14,7 +14,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
 import { getTestUsers, impersonateAccount, stopImpersonatingAccount } from "../../../utils";
-import { deployMintableFixture } from "../../../fixtures/chains/polygon/deploy-mintable.fixture";
+import { deployAllMintableFixture } from "../../../fixtures/chains/polygon/deploy-all.fixture";
 
 const abiCoder = new ethersUtils.AbiCoder();
 
@@ -38,7 +38,7 @@ describe("TradeTrustERC721RootTunnel - Mintable Tokens", () => {
     tokenId = faker.datatype.number();
 
     const mintableFixtures = await loadFixture(
-      deployMintableFixture({
+      deployAllMintableFixture({
         checkPointManagerAddress,
         users,
       })

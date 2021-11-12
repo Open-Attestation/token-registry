@@ -14,7 +14,7 @@ import { loadFixture } from "ethereum-waffle";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
 import { getTestUsers, impersonateAccount, stopImpersonatingAccount } from "../../../utils";
-import { deployMintableFixture } from "../../../fixtures/chains/polygon/deploy-mintable.fixture";
+import { deployAllMintableFixture } from "../../../fixtures/chains/polygon/deploy-all.fixture";
 
 const abiCoder = new ethersUtils.AbiCoder();
 
@@ -33,7 +33,7 @@ describe("TradeTrustERC721ChildTunnel - Mintable Tokens", () => {
     users = await getTestUsers();
 
     const fixtures = await loadFixture(
-      deployMintableFixture({
+      deployAllMintableFixture({
         checkPointManagerAddress: faker.finance.ethereumAddress(),
         users,
       })
