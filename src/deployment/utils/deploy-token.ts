@@ -1,14 +1,14 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import logger from "consola";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { Contract, Signer } from "ethers";
+import { BaseContract, Signer } from "ethers";
 
 type DeployTokenConstructorParameters = {
   name: string;
   symbol: string;
 };
 
-export const deployToken = async <TToken extends Contract>({
+export const deployToken = async <TToken extends BaseContract>({
   constructorParams,
   contractName,
   hre,

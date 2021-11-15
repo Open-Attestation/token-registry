@@ -15,15 +15,20 @@ subtask("deploy:token:root")
     let token: TradeTrustERC721Base;
     if (mintable) {
       const contractName = "TradeTrustERC721RootMintable";
-      token = await deployToken<TradeTrustERC721RootMintable>({
+      token = (await deployToken({
         constructorParams: { name, symbol },
         hre,
         contractName,
         deployer,
-      });
+      })) as TradeTrustERC721RootMintable;
     } else {
       const contractName = "TradeTrustERC721";
-      token = await deployToken<TradeTrustERC721>({ constructorParams: { name, symbol }, hre, contractName, deployer });
+      token = (await deployToken({
+        constructorParams: { name, symbol },
+        hre,
+        contractName,
+        deployer,
+      })) as TradeTrustERC721;
     }
 
     if (verify) {
