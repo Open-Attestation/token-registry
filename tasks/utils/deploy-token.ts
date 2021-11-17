@@ -1,14 +1,15 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import logger from "consola";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { BaseContract, Signer } from "ethers";
+import { Signer } from "ethers";
+import { TradeTrustERC721Base } from "@tradetrust/contracts";
 
 type DeployTokenConstructorParameters = {
   name: string;
   symbol: string;
 };
 
-export const deployToken = async <TToken extends BaseContract>({
+export const deployToken = async <TToken extends TradeTrustERC721Base>({
   constructorParams,
   contractName,
   hre,

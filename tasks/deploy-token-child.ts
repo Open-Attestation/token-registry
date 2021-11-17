@@ -15,20 +15,20 @@ subtask("deploy:token:child")
     let token: TradeTrustERC721Base;
     if (mintable) {
       const contractName = "TradeTrustERC721ChildMintable";
-      token = (await deployToken({
+      token = await deployToken<TradeTrustERC721ChildMintable>({
         constructorParams: { name, symbol },
         hre,
         contractName,
         deployer,
-      })) as TradeTrustERC721ChildMintable;
+      });
     } else {
       const contractName = "TradeTrustERC721Child";
-      token = (await deployToken({
+      token = await deployToken<TradeTrustERC721Child>({
         constructorParams: { name, symbol },
         hre,
         contractName,
         deployer,
-      })) as TradeTrustERC721Child;
+      });
     }
 
     if (verify) {
