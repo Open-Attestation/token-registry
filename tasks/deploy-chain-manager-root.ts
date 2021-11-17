@@ -3,7 +3,7 @@ import { task } from "hardhat/config";
 import { TradeTrustERC721Base } from "@tradetrust/contracts";
 import logger from "consola";
 import { deployRootChainManager } from "./utils/deploy-root-chain-manager";
-import { AddressConstants, RoleConstants } from "../common/constants";
+import { AddressConstants, RoleConstants } from "../src/common/constants";
 import { getNetworkEnv } from "./utils/helpers";
 
 task("deploy:chain-manager:root")

@@ -6,7 +6,7 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@nomiclabs/hardhat-etherscan";
 import { HardhatUserConfig } from "hardhat/types";
-import "./src/deployment";
+import "./tasks";
 
 const config: HardhatUserConfig = {
   solidity: {

@@ -25,6 +25,6 @@
   "ts-node": {
     "files": true
   },
-  "include": ["./src/**/*", "./test/**/*", "./hardhat.config.ts"],
+  "include": ["./src/**/*", "./test/**/*", "./hardhat.config.ts", "./tasks/**/*"],
   "exclude": ["./src/contracts/**/*"]
 }

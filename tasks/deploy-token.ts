@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { task, types } from "hardhat/config";
-import { ChainType } from "../common/enum/chain-type.enum";
+import { ChainType } from "../src/common/enum/chain-type.enum";
 import "./deploy-token-root";
 import "./deploy-token-child";
 
