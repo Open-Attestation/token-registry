@@ -1,8 +1,8 @@
 import { task } from "hardhat/config";
-import { deployChildChainManager } from "./utils/deploy-child-chain-manager";
+import { deployChildChainManager } from "./helpers/deploy-child-chain-manager";
 import { AddressConstants } from "../src/common/constants";
-import { getNetworkEnv } from "./utils/helpers";
-import { verifyContract } from "./utils/verify-contract";
+import { getNetworkEnv } from "./utils";
+import { verifyContract } from "./helpers/verify-contract";
 
 task("deploy:chain-manager:child")
   .setDescription("Deploys the child chain manager")

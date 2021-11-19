@@ -2,7 +2,7 @@
 import { TradeTrustERC721Base, TradeTrustERC721Child, TradeTrustERC721ChildMintable } from "@tradetrust/contracts";
 import { subtask } from "hardhat/config";
 import logger from "consola";
-import { deployToken } from "./utils/deploy-token";
+import { deployToken } from "./helpers/deploy-token";
 
 subtask("deploy:token:child")
   .setDescription("Deploys a mintable child token of TradeTrustERC721")

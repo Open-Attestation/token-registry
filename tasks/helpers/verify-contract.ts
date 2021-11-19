@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { StatusManager } from "./status-manager/status-manager";
+import { StatusManager } from "../utils/status-manager/status-manager";
 
 type Parameters = {
   hre: HardhatRuntimeEnvironment;

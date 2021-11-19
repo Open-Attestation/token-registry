@@ -8,8 +8,8 @@ import {
 import { task } from "hardhat/config";
 import logger from "consola";
 import { HttpNetworkConfig } from "hardhat/src/types/config";
-import { deployToken } from "./utils/deploy-token";
-import { deployChildChainManager } from "./utils/deploy-child-chain-manager";
+import { deployToken } from "./helpers/deploy-token";
+import { deployChildChainManager } from "./helpers/deploy-child-chain-manager";
 import { RoleConstants } from "../src/common/constants";
 
 task("deploy:complete")

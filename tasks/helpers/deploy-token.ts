@@ -1,7 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Signer } from "ethers";
 import { TradeTrustERC721Base } from "@tradetrust/contracts";
-import { StatusManager } from "./status-manager/status-manager";
+import { StatusManager } from "../utils/status-manager/status-manager";
 
 type DeployTokenConstructorParameters = {
   name: string;
