@@ -136,13 +136,13 @@ The deployment of the Chain Managers mainly involves 3 steps.
 
 ### Step 1. Deploy Root Chain Manager on Ethereum
 ```
-Usage: hardhat [GLOBAL OPTIONS] deploy:chain-manager:root [--check-point-manager <STRING>] [--fx-root <STRING>] --root-token <STRING> [--verify]
+Usage: hardhat [GLOBAL OPTIONS] deploy:chain-manager:root [--check-point-manager <STRING>] [--fx-root <STRING>] --token <STRING> [--verify]
 
 OPTIONS:
 
   --check-point-manager	Address of Checkpoint Manager (default: "0x2890bA17EfE978480615e330ecB65333b880928e")
   --fx-root            	Address of FxRoot (default: "0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA")
-  --root-token         	Address of Root Token
+  --token               Address of Root Token
   --verify             	Verify on Etherscan
 
 deploy:chain-manager:root: Deploys the root chain manager
@@ -152,18 +152,18 @@ deploy:chain-manager:root: Deploys the root chain manager
 
 #### Example
 ```
-npx hardhat deploy:chain-manager:root --network goerli --root-token 0xRootTokenAddress --verify
+npx hardhat deploy:chain-manager:root --network goerli --token 0xRootTokenAddress --verify
 ```
 This example will deploy the _root chain manager_ on the Ethereum _Goerli_ network meant for the root token address `0xRootTokenAddress`.
 The root chain manager will also be _verified_ on Etherscan.
 
 ### Step 2. Deploy Child Chain Manager on Polygon
 ```
-Usage: hardhat [GLOBAL OPTIONS] deploy:chain-manager:child --child-token <STRING> [--fx-child <STRING>] [--verify]
+Usage: hardhat [GLOBAL OPTIONS] deploy:chain-manager:child --token <STRING> [--fx-child <STRING>] [--verify]
 
 OPTIONS:
 
-  --child-token	Address of Child Token
+  --token       Address of Child Token
   --fx-child   	Address of FxChild (default: "0xCf73231F28B7331BBe3124B907840A94851f9f11")
   --verify     	Verify on Etherscan
 
@@ -174,7 +174,7 @@ deploy:chain-manager:child: Deploys the child chain manager
 
 #### Example
 ```
-npx hardhat deploy:chain-manager:child --network mumbai --child-token 0xChildTokenAddress --verify
+npx hardhat deploy:chain-manager:child --network mumbai --token 0xChildTokenAddress --verify
 ```
 This example will deploy the _child chain manager_ on the Polygon _Mumbai_ network meant for the child token address `0xChildTokenAddress`.
 The child chain manager will also be _verified_ on Etherscan.
