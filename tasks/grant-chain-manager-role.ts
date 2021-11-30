@@ -1,16 +1,15 @@
 import { TradeTrustERC721Base } from "@tradetrust/contracts";
 import { subtask } from "hardhat/config";
 import { RoleConstants } from "../src/common/constants";
-import { StatusManager } from "./utils/status-manager/status-manager";
+import { TASK_DEPLOY_CHAIN_MANAGER_GRANT_ROLE } from "./task-names";
 
-subtask("deploy:chain-manager:grant-role")
+subtask(TASK_DEPLOY_CHAIN_MANAGER_GRANT_ROLE)
   .setDescription("Grants chain manager role to chain managers")
   .addParam("token", "Address of token")
   .addParam("chainManager", "Address of chain manager")
   .addFlag("rootChain", "Flag that this is on the root chain")
   .setAction(async ({ token, chainManager, rootChain }, hre) => {
     const { ethers } = hre;
-    const status = StatusManager.create();
 
     try {
       const rootChildName = rootChain ? "root" : "child";
@@ -21,14 +20,13 @@ subtask("deploy:chain-manager:grant-role")
         token,
         deployer
       )) as unknown as TradeTrustERC721Base;
-      status.add(`Granting role on ${rootChildName} chain manager...`);
+      console.log(`[Status] Granting role on ${rootChildName} chain manager...`);
       const tx = await tokenContract.grantRole(RoleConstants.chainManager, chainManager);
-      status.update(`Pending role transaction ${tx.hash}...`);
+      console.log(`[Transaction] Pending ${tx.hash}...`);
       await tx.wait();
-      status.succeed(`Granted role to ${rootChildName} chain manager in ${tx.hash}`);
-      return tx;
+      console.log(`[Status] Granted role to ${rootChildName} chain manager`);
     } catch (err) {
-      status.fail(`Failed granting role: ${err}`);
-      throw err;
+      console.log(`[Status] Failed to grant role to chain manager`);
+      console.error(err);
     }
   });

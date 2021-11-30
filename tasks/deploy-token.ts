@@ -3,7 +3,9 @@ import { ChainType } from "../src/common/enum/chain-type.enum";
 import "./deploy-token-root";
 import "./deploy-token-child";
 
-task("deploy:token")
+const TASK_DEPLOY_TOKEN = "deploy:token";
+
+task(TASK_DEPLOY_TOKEN)
   .setDescription("Deploys the TradeTrustERC721 token")
   .addParam("name", "Name of the token")
   .addParam("symbol", "Symbol of token")
@@ -28,7 +30,10 @@ task("deploy:token")
         mintable,
         verify,
       });
+
+      console.log(`[Status] Completed deploying token`);
     } catch (err) {
+      console.log(`[Status] Failed to deploy token`);
       console.error(err);
     }
   });

@@ -1,10 +1,10 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { TradeTrustERC721, TradeTrustERC721Base, TradeTrustERC721RootMintable } from "@tradetrust/contracts";
 import { subtask } from "hardhat/config";
-import logger from "consola";
 import { deployToken } from "./helpers/deploy-token";
+import { verifyContract } from "./helpers/verify-contract";
+import { TASK_DEPLOY_TOKEN_ROOT } from "./task-names";
 
-subtask("deploy:token:root")
+subtask(TASK_DEPLOY_TOKEN_ROOT)
   .setDescription("Deploys a mintable root token of TradeTrustERC721")
   .addParam("name", "Name of the token")
   .addParam("symbol", "Symbol of token")
@@ -32,12 +32,11 @@ subtask("deploy:token:root")
     }
 
     if (verify) {
-      logger.info("Verifying contract...");
-      await hre.run("verify", {
+      await verifyContract({
         address: token.address,
         constructorArgsParams: [name, symbol],
+        hre,
       });
-      logger.info("Done verifying contract!");
     }
 
     return token;

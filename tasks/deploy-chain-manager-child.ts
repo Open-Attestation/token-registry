@@ -3,8 +3,9 @@ import { deployChildChainManager } from "./helpers/deploy-child-chain-manager";
 import { AddressConstants } from "../src/common/constants";
 import { getNetworkEnv } from "./utils";
 import { verifyContract } from "./helpers/verify-contract";
+import { TASK_DEPLOY_CHAIN_MANAGER_CHILD, TASK_DEPLOY_CHAIN_MANAGER_GRANT_ROLE } from "./task-names";
 
-task("deploy:chain-manager:child")
+task(TASK_DEPLOY_CHAIN_MANAGER_CHILD)
   .setDescription("Deploys the child chain manager")
   .addParam("fxChild", "Address of FxChild", AddressConstants.polygon[getNetworkEnv()].fxChild)
   .addParam("token", "Address of Child Token")
@@ -22,7 +23,7 @@ task("deploy:chain-manager:child")
         deployer,
       });
 
-      await hre.run("deploy:chain-manager:grant-role", {
+      await hre.run(TASK_DEPLOY_CHAIN_MANAGER_GRANT_ROLE, {
         token,
         chainManager: chainManager.address,
         rootChain: false,
@@ -36,8 +37,11 @@ task("deploy:chain-manager:child")
         });
       }
 
+      console.log(`[Status] Completed deploying child chain manager`);
+
       return chainManager;
     } catch (err) {
+      console.log(`[Status] Failed to deploy child chain manager`);
       console.error(err);
       return undefined;
     }

@@ -1,7 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Signer } from "ethers";
 import { TradeTrustERC721Base } from "@tradetrust/contracts";
-import { StatusManager } from "../utils/status-manager/status-manager";
 
 type DeployTokenConstructorParameters = {
   name: string;
@@ -20,25 +19,20 @@ export const deployToken = async <TToken extends TradeTrustERC721Base>({
   deployer: Signer;
 }): Promise<TToken> => {
   const { ethers } = hre;
-  const status = StatusManager.create();
 
-  try {
-    const deployerAddress = await deployer.getAddress();
-    status.add(`Deploying ${contractName} contract as deployer ${deployerAddress}...`);
-    const tokenFactory = await ethers.getContractFactory(contractName);
-    const token = (await tokenFactory
-      .connect(deployer)
-      .deploy(constructorParams.name, constructorParams.symbol)) as TToken;
+  const deployerAddress = await deployer.getAddress();
+  console.log(`[Deployer] ${deployerAddress}`);
 
-    const tx = token.deployTransaction;
-    status.update(`Pending transaction ${tx.hash}...`);
+  const tokenFactory = await ethers.getContractFactory(contractName);
+  const token = (await tokenFactory
+    .connect(deployer)
+    .deploy(constructorParams.name, constructorParams.symbol)) as TToken;
 
-    await token.deployed();
-    status.succeed(`Deployed ${contractName}  at ${token.address}`);
+  const tx = token.deployTransaction;
+  console.log(`[Transaction] Pending ${tx.hash}...`);
 
-    return token;
-  } catch (err) {
-    status.fail(`Failed to deploy ${contractName}: ${err}`);
-    throw err;
-  }
+  await token.deployed();
+  console.log(`[Address] Deployed to ${token.address}`);
+
+  return token;
 };

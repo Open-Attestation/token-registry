@@ -3,8 +3,9 @@ import { deployRootChainManager } from "./helpers/deploy-root-chain-manager";
 import { AddressConstants } from "../src/common/constants";
 import { getNetworkEnv } from "./utils";
 import { verifyContract } from "./helpers/verify-contract";
+import { TASK_DEPLOY_CHAIN_MANAGER_GRANT_ROLE, TASK_DEPLOY_CHAIN_MANAGER_ROOT } from "./task-names";
 
-task("deploy:chain-manager:root")
+task(TASK_DEPLOY_CHAIN_MANAGER_ROOT)
   .setDescription("Deploys the root chain manager")
   .addParam(
     "checkPointManager",
@@ -28,7 +29,7 @@ task("deploy:chain-manager:root")
         deployer,
       });
 
-      await hre.run("deploy:chain-manager:grant-role", {
+      await hre.run(TASK_DEPLOY_CHAIN_MANAGER_GRANT_ROLE, {
         token,
         chainManager: chainManager.address,
         rootChain: true,
@@ -42,8 +43,11 @@ task("deploy:chain-manager:root")
         });
       }
 
+      console.log(`[Status] Completed deploying root chain manager`);
+
       return chainManager;
     } catch (err) {
+      console.log(`[Status] Failed to deploy root chain manager`);
       console.error(err);
       return undefined;
     }

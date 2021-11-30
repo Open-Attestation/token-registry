@@ -1,10 +1,10 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { TradeTrustERC721Base, TradeTrustERC721Child, TradeTrustERC721ChildMintable } from "@tradetrust/contracts";
 import { subtask } from "hardhat/config";
-import logger from "consola";
 import { deployToken } from "./helpers/deploy-token";
+import { verifyContract } from "./helpers/verify-contract";
+import { TASK_DEPLOY_TOKEN_CHILD } from "./task-names";
 
-subtask("deploy:token:child")
+subtask(TASK_DEPLOY_TOKEN_CHILD)
   .setDescription("Deploys a mintable child token of TradeTrustERC721")
   .addParam("name", "Name of the token")
   .addParam("symbol", "Symbol of token")
@@ -32,12 +32,11 @@ subtask("deploy:token:child")
     }
 
     if (verify) {
-      logger.info("Verifying contract...");
-      await hre.run("verify", {
+      await verifyContract({
         address: token.address,
         constructorArgsParams: [name, symbol],
+        hre,
       });
-      logger.info("Done verifying contract!");
     }
 
     return token;

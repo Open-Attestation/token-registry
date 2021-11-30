@@ -1,5 +1,4 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { StatusManager } from "../utils/status-manager/status-manager";
 
 type Parameters = {
   hre: HardhatRuntimeEnvironment;
@@ -8,17 +7,14 @@ type Parameters = {
 };
 
 export const verifyContract = async ({ hre, address, constructorArgsParams }: Parameters) => {
-  const status = StatusManager.create();
-
-  try {
-    status.add(`Verifying contract ${address}...`);
-    await hre.run("verify", {
-      address,
-      constructorArgsParams,
-    });
-    status.succeed(`Verified contract at ${address}`);
-  } catch (err) {
-    status.fail(`Failed verifying contract: ${err}`);
-    throw err;
+  if (["localhost", "hardhat"].includes(hre.network.name)) {
+    console.log(`[Status] Skipped verifying contract ${address} on local`);
+    return;
   }
+  console.log(`[Status] Verifying contract ${address}...`);
+  await hre.run("verify", {
+    address,
+    constructorArgsParams,
+  });
+  console.log(`[Status] Verified contract at ${address}`);
 };

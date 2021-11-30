@@ -2,7 +2,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Signer } from "ethers";
 import { TradeTrustERC721ChildTunnel } from "@tradetrust/contracts";
-import { StatusManager } from "../utils/status-manager/status-manager";
 
 type DeployChildChainManagerConstructorParams = {
   fxChild: string;
@@ -21,26 +20,20 @@ export const deployChildChainManager = async ({
   const { ethers } = hre;
   const { fxChild, childToken } = constructorParams;
   const contractName = "TradeTrustERC721ChildTunnel";
-  const status = StatusManager.create();
 
-  try {
-    const deployerAddress = await deployer.getAddress();
-    status.add(`Deploying child chain manager contract ${contractName} as deployer ${deployerAddress}...`);
+  const deployerAddress = await deployer.getAddress();
+  console.log(`[Deployer] ${deployerAddress}`);
 
-    const chainManagerFactory = await ethers.getContractFactory(contractName);
-    const chainManager = (await chainManagerFactory
-      .connect(deployer)
-      .deploy(fxChild, childToken)) as TradeTrustERC721ChildTunnel;
+  const chainManagerFactory = await ethers.getContractFactory(contractName);
+  const chainManager = (await chainManagerFactory
+    .connect(deployer)
+    .deploy(fxChild, childToken)) as TradeTrustERC721ChildTunnel;
 
-    const tx = chainManager.deployTransaction;
-    status.update(`Pending deployment transaction ${tx.hash}...`);
+  const tx = chainManager.deployTransaction;
+  console.log(`[Transaction] Pending ${tx.hash}...`);
 
-    await chainManager.deployed();
-    status.succeed(`Deployed ${contractName} at ${chainManager.address}`);
+  await chainManager.deployed();
+  console.log(`[Address] Deployed to ${chainManager.address}`);
 
-    return chainManager;
-  } catch (err) {
-    status.fail(`Child chain manager deployment failed: ${err}`);
-    throw err;
-  }
+  return chainManager;
 };
