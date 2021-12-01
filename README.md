@@ -131,12 +131,15 @@ This uses the _mintable_ contract meant for the _Polygon_ chain and deploys it t
 The contract source will also be _verified_ on Etherscan.
 
 ## Chain Managers
-The Chain Managers can be deployed and used to bridge the tokens between Ethereum and Polygon. They are, however, optional if there is no intention to transfer the tokens between the layers.
+The Chain Managers can be deployed and used to bridge the tokens between Ethereum and Polygon. They are not needed if the intention is to remain on a blockchain only.
+
+> ⚠️ Transferring of documents across chains currently only works when the address of the token registry is the same between them.
+
 The deployment of the Chain Managers mainly involves 3 steps.
 
 ### Step 1. Deploy Root Chain Manager on Ethereum
 ```
-Usage: hardhat [GLOBAL OPTIONS] deploy:chain-manager:root [--check-point-manager <STRING>] [--fx-root <STRING>] --token <STRING> [--verify]
+Usage: hardhat [GLOBAL OPTIONS] deploy:cm:root [--check-point-manager <STRING>] [--fx-root <STRING>] --token <STRING> [--verify]
 
 OPTIONS:
 
@@ -145,21 +148,21 @@ OPTIONS:
   --token               Address of Root Token
   --verify             	Verify on Etherscan
 
-deploy:chain-manager:root: Deploys the root chain manager
+deploy:cm:root: Deploys the root chain manager
 ```
 > 💡 The `--check-point-manager` and `--fx-root` parameters are optional.
 > The default value of these parameters will refer to the addresses on the mainnet if the env variable value of `NODE_ENV` is `production`. Otherwise, the default values will refer to the addresses on the testnet.
 
 #### Example
 ```
-npx hardhat deploy:chain-manager:root --network goerli --token 0xRootTokenAddress --verify
+npx hardhat deploy:cm:root --network goerli --token 0xRootTokenAddress --verify
 ```
 This example will deploy the _root chain manager_ on the Ethereum _Goerli_ network meant for the root token address `0xRootTokenAddress`.
 The root chain manager will also be _verified_ on Etherscan.
 
 ### Step 2. Deploy Child Chain Manager on Polygon
 ```
-Usage: hardhat [GLOBAL OPTIONS] deploy:chain-manager:child --token <STRING> [--fx-child <STRING>] [--verify]
+Usage: hardhat [GLOBAL OPTIONS] deploy:cm:child --token <STRING> [--fx-child <STRING>] [--verify]
 
 OPTIONS:
 
@@ -167,36 +170,36 @@ OPTIONS:
   --fx-child   	Address of FxChild (default: "0xCf73231F28B7331BBe3124B907840A94851f9f11")
   --verify     	Verify on Etherscan
 
-deploy:chain-manager:child: Deploys the child chain manager
+deploy:cm:child: Deploys the child chain manager
 ```
 > 💡 The `--fx-child` parameter is optional.
 > Its default value refers to the addresses on the mainnet if the env variable value of `NODE_ENV` is `production`. Otherwise, the default value will refer to the address on the testnet.
 
 #### Example
 ```
-npx hardhat deploy:chain-manager:child --network mumbai --token 0xChildTokenAddress --verify
+npx hardhat deploy:cm:child --network mumbai --token 0xChildTokenAddress --verify
 ```
 This example will deploy the _child chain manager_ on the Polygon _Mumbai_ network meant for the child token address `0xChildTokenAddress`.
 The child chain manager will also be _verified_ on Etherscan.
 
 ### Step 3. Link up the Root and Child Chain Managers
 ```
-Usage: hardhat [GLOBAL OPTIONS] deploy:chain-manager:link --child-chain-manager <STRING> --child-network <STRING> --root-chain-manager <STRING>
+Usage: hardhat [GLOBAL OPTIONS] deploy:cm:link --child-cm <STRING> --child-network <STRING> --root-cm <STRING>
 
 OPTIONS:
 
-  --child-chain-manager	Address of Root Chain Manager
-  --child-network      	Network name of child chain
-  --root-chain-manager 	Address of Root Chain Manager
+  --child-cm        Address of Root Chain Manager
+  --child-network   Network name of child chain
+  --root-cm         Address of Root Chain Manager
 
-deploy:chain-manager:link: Links up the root and child chain managers
+deploy:cm:link: Links up the root and child chain managers
 ```
 > 💡 The `--child-network` should be supplied with the name of the child network where the child chain manager is deployed on.
 > The root network has to be supplied to Hardhat's `--network`. See below for an example.
 
 #### Example
 ```
-npx hardhat deploy:chain-manager:link --network goerli --child-network mumbai --root-chain-manager 0xRootChainManagerAddress --child-chain-manager 0xChildChainManagerAddress
+npx hardhat deploy:cm:link --network goerli --child-network mumbai --root-cm 0xRootChainManagerAddress --child-cm 0xChildChainManagerAddress
 ```
 This example will link up the root chain manager located at `0xRootChainManagerAddress` on the Ethereum _Goerli_ network to the child chain manager located at `0xChildChainManagerAddress` on the Polygon _Mumbai_ network. Notice that the name of the child network is provided to `--child-network`.
 
