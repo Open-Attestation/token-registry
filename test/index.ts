@@ -2,7 +2,9 @@
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { solidity } from "ethereum-waffle";
+import { smock } from "@defi-wonderland/smock";
 
 export const { expect } = chai
   .use(chaiAsPromised) //
-  .use(solidity);
+  .use(solidity)
+  .use(smock.matchers);
