@@ -7,9 +7,13 @@ contract TradeTrustERC721Mock is TradeTrustERC721 {
 
   constructor(string memory name, string memory symbol) TradeTrustERC721(name, symbol) {}
 
-  function surrenderedOwners(
+  function surrenderedOwnersInternal(
     uint256 tokenId
   ) public view returns (address) {
     return _surrenderedOwners[tokenId];
+  }
+
+  function burnInternal(uint256 tokenId) public virtual {
+    _burn(tokenId);
   }
 }
