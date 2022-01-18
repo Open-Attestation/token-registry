@@ -222,10 +222,10 @@ npx hardhat <command>
 
 ## Configuration
 Create a `.env` file and add your own keys into it. The following variables are supported:
-* INFURA_API_KEY
-* ETHERSCAN_API_KEY
-* COINMARKETCAP_API_KEY
-* DEPLOYER_PK
-* MNEMONIC
+* `INFURA_API_KEY`
+* `ETHERSCAN_API_KEY`
+* `COINMARKETCAP_API_KEY`
+* `DEPLOYER_PK`
+* `MNEMONIC`
 
 Only either the `DEPLOYER_PK` or `MNEMONIC` is needed. 
