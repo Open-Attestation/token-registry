@@ -27,7 +27,7 @@ describe("TradeTrustErc721", async () => {
 
   before("Initialising contract factories and accounts for TradeTrustErc721 tests", async () => {
     [carrier1, owner1, owner2, nonMinter, holder1] = await ethers.getSigners();
-    TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneable");
+    TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneableMock");
     Erc721 = await ethers.getContractFactory("TradeTrustERC721");
   });
 

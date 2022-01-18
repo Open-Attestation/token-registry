@@ -3,7 +3,7 @@ const { expect } = require("chai").use(require("chai-as-promised"));
 describe("TradeTrustErc721", async () => {
   const accounts = await ethers.getSigners();
   const Erc721 = await ethers.getContractFactory("TradeTrustERC721");
-  const TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneable");
+  const TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneableMock");
   const shippingLine = accounts[0];
   const beneficiary1 = accounts[1];
 
@@ -30,7 +30,7 @@ describe("TradeTrustErc721", async () => {
       await tokenRegistryInstanceWithShippingLineWallet["safeMint(address,uint256)"](escrowInstanceAddress, merkleRoot);
       const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(currentOwner).to.deep.equal(escrowInstanceAddress);
-      await escrowInstance.transferTo(tokenRegistryAddress);
+      await escrowInstance.surrender();
 
       const nextOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(nextOwner).to.deep.equal(tokenRegistryAddress);
