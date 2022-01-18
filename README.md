@@ -207,7 +207,7 @@ This example will link up the root chain manager located at `0xRootChainManagerA
 When verifying the contracts through either the Hardhat's verify plugin or passing the `--verify` flag to the deployment tasks (which internally uses the same plugin), you will need to set `ETHERSCAN_API_KEY` in your environment to your Etherscan API key.
 
 # Development
-This repository's development framework uses (HardHat)[https://hardhat.org/getting-started/].
+This repository's development framework uses [HardHat](https://hardhat.org/getting-started/).
 
 Tests are run using `npm run test`, more development tasks can be found in the package.json scripts.
 
@@ -219,12 +219,6 @@ npm lint
 npm test
 npx hardhat <command>
 ```
-
-## Development
-
-This repository's development framework uses [HardHat](https://hardhat.org/getting-started/).
-
-Tests are run using `npm run test`, more development tasks can be found in the package.json scripts.
 
 ## Configuration
 Create a `.env` file and add your own keys into it. The following variables are supported:
