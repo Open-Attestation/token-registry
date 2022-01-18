@@ -102,11 +102,7 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
     tokenRegistry.safeTransferFrom(address(this), address(newOwner), _tokenId);
   }
 
-  function transferTo(address newOwner) public virtual override isHoldingToken onlyHolder allowTransferOwner(newOwner) {
-    revert("Transfer disabled");
-  }
-
-  function surrender() external isHoldingToken onlyBeneficiary onlyHolder {
+  function surrender() external override isHoldingToken onlyBeneficiary onlyHolder {
     _transferTo(address(tokenRegistry));
   }
 
