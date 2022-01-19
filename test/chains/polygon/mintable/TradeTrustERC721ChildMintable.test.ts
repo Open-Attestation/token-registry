@@ -1,15 +1,15 @@
 /* eslint-disable camelcase */
 import { ethers } from "hardhat";
-import { utils as ethersUtils } from "ethers";
 import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { TradeTrustERC721ChildMintableMock, TradeTrustERC721ChildMintableMock__factory } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
+import { RoleConstants } from "../../../../src/common/constants";
 
 describe("TradeTrustERC721ChildMintable", () => {
-  const CHAIN_MANAGER_ROLE = ethersUtils.id("CHAIN_MANAGER_ROLE");
+  const CHAIN_MANAGER_ROLE = RoleConstants.chainManager;
 
   let users: TestUsers;
   let tradeTrustERC721ChildMintableMock: MockContract<TradeTrustERC721ChildMintableMock>;
