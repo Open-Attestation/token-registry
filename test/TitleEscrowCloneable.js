@@ -72,7 +72,7 @@ describe("TitleEscrowCloneable", async () => {
 
   it("should have the correct ERC165 interface support", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address);
-    const ITitleEscrowInterfaceId = "0x015509a1";
+    const ITitleEscrowInterfaceId = "0x1676e9e0";
     const interfaceSupported = await escrowInstance.supportsInterface(ITitleEscrowInterfaceId);
     expect(interfaceSupported).to.be.equal(true, `Expected selector: ${ITitleEscrowInterfaceId}`);
   });
