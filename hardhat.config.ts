@@ -12,18 +12,18 @@ import "./tasks";
 dotenv.config();
 
 const { INFURA_API_KEY, MNEMONIC, DEPLOYER_PK, COINMARKETCAP_API_KEY, ETHERSCAN_API_KEY } = process.env;
-const IS_TEST_ENV = process.env.NODE_ENV === "test";
+const IS_CI_ENV = process.env.NODE_ENV === "ci";
 
-if (!IS_TEST_ENV && !INFURA_API_KEY) {
+if (!IS_CI_ENV && !INFURA_API_KEY) {
   throw new Error("Infura key is not provided in env");
 }
 
-if (!IS_TEST_ENV && !DEPLOYER_PK && !MNEMONIC) {
+if (!IS_CI_ENV && !DEPLOYER_PK && !MNEMONIC) {
   throw new Error("Provide at least either deployer private key or mnemonic in env");
 }
 
 const networkConfig: HttpNetworkUserConfig = {};
-if (IS_TEST_ENV) {
+if (IS_CI_ENV) {
   networkConfig.accounts = ["0xbabe"];
 } else if (DEPLOYER_PK) {
   networkConfig.accounts = [DEPLOYER_PK];
