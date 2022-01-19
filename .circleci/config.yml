@@ -41,7 +41,7 @@ jobs:
     docker:
       - image: 'circleci/node:14'
     environment:
-      ENV_NAME: test
+      ENV_NAME: ci
     steps:
       - checkout
       - run:
