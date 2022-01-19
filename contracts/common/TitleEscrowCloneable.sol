@@ -95,17 +95,13 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
     approvedOwner = newOwner;
   }
 
-  function _transferTo(address newOwner) private {
+  function _transferTo(address newOwner) internal {
     status = StatusTypes.Exited;
     emit TitleCeded(address(tokenRegistry), newOwner, _tokenId);
     tokenRegistry.safeTransferFrom(address(this), address(newOwner), _tokenId);
   }
 
-  function transferTo(address newOwner) public override isHoldingToken onlyHolder allowTransferOwner(newOwner) {
-    _transferTo(newOwner);
-  }
-
-  function surrender() external isHoldingToken onlyBeneficiary onlyHolder {
+  function surrender() external override isHoldingToken onlyBeneficiary onlyHolder {
     _transferTo(address(tokenRegistry));
   }
 

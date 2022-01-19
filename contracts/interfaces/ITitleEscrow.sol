@@ -44,9 +44,8 @@ interface ITitleEscrow is IHasHolder, IHasBeneficiary, IERC165, IERC721Receiver 
   /// @param newHolder The address of the new holder
   function changeHolder(address newHolder) external;
 
-  /// @notice Handle the token transfer by the holder after beneficiary's endorsement
-  /// @param newBeneficiary The address of the new holder
-  function transferTo(address newBeneficiary) external;
+  /// @notice Surrender token back to registry
+  function surrender() external;
 
   /// @notice Public getter to access the approved owner if any
   function approvedOwner() external returns (address);
