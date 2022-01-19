@@ -3,8 +3,9 @@ pragma solidity ^0.8.0;
 
 import "./IChildToken.sol";
 import "../../common/TradeTrustERC721Mintable.sol";
+import "../../access/ChainManagerRole.sol";
 
-contract TradeTrustERC721ChildMintable is TradeTrustERC721Mintable, IChildToken {
+contract TradeTrustERC721ChildMintable is ChainManagerRole, IChildToken, TradeTrustERC721Mintable  {
   mapping(uint256 => bool) internal _withdrawnTokens;
 
   constructor(string memory name, string memory symbol) TradeTrustERC721Mintable(name, symbol) {}
@@ -29,7 +30,7 @@ contract TradeTrustERC721ChildMintable is TradeTrustERC721Mintable, IChildToken 
     address depositor,
     uint256 tokenId,
     bytes memory depositData
-  ) external virtual override onlyRole(CHAIN_MANAGER_ROLE) {
+  ) external virtual override onlyChainManager {
     _withdrawnTokens[tokenId] = false;
     _mintTitle(depositor, depositor, tokenId);
   }
@@ -38,7 +39,7 @@ contract TradeTrustERC721ChildMintable is TradeTrustERC721Mintable, IChildToken 
     address withdrawer,
     uint256 tokenId,
     bytes memory withdrawData
-  ) external virtual override onlyRole(CHAIN_MANAGER_ROLE) {
+  ) external virtual override onlyChainManager {
     require(
       _isApprovedOrOwner(_msgSender(), tokenId),
       "TradeTrustERC721ChildMintable: Caller is not owner nor approved"
@@ -46,5 +47,9 @@ contract TradeTrustERC721ChildMintable is TradeTrustERC721Mintable, IChildToken 
 
     _withdrawnTokens[tokenId] = true;
     _burn(tokenId);
+  }
+
+  function supportsInterface(bytes4 interfaceId) public view virtual override(TradeTrustERC721Mintable, ChainManagerRole) returns (bool) {
+    return super.supportsInterface(interfaceId) || ChainManagerRole.supportsInterface(interfaceId);
   }
 }

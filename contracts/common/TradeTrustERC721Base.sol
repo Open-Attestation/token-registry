@@ -8,10 +8,8 @@ import "../interfaces/ITitleEscrow.sol";
 import "../interfaces/ITradeTrustERC721.sol";
 import {ERC721Mintable, IERC721Receiver, Address, ERC721, MinterRole} from "../lib/ERC721.sol";
 
-abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Receiver, MinterRole {
+abstract contract TradeTrustERC721Base is MinterRole, TitleEscrowCloner, IERC721Receiver, ERC721 {
   using Address for address;
-
-  bytes32 public constant CHAIN_MANAGER_ROLE = keccak256("CHAIN_MANAGER_ROLE");
 
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
@@ -56,7 +54,7 @@ abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Rece
    *
    * @param tokenId Token ID to be burnt
    */
-  function destroyToken(uint256 tokenId) external onlyMinter {
+  function destroyToken(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) {
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -66,7 +64,7 @@ abstract contract TradeTrustERC721Base is TitleEscrowCloner, ERC721, IERC721Rece
     delete _surrenderedOwners[tokenId];
   }
 
-  function restoreTitle(uint256 tokenId) external onlyMinter returns (address) {
+  function restoreTitle(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) returns (address) {
     address previousOwner = _surrenderedOwners[tokenId];
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");

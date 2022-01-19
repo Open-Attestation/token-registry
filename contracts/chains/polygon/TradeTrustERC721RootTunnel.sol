@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import {FxBaseRootTunnel} from "@maticnetwork/fx-portal/contracts/tunnel/FxBaseRootTunnel.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC721Receiver, IERC721, IERC165} from "../../lib/ERC721.sol";
+import {FxBaseRootTunnel} from "../../lib/tunnels/FxBaseRootTunnel.sol";
 import "../../interfaces/ITradeTrustERC721Mintable.sol";
 
-contract TradeTrustERC721RootTunnel is FxBaseRootTunnel, IERC721Receiver {
+contract TradeTrustERC721RootTunnel is Ownable, IERC721Receiver, FxBaseRootTunnel {
   event RootTokenDeposit(address indexed rootToken, address indexed depositor, uint256 tokenId);
   event RootTokenWithdrawal(
     address indexed rootToken,
@@ -16,7 +17,6 @@ contract TradeTrustERC721RootTunnel is FxBaseRootTunnel, IERC721Receiver {
 
   address public rootToken;
 
-  // TODO: Lock setFxRootTunnel to only minter
   constructor(
     address _checkPointManager,
     address _fxRoot,
@@ -33,6 +33,10 @@ contract TradeTrustERC721RootTunnel is FxBaseRootTunnel, IERC721Receiver {
     bytes calldata /* data */
   ) external pure override returns (bytes4) {
     return this.onERC721Received.selector;
+  }
+
+  function setFxChildTunnel(address _fxChildTunnel) public override onlyOwner {
+    super.setFxChildTunnel(_fxChildTunnel);
   }
 
   function deposit(uint256 tokenId, bytes memory data) public virtual {

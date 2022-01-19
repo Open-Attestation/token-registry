@@ -21,4 +21,8 @@ export const getTestUsers = async () => {
   return users;
 };
 
+export const toAccessControlRevertMessage = (account: string, role: string): string => {
+  return `AccessControl: account ${account.toLowerCase()} is missing role ${role}`;
+};
+
 export { impersonateAccount, stopImpersonatingAccount } from "./impersonate-account";

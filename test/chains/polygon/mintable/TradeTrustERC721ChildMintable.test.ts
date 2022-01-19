@@ -6,12 +6,9 @@ import { TradeTrustERC721ChildMintableMock, TradeTrustERC721ChildMintableMock__f
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
-import { RoleConstants } from "../../../../src/common/constants";
 import { getTestUsers } from "../../../utils";
 
 describe("TradeTrustERC721ChildMintable", () => {
-  const CHAIN_MANAGER_ROLE = RoleConstants.chainManager;
-
   let users: TestUsers;
   let tradeTrustERC721ChildMintableMock: MockContract<TradeTrustERC721ChildMintableMock>;
   let fakeChainManager: SignerWithAddress;
@@ -33,7 +30,7 @@ describe("TradeTrustERC721ChildMintable", () => {
 
     fakeChainManager = users.others[users.others.length - 1];
 
-    await tradeTrustERC721ChildMintableMock.grantRole(CHAIN_MANAGER_ROLE, fakeChainManager.address);
+    await tradeTrustERC721ChildMintableMock.addChainManager(fakeChainManager.address);
   });
 
   describe("Mintable Child Token", () => {
@@ -101,7 +98,7 @@ describe("TradeTrustERC721ChildMintable", () => {
           .connect(users.carrier)
           .deposit(users.beneficiary.address, tokenId, "0x");
 
-        await expect(tx).to.be.revertedWith("AccessControl");
+        await expect(tx).to.be.revertedWith("ChainManagerRole: caller is not a chain manager");
       });
 
       it("should reset withdrawn status of token", async () => {
@@ -140,7 +137,7 @@ describe("TradeTrustERC721ChildMintable", () => {
           .connect(users.carrier)
           .withdraw(users.beneficiary.address, tokenId, "0x");
 
-        expect(tx).to.be.revertedWith("AccessControl");
+        expect(tx).to.be.revertedWith("ChainManagerRole: caller is not a chain manager");
       });
 
       it("should revert if chain manager is not approved", async () => {

@@ -13,7 +13,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { mintTokenFixture } from "./fixtures/mint-token.fixture";
-import { getTestUsers } from "./utils";
+import { getTestUsers, toAccessControlRevertMessage } from "./utils";
+import { AddressConstants, RoleConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 
@@ -25,8 +26,6 @@ const { loadFixture } = waffle;
  */
 
 describe("TradeTrustERC721 (TS Migration)", async () => {
-  const burnAddress = "0x000000000000000000000000000000000000dEaD";
-
   let users: TestUsers;
   let tradeTrustERC721Mock: TradeTrustERC721Mock;
 
@@ -332,7 +331,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           const tx = tradeTrustERC721Mock
             .connect(unapprovedOperator)
-            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, burnAddress, tokenId);
+            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, AddressConstants.burn, tokenId);
 
           await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
         });
@@ -366,7 +365,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         it("should not allow transfer to burn address", async () => {
           const tx = tradeTrustERC721Mock["safeTransferFrom(address,address,uint256)"](
             users.beneficiary.address,
-            burnAddress,
+            AddressConstants.burn,
             tokenId
           );
 
@@ -402,7 +401,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           const tx = tradeTrustERC721Mock
             .connect(unapprovedOperator)
-            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, burnAddress, tokenId);
+            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, AddressConstants.burn, tokenId);
 
           await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
         });
@@ -443,7 +442,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
           const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
 
-          expect(newOwner).to.equal(burnAddress);
+          expect(newOwner).to.equal(AddressConstants.burn);
         });
 
         it("should emit TokenBurnt event on burning of token", async () => {
@@ -465,7 +464,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         it("should not allow a non-minter to burn the token", async () => {
           const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
 
-          await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+          await expect(tx).to.be.revertedWith(
+            toAccessControlRevertMessage(users.beneficiary.address, RoleConstants.defaultAdmin)
+          );
         });
       });
     });
@@ -482,7 +483,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       it("should not allow a non-minter to burn the token", async () => {
         const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
 
-        await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+        await expect(tx).to.be.revertedWith(
+          toAccessControlRevertMessage(users.beneficiary.address, RoleConstants.defaultAdmin)
+        );
       });
 
       it("should allow ERC721 burning of unsurrendered token internally", async () => {
