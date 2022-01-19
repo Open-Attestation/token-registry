@@ -16,6 +16,7 @@
     "stripInternal": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "emitDeclarationOnly": true,
     "baseUrl": ".",
     "paths": {
       "@tradetrust/contracts": ["./src/contracts"]
@@ -24,6 +25,6 @@
   "ts-node": {
     "files": true
   },
-  "include": ["./src/**/*", "./test/**/*", "./hardhat.config.ts"],
+  "include": ["./src/**/*", "./test/**/*", "./hardhat.config.ts", "./tasks/**/*", "./types"],
   "exclude": ["./src/contracts/**/*"]
 }

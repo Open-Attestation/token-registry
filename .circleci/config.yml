@@ -15,11 +15,13 @@ jobs:
   build:
     docker:
       - image: 'circleci/node:14'
+    environment:
+      ENV_NAME: test
     steps:
       - checkout
       - run:
           name: install
-          command: npm ci
+          command: NODE_ENV=$ENV_NAME npm ci
       - run:
           name: commitlint
           command: npx --no-install commitlint-circle
@@ -28,23 +30,25 @@ jobs:
           command: npm run lint
       - run:
           name: test
-          command: npm run test
+          command: NODE_ENV=$ENV_NAME npm run test
       - run:
           name: build
-          command: npm run build
+          command: NODE_ENV=$ENV_NAME npm run build
       - run:
           name: release
           command: npm run semantic-release
   coverage:
     docker:
       - image: 'circleci/node:14'
+    environment:
+      ENV_NAME: test
     steps:
       - checkout
       - run:
           name: install
-          command: npm ci
+          command: NODE_ENV=$ENV_NAME npm ci
       - run:
           name: coverage
-          command: npm run coverage
+          command: NODE_ENV=$ENV_NAME npm run coverage
       - codecov/upload
 
