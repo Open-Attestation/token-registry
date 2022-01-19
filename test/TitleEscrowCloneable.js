@@ -14,9 +14,9 @@ describe("TitleEscrowCloneable", async () => {
 
   before("Initialising contract factories and accounts for TitleEscrow tests", async () => {
     [carrier1, beneficiary1, beneficiary2, holder1, holder2] = await ethers.getSigners();
-    TitleEscrowCloneableFactory = await ethers.getContractFactory("TitleEscrowCloneable");
+    TitleEscrowCloneableFactory = await ethers.getContractFactory("TitleEscrowCloneableMock");
     ERC721Factory = await ethers.getContractFactory("TradeTrustERC721");
-    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowCloner");
+    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowClonerMock");
 
     TitleEscrowCloner = await TitleEscrowClonerFactory.connect(carrier1).deploy();
   });
@@ -72,7 +72,7 @@ describe("TitleEscrowCloneable", async () => {
 
   it("should have the correct ERC165 interface support", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address);
-    const ITitleEscrowInterfaceId = "0x015509a1";
+    const ITitleEscrowInterfaceId = "0x1676e9e0";
     const interfaceSupported = await escrowInstance.supportsInterface(ITitleEscrowInterfaceId);
     expect(interfaceSupported).to.be.equal(true, `Expected selector: ${ITitleEscrowInterfaceId}`);
   });

@@ -18,8 +18,8 @@ describe("TitleEscrowCloner", async () => {
 
   before("Initialising contract factories and accounts for TitleEscrowCreator tests", async () => {
     [carrier1, beneficiary1, beneficiary2, holder2] = await ethers.getSigners();
-    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowCloner");
-    TitleEscrowCloneableFactory = await ethers.getContractFactory("TitleEscrowCloneable");
+    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowClonerMock");
+    TitleEscrowCloneableFactory = await ethers.getContractFactory("TitleEscrowCloneableMock");
     ERC721 = await ethers.getContractFactory("TradeTrustERC721");
   });
 
