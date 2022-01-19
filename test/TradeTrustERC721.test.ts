@@ -2,10 +2,10 @@
 import { ethers, waffle } from "hardhat";
 import {
   TitleEscrowCloneable,
-  TradeTrustERC721,
-  TradeTrustERC721Mock,
   TitleEscrowCloneable__factory,
+  TradeTrustERC721,
   TradeTrustERC721__factory,
+  TradeTrustERC721Mock,
 } from "@tradetrust/contracts";
 import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
@@ -13,6 +13,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { mintTokenFixture } from "./fixtures/mint-token.fixture";
+import { getTestUsers } from "./utils";
 
 const { loadFixture } = waffle;
 
@@ -30,15 +31,16 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
   let tradeTrustERC721Mock: TradeTrustERC721Mock;
 
   beforeEach(async () => {
-    const setupData = await loadFixture(
+    users = await getTestUsers();
+
+    tradeTrustERC721Mock = await loadFixture(
       deployTokenFixture<TradeTrustERC721Mock>({
         tokenContractName: "TradeTrustERC721Mock",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
+        users,
       })
     );
-    users = setupData.users;
-    tradeTrustERC721Mock = setupData.token;
   });
 
   describe("Restore Surrendered Token", () => {

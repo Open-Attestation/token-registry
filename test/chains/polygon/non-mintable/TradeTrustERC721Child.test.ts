@@ -1,12 +1,11 @@
 /* eslint-disable camelcase */
-import { ethers } from "hardhat";
 import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { TradeTrustERC721Child, TradeTrustERC721Child__factory } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
-import { impersonateAccount, stopImpersonatingAccount } from "../../../utils";
+import { getTestUsers, impersonateAccount, stopImpersonatingAccount } from "../../../utils";
 import { RoleConstants } from "../../../../src/common/constants";
 
 describe("TradeTrustERC721Child", () => {
@@ -24,8 +23,7 @@ describe("TradeTrustERC721Child", () => {
     const tradeTrustERC721ChildFactory = await smock.mock<TradeTrustERC721Child__factory>("TradeTrustERC721Child");
     tradeTrustERC721Child = await tradeTrustERC721ChildFactory.deploy("The Great Shipping Company", "GSC");
 
-    const [carrier, beneficiary, holder, ...others] = await ethers.getSigners();
-    users = { carrier, beneficiary, holder, others };
+    users = await getTestUsers();
 
     fakeChainManager = users.others[users.others.length - 1];
 

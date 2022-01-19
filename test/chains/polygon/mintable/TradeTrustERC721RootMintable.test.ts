@@ -11,6 +11,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "../../../index";
 import { TestUsers } from "../../../fixtures/deploy-token.fixture";
 import { RoleConstants } from "../../../../src/common/constants";
+import { getTestUsers } from "../../../utils";
 
 describe("TradeTrustERC721RootMintable", () => {
   const CHAIN_MANAGER_ROLE = RoleConstants.chainManager;
@@ -24,8 +25,7 @@ describe("TradeTrustERC721RootMintable", () => {
   beforeEach(async () => {
     tokenId = faker.datatype.number();
 
-    const [carrier, beneficiary, holder, ...others] = await ethers.getSigners();
-    users = { carrier, beneficiary, holder, others };
+    users = await getTestUsers();
 
     const tradeTrustERC721RootMintableFactory = await smock.mock<TradeTrustERC721RootMintable__factory>(
       "TradeTrustERC721RootMintable"

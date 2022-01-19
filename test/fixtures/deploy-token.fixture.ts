@@ -14,16 +14,14 @@ export const deployTokenFixture =
     tokenContractName,
     tokenName,
     tokenInitials,
+    users,
   }: {
     tokenContractName: string;
     tokenName: string;
     tokenInitials: string;
+    users: TestUsers;
   }) =>
   async () => {
     const tradeTrustERC721MockFactory = await ethers.getContractFactory(tokenContractName);
-    const [carrier, beneficiary, holder, ...others] = await ethers.getSigners();
-    const users: TestUsers = { carrier, beneficiary, holder, others };
-    const token = (await tradeTrustERC721MockFactory.connect(users.carrier).deploy(tokenName, tokenInitials)) as T;
-
-    return { token, users };
+    return (await tradeTrustERC721MockFactory.connect(users.carrier).deploy(tokenName, tokenInitials)) as T;
   };
