@@ -221,11 +221,20 @@ npx hardhat <command>
 ```
 
 ## Configuration
-Create a `.env` file and add your own keys into it. The following variables are supported:
-* `INFURA_API_KEY`
-* `ETHERSCAN_API_KEY`
-* `COINMARKETCAP_API_KEY`
-* `DEPLOYER_PK`
-* `MNEMONIC`
+Create a `.env` file and add your own keys into it. You can rename from the sample file `.env.sample` or copy the following into a new file:
+```
+# Infura
+INFURA_APP_ID=
+
+# API Keys
+ETHERSCAN_API_KEY=
+COINMARKETCAP_API_KEY=
+
+# Deployer Private Key
+DEPLOYER_PK=
+
+# Mnemonic words
+MNEMONIC=
+```
 
 Only either the `DEPLOYER_PK` or `MNEMONIC` is needed. 
