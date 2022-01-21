@@ -94,12 +94,15 @@ const config: HardhatUserConfig = {
      */
     polygon: {
       ...networkConfig,
-      url: `https://polygon-mainnet.infura.io/v3/${INFURA_APP_ID}`,
+      url: "https://polygon-rpc.com",
+      // Uncomment line below if using Infura
+      // url: `https://polygon-mainnet.infura.io/v3/${INFURA_APP_ID}`,
     },
     mumbai: {
       ...networkConfig,
-      // url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
-      url: "https://rpc-mumbai.maticvigil.com",
+      url: "https://matic-mumbai.chainstacklabs.com",
+      // Uncomment line below if using Infura
+      // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
     },
     /**
      * Development
