@@ -11,10 +11,10 @@ import "./tasks";
 
 dotenv.config();
 
-const { INFURA_API_KEY, MNEMONIC, DEPLOYER_PK, COINMARKETCAP_API_KEY, ETHERSCAN_API_KEY } = process.env;
+const { INFURA_APP_ID, MNEMONIC, DEPLOYER_PK, COINMARKETCAP_API_KEY, ETHERSCAN_API_KEY } = process.env;
 const IS_CI_ENV = process.env.NODE_ENV === "ci";
 
-if (!IS_CI_ENV && !INFURA_API_KEY) {
+if (!IS_CI_ENV && !INFURA_APP_ID) {
   throw new Error("Infura key is not provided in env");
 }
 
@@ -71,35 +71,38 @@ const config: HardhatUserConfig = {
      */
     mainnet: {
       ...networkConfig,
-      url: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
+      url: `https://mainnet.infura.io/v3/${INFURA_APP_ID}`,
     },
     ropsten: {
       ...networkConfig,
-      url: `https://ropsten.infura.io/v3/${INFURA_API_KEY}`,
+      url: `https://ropsten.infura.io/v3/${INFURA_APP_ID}`,
     },
     goerli: {
       ...networkConfig,
-      url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
+      url: `https://goerli.infura.io/v3/${INFURA_APP_ID}`,
     },
     rinkeby: {
       ...networkConfig,
-      url: `https://rinkeby.infura.io/v3/${INFURA_API_KEY}`,
+      url: `https://rinkeby.infura.io/v3/${INFURA_APP_ID}`,
     },
     kovan: {
       ...networkConfig,
-      url: `https://kovan.infura.io/v3/${INFURA_API_KEY}`,
+      url: `https://kovan.infura.io/v3/${INFURA_APP_ID}`,
     },
     /**
      * Polygon
      */
     polygon: {
       ...networkConfig,
-      url: `https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
+      url: "https://polygon-rpc.com",
+      // Uncomment line below if using Infura
+      // url: `https://polygon-mainnet.infura.io/v3/${INFURA_APP_ID}`,
     },
     mumbai: {
       ...networkConfig,
-      url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
-      // url: "https://matic-mumbai.chainstacklabs.com",
+      url: "https://matic-mumbai.chainstacklabs.com",
+      // Uncomment line below if using Infura
+      // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
     },
     /**
      * Development
