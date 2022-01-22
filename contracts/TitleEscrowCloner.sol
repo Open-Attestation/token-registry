@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "../interfaces/ITitleEscrowCreator.sol";
+import "./interfaces/ITitleEscrowCreator.sol";
 import "./TitleEscrowCloneable.sol";
-import "../lib/Clones.sol";
+import "./lib/Clones.sol";
 
 contract TitleEscrowCloner is ITitleEscrowCreator {
   address public  titleEscrowImplementation;

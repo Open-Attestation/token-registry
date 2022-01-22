@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./TitleEscrowCloneableMock.sol";
-import "../common/TitleEscrowCloner.sol";
+import "../TitleEscrowCloner.sol";
 
 contract TitleEscrowClonerMock is TitleEscrowCloner {
 

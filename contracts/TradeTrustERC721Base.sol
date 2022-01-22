@@ -3,10 +3,10 @@ pragma solidity ^0.8.0;
 
 import "./TitleEscrowCloneable.sol";
 import "./TitleEscrowCloner.sol";
-import "../interfaces/ITitleEscrowCreator.sol";
-import "../interfaces/ITitleEscrow.sol";
-import "../interfaces/ITradeTrustERC721.sol";
-import {ERC721Mintable, IERC721Receiver, Address, ERC721, MinterRole} from "../lib/ERC721.sol";
+import "./interfaces/ITitleEscrowCreator.sol";
+import "./interfaces/ITitleEscrow.sol";
+import "./interfaces/ITradeTrustERC721.sol";
+import {ERC721Mintable, IERC721Receiver, Address, ERC721, MinterRole} from "./lib/ERC721.sol";
 
 abstract contract TradeTrustERC721Base is MinterRole, TitleEscrowCloner, IERC721Receiver, ERC721 {
   using Address for address;
