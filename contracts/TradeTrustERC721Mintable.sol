@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./TradeTrustERC721Base.sol";
-import "../interfaces/ITradeTrustERC721Mintable.sol";
+import "./interfaces/ITradeTrustERC721Mintable.sol";
 
 abstract contract TradeTrustERC721Mintable is TradeTrustERC721Base, ITradeTrustERC721Mintable {
   constructor(string memory name, string memory symbol) TradeTrustERC721Base(name, symbol) {}

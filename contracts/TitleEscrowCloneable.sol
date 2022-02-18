@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "../access/HasNamedBeneficiaryInitializable.sol";
-import "../access/HasHolderInitializable.sol";
-import "../interfaces/ITitleEscrowCreator.sol";
-import "../interfaces/ITitleEscrow.sol";
-import "../lib/Initializable.sol";
-import { ERC721, ERC165 } from "../lib/ERC721.sol";
+import "./access/HasNamedBeneficiaryInitializable.sol";
+import "./access/HasHolderInitializable.sol";
+import "./interfaces/ITitleEscrowCreator.sol";
+import "./interfaces/ITitleEscrow.sol";
+import "./lib/Initializable.sol";
+import { ERC721, ERC165 } from "./lib/ERC721.sol";
 
 contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolderInitializable, HasNamedBeneficiaryInitializable, ERC165  {
   // Documentation on how this smart contract works: https://docs.tradetrust.io/docs/overview/title-transfer
