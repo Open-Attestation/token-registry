@@ -22,6 +22,9 @@ interface ITitleEscrow is IHasHolder, IHasBeneficiary, IERC165, IERC721Receiver 
   /// @dev This emits when the beneficiary approves new beneficiary and holder for the next title escrow.
   event TransferTitleEscrowApproval(address indexed newBeneficiary, address indexed newHolder);
 
+  /// @dev Emits when a token is surrendered to token registry
+  event Surrender(address indexed tokenRegistry, uint256 indexed tokenId, address indexed beneficiaryAndHolder);
+
   /// @notice Handle the receipt of an NFT
   /// @param operator The address which called `safeTransferFrom` function
   /// @param from The address which previously owned the token
