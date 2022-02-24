@@ -19,12 +19,22 @@
     "emitDeclarationOnly": true,
     "baseUrl": ".",
     "paths": {
-      "@tradetrust/contracts": ["./src/contracts"]
+      "@tradetrust/contracts": [
+        "./src/contracts"
+      ]
     }
   },
   "ts-node": {
     "files": true
   },
-  "include": ["./src/**/*", "./test/**/*", "./hardhat.config.ts", "./tasks/**/*", "./types"],
-  "exclude": ["./src/contracts/**/*"]
+  "include": [
+    "./src/**/*",
+    "./test/**/*",
+    "./hardhat.config.ts",
+    "./tasks/**/*",
+    "./types"
+  ],
+  "exclude": [
+    "./src/contracts/**/*"
+  ]
 }
