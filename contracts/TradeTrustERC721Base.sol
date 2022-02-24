@@ -13,6 +13,7 @@ abstract contract TradeTrustERC721Base is MinterRole, TitleEscrowCloner, IERC721
 
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
+  event TokenRestored(uint256 indexed tokenId, address indexed newOwner);
 
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
@@ -97,6 +98,8 @@ abstract contract TradeTrustERC721Base is MinterRole, TitleEscrowCloner, IERC721
     }
     address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
     _registrySafeTransformFrom(address(this), newTitleEscrow, tokenId);
+
+    emit TokenRestored(tokenId, newTitleEscrow);
 
     return ownerOf(tokenId);
   }
