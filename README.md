@@ -9,7 +9,7 @@ The [Token Registry](https://github.com/Open-Attestation/token-registry) reposit
 >
 > Welcome to the beta branch of Token Registry! This branch is still in its early stages. Please expect bugs and breaking changes. Be warned but be brave!💪 
 > 
-> Please report any issues or suggestions [here](github.com/Open-Attestation/token-registry/issues).
+> Please report any issues or suggestions [here](https://github.com/Open-Attestation/token-registry/issues).
 
 ## Installation
 
