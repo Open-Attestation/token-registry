@@ -106,3 +106,6 @@ npx hardhat <command>
 This repository's development framework uses [HardHat](https://hardhat.org/getting-started/).
 
 Tests are run using `npm run test`, more development tasks can be found in the package.json scripts.
+
+## Notes
+* The contracts have not gone through formal audits yet. Please use them at your own discretion. 
