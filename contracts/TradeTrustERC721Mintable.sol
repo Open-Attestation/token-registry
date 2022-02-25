@@ -17,11 +17,6 @@ abstract contract TradeTrustERC721Mintable is TradeTrustERC721Base, ITradeTrustE
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
-  function mint(address to, uint256 tokenId) public virtual override onlyMinter returns (bool) {
-    _safeMint(to, tokenId);
-    return true;
-  }
-
   function exists(uint256 tokenId) external view override returns (bool) {
     return _exists(tokenId);
   }
