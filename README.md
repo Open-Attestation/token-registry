@@ -5,6 +5,12 @@
 
 The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
 
+> ⚠️ **Beta Notice**
+>
+> Welcome to the beta branch of Token Registry! This branch is still in its early stages. Please expect bugs and breaking changes. Be warned but be brave!💪 
+> 
+> Please report any issues or suggestions [here](github.com/Open-Attestation/token-registry/issues).
+
 ## Installation
 
 ```sh
@@ -168,3 +174,6 @@ MNEMONIC=
 ```
 
 Only either the `DEPLOYER_PK` or `MNEMONIC` is needed. 
+
+## Notes
+* The contracts have not gone through formal audits yet. Please use them at your own discretion.
