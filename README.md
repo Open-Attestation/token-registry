@@ -5,6 +5,10 @@
 
 The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
 
+> 🧪 **Join the Beta!**
+> 
+>If you are interested in using and helping us at testing the new features of transferable records, please consider trying out our [beta](https://github.com/Open-Attestation/token-registry/tree/beta) branch. We'd love to hear your feedback!😊
+
 ## Installation
 
 ```sh
