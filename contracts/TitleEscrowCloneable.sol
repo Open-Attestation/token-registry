@@ -103,6 +103,8 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
 
   function surrender() external override isHoldingToken onlyBeneficiary onlyHolder {
     _transferTo(address(tokenRegistry));
+
+    emit Surrender(address(tokenRegistry), _tokenId, beneficiary);
   }
 
   function transferToNewEscrow(address newBeneficiary, address newHolder)
