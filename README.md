@@ -7,7 +7,7 @@ The [Token Registry](https://github.com/Open-Attestation/token-registry) reposit
 
 > ⚠️ **Beta Notice**
 >
-> Welcome to the beta branch of Token Registry! This branch is still in its early stages. Please expect bugs and breaking changes. Be warned but be brave!💪 
+> Welcome to the beta branch of Token Registry! This branch is still in active development. Please expect bugs and breaking changes. Be warned but be brave!💪 
 > 
 > Please report any issues or suggestions [here](https://github.com/Open-Attestation/token-registry/issues).
 
@@ -174,6 +174,9 @@ MNEMONIC=
 ```
 
 Only either the `DEPLOYER_PK` or `MNEMONIC` is needed. 
+
+## Subgraph
+Check out our [Token Registry Subgraph](https://github.com/Open-Attestation/token-registry-subgraph) Github repository for more information on using and deploying your own subgraphs for the Token Registry contracts.
 
 ## Notes
 * The contracts have not gone through formal audits yet. Please use them at your own discretion.
