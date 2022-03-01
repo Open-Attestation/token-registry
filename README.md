@@ -11,6 +11,19 @@ The [Token Registry](https://github.com/Open-Attestation/token-registry) reposit
 > 
 > Please report any issues or suggestions [here](https://github.com/Open-Attestation/token-registry/issues).
 
+## Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [Deployment](#deployment)
+  - [Token Contract](#token-contract)
+  - [Network Configuration](#network-configuration)
+  - [Verification](#verification)
+- [Development](#development)
+- [Setup](#setup)
+- [Configuration](#configuration)
+- [Subgraph](#subgraph)
+- [Notes](#notes)
+
 ## Installation
 
 ```sh
@@ -127,7 +140,7 @@ npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symb
 This will deploy the token with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon _mumbai_ network.
 The contract will also be _verified_ on Etherscan.
 
-## Networks Configuration
+## Network Configuration
 Here's a list of network names currently pre-configured:
  * `mainnet` (Ethereum)
  * `ropsten`
