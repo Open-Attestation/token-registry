@@ -527,4 +527,53 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       });
     });
   });
+
+  describe("Check is token surrendered status", () => {
+    let tokenId: string;
+    let titleEscrowContract: TitleEscrowCloneable;
+
+    beforeEach(async () => {
+      tokenId = faker.datatype.hexaDecimal(64);
+
+      await tradeTrustERC721Mock
+        .connect(users.carrier)
+        .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+
+      const TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneable");
+      const titleEscrowAddr = await tradeTrustERC721Mock.ownerOf(tokenId);
+      titleEscrowContract = TitleEscrow.attach(titleEscrowAddr) as TitleEscrowCloneable;
+    });
+
+    it("should return false for an unsurrendered token", async () => {
+      const res = await tradeTrustERC721Mock.isSurrendered(tokenId);
+
+      expect(res).to.be.false;
+    });
+
+    it("should return true for a surrendered token", async () => {
+      await titleEscrowContract.connect(users.beneficiary).surrender();
+
+      const res = await tradeTrustERC721Mock.isSurrendered(tokenId);
+
+      expect(res).to.be.true;
+    });
+
+    it("should return true for an accepted token", async () => {
+      await titleEscrowContract.connect(users.beneficiary).surrender();
+      await tradeTrustERC721Mock.destroyToken(tokenId);
+
+      const res = await tradeTrustERC721Mock.isSurrendered(tokenId);
+
+      expect(res).to.be.true;
+    });
+
+    it("should return false for a restored token", async () => {
+      await titleEscrowContract.connect(users.beneficiary).surrender();
+      await tradeTrustERC721Mock.restoreTitle(tokenId);
+
+      const res = await tradeTrustERC721Mock.isSurrendered(tokenId);
+
+      expect(res).to.be.false;
+    });
+  });
 });
