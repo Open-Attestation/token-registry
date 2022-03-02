@@ -106,7 +106,8 @@ abstract contract TradeTrustERC721Base is MinterRole, TitleEscrowCloner, IERC721
 
   function isSurrendered(uint256 tokenId) public view returns (bool) {
     if (_exists(tokenId)) {
-      return ownerOf(tokenId) == address(this) && _surrenderedOwners[tokenId] != address(0);
+      address owner = ownerOf(tokenId);
+      return (owner == address(this) && _surrenderedOwners[tokenId] != address(0)) || owner == BURN_ADDRESS;
     }
     return false;
   }
