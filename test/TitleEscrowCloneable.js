@@ -118,7 +118,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should update status upon receiving a ERC721 token", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
     const owner = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
@@ -132,7 +132,7 @@ describe("TitleEscrowCloneable", async () => {
     const newERC721Instance = await ERC721Factory.connect(beneficiary1).deploy("foo", "bar");
 
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address, newERC721Instance.address);
-    const mintTx = ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID);
+    const mintTx = ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID);
 
     await expect(mintTx).to.be.revertedWith("TitleEscrow: Only tokens from predefined token registry can be accepted");
   });
@@ -143,7 +143,7 @@ describe("TitleEscrowCloneable", async () => {
     const escrowInstance2 = await makeTitleEscrow(beneficiary2.address, holder2.address);
 
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance1.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance1.address, SAMPLE_TOKEN_ID)
     ).wait();
 
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance1.address);
@@ -159,7 +159,7 @@ describe("TitleEscrowCloneable", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address);
 
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
     ).wait();
 
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
@@ -175,7 +175,7 @@ describe("TitleEscrowCloneable", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
@@ -199,7 +199,7 @@ describe("TitleEscrowCloneable", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
@@ -216,7 +216,7 @@ describe("TitleEscrowCloneable", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address);
 
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
@@ -226,7 +226,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should not allow holder to transfer to new beneficiary without endorsement", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
@@ -241,7 +241,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should not allow unauthorised party to execute any state change", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
@@ -264,7 +264,7 @@ describe("TitleEscrowCloneable", async () => {
     const escrowInstance2 = (await makeTitleEscrow(beneficiary2.address, holder2.address)).connect(beneficiary2);
 
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance1.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance1.address, SAMPLE_TOKEN_ID)
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance1.address);
 
@@ -289,7 +289,7 @@ describe("TitleEscrowCloneable", async () => {
     const escrowInstance2 = (await makeTitleEscrow(beneficiary2.address, beneficiary2.address)).connect(beneficiary2);
 
     const mintTx = await (
-      await ERC721Instance["mint(address,uint256)"](escrowInstance1.address, SAMPLE_TOKEN_ID)
+      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance1.address, SAMPLE_TOKEN_ID)
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance1.address);
 
@@ -312,7 +312,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should be able to transfer to a new beneficiary and holder instantly", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address);
 
-    await (await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
+    await (await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
 
     const receipt = await (
       await escrowInstance.connect(beneficiary1).transferToNewEscrow(beneficiary2.address, holder2.address)
@@ -336,7 +336,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should allow current beneficiary to appoint new beneficiary and holder as the transfer target", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
-    await (await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
+    await (await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
 
     const prevApprovedBeneficiary = await escrowInstance.approvedBeneficiary();
     const prevApprovedHolder = await escrowInstance.approvedHolder();
@@ -369,7 +369,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should not allow user to appoint new beneficiary and holder when user is not the beneficiary", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
-    await (await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
+    await (await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
 
     const attemptToAppoint = escrowInstance
       .connect(carrier1)
@@ -383,7 +383,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should allow holder to execute transferToNewEscrow when new beneficiary and holder has been appointed by beneficiary", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
-    await (await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
+    await (await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
 
     await (
       await escrowInstance.connect(beneficiary1).approveNewTransferTargets(beneficiary2.address, holder2.address)
@@ -405,7 +405,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should not allow holder to execute transferToNewEscrow when new beneficiary and holder has not been appointed", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
-    await (await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
+    await (await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
 
     const attemptToTransfer = escrowInstance
       .connect(holder1)
@@ -417,7 +417,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should not allow anyone else (esp beneficiary) to execute transferToNewEscrow when new beneficiary and holder has been appointed", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
-    await (await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
+    await (await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
 
     const attemptToTransferByBeneficiay = escrowInstance
       .connect(beneficiary1)
@@ -435,7 +435,7 @@ describe("TitleEscrowCloneable", async () => {
   it("should not allow holder to execute transferToNewEscrow to other targets not appointed by beneficiary", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
-    await (await ERC721Instance["mint(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
+    await (await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)).wait();
 
     await (
       await escrowInstance.connect(beneficiary1).approveNewTransferTargets(beneficiary2.address, holder2.address)

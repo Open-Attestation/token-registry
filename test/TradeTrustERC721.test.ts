@@ -75,7 +75,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
                 users.beneficiary.address,
                 stubTitleEscrow.address
               );
-              await tradeTrustERC721Mock["mint(address,uint256)"](stubTitleEscrow.address, tokenId);
+              await tradeTrustERC721Mock["mintInternal(address,uint256)"](stubTitleEscrow.address, tokenId);
               await stubTitleEscrow.connect(users.beneficiary).surrender();
             });
 
@@ -185,7 +185,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
             await tradeTrustERC721Mock
               .connect(users.carrier)
-              ["mint(address,uint256)"](users.beneficiary.address, tokenId);
+              ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
 
             // EOA surrendering
             await tradeTrustERC721Mock
@@ -300,7 +300,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
     beforeEach(async () => {
       tokenId = faker.datatype.number();
 
-      await tradeTrustERC721Mock.connect(users.carrier)["mint(address,uint256)"](users.beneficiary.address, tokenId);
+      await tradeTrustERC721Mock
+        .connect(users.carrier)
+        ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
     });
 
     describe("Transferring of surrendered token to burn/zero addresses", () => {
@@ -415,7 +417,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
     beforeEach(async () => {
       tokenId = faker.datatype.hexaDecimal(64);
 
-      await tradeTrustERC721Mock.connect(users.carrier)["mint(address,uint256)"](users.beneficiary.address, tokenId);
+      await tradeTrustERC721Mock
+        .connect(users.carrier)
+        ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
     });
 
     describe("When a token has been surrendered", () => {
@@ -521,7 +525,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       it("should not allow minting of the same token ID to EOA again", async () => {
         const tx = tradeTrustERC721Mock
           .connect(users.carrier)
-          ["mint(address,uint256)"](users.beneficiary.address, tokenId);
+          ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
 
         await expect(tx).to.be.revertedWith("ERC721: token already minted");
       });
