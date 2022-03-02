@@ -177,6 +177,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
           });
         });
 
+        // Note: This test scenario is not applicable in actual use case but is useful for testing.
         describe("When previous owner is an EOA", () => {
           let eoa: SignerWithAddress;
 
