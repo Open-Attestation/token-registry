@@ -15,6 +15,7 @@ import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { mintTokenFixture } from "./fixtures/mint-token.fixture";
 import { getTestUsers, toAccessControlRevertMessage } from "./utils";
 import { AddressConstants, RoleConstants } from "../src/common/constants";
+import { getTitleEscrow } from "./utils/getTitleEscrow";
 
 const { loadFixture } = waffle;
 
@@ -544,9 +545,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         .connect(users.carrier)
         .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-      const TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneable");
-      const titleEscrowAddr = await tradeTrustERC721Mock.ownerOf(tokenId);
-      titleEscrowContract = TitleEscrow.attach(titleEscrowAddr) as TitleEscrowCloneable;
+      titleEscrowContract = await getTitleEscrow(tradeTrustERC721Mock, tokenId);
     });
 
     it("should return false for an unsurrendered token", async () => {
