@@ -6,19 +6,20 @@ import "./TitleEscrowCloner.sol";
 import "./interfaces/ITitleEscrowCreator.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
-import { ERC721Mintable, IERC721Receiver } from "./lib/ERC721.sol";
+import { ERC721, IERC721Receiver, MinterRole } from "./lib/ERC721.sol";
 
-contract TradeTrustERC721 is TitleEscrowCloner, ERC721Mintable, IERC721Receiver {
+contract TradeTrustERC721 is ERC721, MinterRole, TitleEscrowCloner, IERC721Receiver {
   event TokenBurnt(uint256 indexed tokenId);
   event TokenReceived(address indexed operator, address indexed from, uint256 indexed tokenId, bytes data);
 
-  constructor(string memory name, string memory symbol) ERC721Mintable(name, symbol) {return;}
+  constructor(string memory name, string memory symbol) ERC721(name, symbol) {return;}
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Mintable) returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, MinterRole) returns (bool) {
     return
     interfaceId == type(ITitleEscrowCreator).interfaceId ||
     interfaceId == type(ITradeTrustERC721).interfaceId ||
-    ERC721Mintable.supportsInterface(interfaceId);
+    MinterRole.supportsInterface(interfaceId) ||
+    ERC721.supportsInterface(interfaceId);
   }
 
   function onERC721Received(
