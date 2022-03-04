@@ -14,7 +14,7 @@ contract TradeTrustERC721Mock is TradeTrustERC721 {
    * @param tokenId The token id to mint.
    * @return A boolean that indicates if the operation was successful.
    */
-  function mint(address to, uint256 tokenId) public onlyMinter returns (bool) {
+  function mintInternal(address to, uint256 tokenId) public onlyMinter returns (bool) {
     _mint(to, tokenId);
     return true;
   }
@@ -25,7 +25,7 @@ contract TradeTrustERC721Mock is TradeTrustERC721 {
    * @param tokenId The token id to mint.
    * @return A boolean that indicates if the operation was successful.
    */
-  function safeMint(address to, uint256 tokenId) public onlyMinter returns (bool) {
+  function safeMintInternal(address to, uint256 tokenId) public onlyMinter returns (bool) {
     _safeMint(to, tokenId);
     return true;
   }

@@ -76,7 +76,7 @@ describe("TitleEscrowCloner", async () => {
     ).wait();
     const { escrowAddress } = events[1].args;
 
-    await ERC721Instance["safeMint(address,uint256)"](escrowAddress, SAMPLE_TOKEN_ID);
+    await ERC721Instance["safeMintInternal(address,uint256)"](escrowAddress, SAMPLE_TOKEN_ID);
 
     const escrowInstance = await TitleEscrowCloneableFactory.attach(escrowAddress);
     const receipt = await (

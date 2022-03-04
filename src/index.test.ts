@@ -1,9 +1,9 @@
 import { providers } from "ethers";
 import {
   TitleEscrowCloneable__factory as TitleEscrowCloneableFactory,
-  TradeTrustERC721__factory as TradeTrustERC721Factory,
+  TradeTrustERC721Mock__factory as TradeTrustERC721MockFactory,
   TitleEscrowCloner__factory as TitleEscrowClonerFactory,
-  TradeTrustERC721,
+  TradeTrustERC721Mock,
   TitleEscrowCloner,
 } from "./contracts";
 
@@ -20,13 +20,13 @@ beforeAll(async () => {
 });
 
 describe("TitleEscrowClonerFactory", () => {
-  let tokenRegistry: TradeTrustERC721;
+  let tokenRegistry: TradeTrustERC721Mock;
   let titleEscrowFactory: TitleEscrowCloner;
 
   beforeEach(async () => {
     const factory = new TitleEscrowClonerFactory(signer1);
     titleEscrowFactory = await factory.deploy();
-    const tokenRegistryFactory = new TradeTrustERC721Factory(signer1);
+    const tokenRegistryFactory = new TradeTrustERC721MockFactory(signer1);
     tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
   });
 
@@ -46,10 +46,10 @@ describe("TitleEscrowClonerFactory", () => {
 });
 
 describe("TitleEscrowCloneableFactory", () => {
-  let tokenRegistry: TradeTrustERC721;
+  let tokenRegistry: TradeTrustERC721Mock;
 
   beforeEach(async () => {
-    const tokenRegistryFactory = new TradeTrustERC721Factory(signer1);
+    const tokenRegistryFactory = new TradeTrustERC721MockFactory(signer1);
     tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
   });
 
@@ -84,7 +84,7 @@ describe("TitleEscrowCloneableFactory", () => {
 
   it("should be able to write to TitleEscrow", async () => {
     const escrowInstance = await deployTitleEscrow();
-    await tokenRegistry["safeMint(address,uint256)"](escrowInstance.address, tokenId);
+    await tokenRegistry["safeMintInternal(address,uint256)"](escrowInstance.address, tokenId);
     await escrowInstance.approveNewOwner(account2);
     const target = await escrowInstance.approvedOwner();
     expect(target).toBe(account2);
@@ -93,7 +93,7 @@ describe("TitleEscrowCloneableFactory", () => {
 
 describe("TradeTrustErc721Factory", () => {
   const deployTradeTrustERC721 = async () => {
-    const factory = new TradeTrustERC721Factory(signer1);
+    const factory = new TradeTrustERC721MockFactory(signer1);
     const registryInstance = await factory.deploy("TOKEN_REGISTRY_NAME", "TKN");
     return registryInstance;
   };
@@ -105,13 +105,13 @@ describe("TradeTrustErc721Factory", () => {
   });
   it("should be able to connect to an existing TradeTrustERC721", async () => {
     const deployedInstance = await deployTradeTrustERC721();
-    const instance = await TradeTrustERC721Factory.connect(deployedInstance.address, signer1);
+    const instance = await TradeTrustERC721MockFactory.connect(deployedInstance.address, signer1);
     const sym = await instance.symbol();
     expect(sym).toBe("TKN");
   });
   it("should be able to write to TradeTrustERC721", async () => {
     const instance = await deployTradeTrustERC721();
-    await instance["safeMint(address,uint256)"](account1, tokenId);
+    await instance["safeMintInternal(address,uint256)"](account1, tokenId);
     const ownerOfToken = await instance.ownerOf(tokenId);
     expect(ownerOfToken).toBe(account1);
   });
