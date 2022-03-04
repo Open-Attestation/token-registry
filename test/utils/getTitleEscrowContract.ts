@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { TitleEscrowCloneable, TradeTrustERC721 } from "@tradetrust/contracts";
 
-export const getTitleEscrow = async (
+export const getTitleEscrowContract = async (
   tokenContract: TradeTrustERC721,
   tokenId: string | number
 ): Promise<TitleEscrowCloneable> => {

@@ -13,9 +13,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { mintTokenFixture } from "./fixtures/mint-token.fixture";
-import { getTestUsers, toAccessControlRevertMessage } from "./utils";
+import { getTestUsers, toAccessControlRevertMessage, getTitleEscrowContract } from "./utils";
 import { AddressConstants, RoleConstants } from "../src/common/constants";
-import { getTitleEscrow } from "./utils/getTitleEscrow";
 
 const { loadFixture } = waffle;
 
@@ -545,7 +544,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         .connect(users.carrier)
         .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-      titleEscrowContract = await getTitleEscrow(tradeTrustERC721Mock, tokenId);
+      titleEscrowContract = await getTitleEscrowContract(tradeTrustERC721Mock, tokenId);
     });
 
     it("should return false for an unsurrendered token", async () => {
