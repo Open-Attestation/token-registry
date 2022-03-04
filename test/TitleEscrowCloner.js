@@ -20,7 +20,7 @@ describe("TitleEscrowCloner", async () => {
     [carrier1, beneficiary1, beneficiary2, holder2] = await ethers.getSigners();
     TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowClonerMock");
     TitleEscrowCloneableFactory = await ethers.getContractFactory("TitleEscrowCloneableMock");
-    ERC721 = await ethers.getContractFactory("TradeTrustERC721");
+    ERC721 = await ethers.getContractFactory("TradeTrustERC721Mock");
   });
 
   let ERC721Address = "";
