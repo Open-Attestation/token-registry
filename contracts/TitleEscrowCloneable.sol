@@ -5,12 +5,20 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "./access/HasNamedBeneficiaryInitializable.sol";
 import "./access/HasHolderInitializable.sol";
-import "./interfaces/ITitleEscrowCreator.sol";
 import "./interfaces/ITitleEscrow.sol";
+import "./TitleEscrowFactory.sol";
 
-contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolderInitializable, HasNamedBeneficiaryInitializable, ERC165  {
+contract TitleEscrowCloneable is
+  Context,
+  Initializable,
+  ITitleEscrow,
+  HasHolderInitializable,
+  HasNamedBeneficiaryInitializable,
+  ERC165
+{
   // Documentation on how this smart contract works: https://docs.tradetrust.io/docs/overview/title-transfer
 
   ITitleEscrow.StatusTypes public override status;
@@ -20,14 +28,11 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
   uint256 public _tokenId;
 
   // Factory to clone this title escrow
-  ITitleEscrowCreator public titleEscrowFactory;
+  ITitleEscrowFactory public titleEscrowFactory;
 
   // For exiting into title escrow contracts
   address public override approvedBeneficiary;
   address public override approvedHolder;
-
-  // For exiting into non-title escrow contracts
-  address public override approvedOwner;
 
   function initialize(
     address _tokenRegistry,
@@ -35,11 +40,11 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
     address _holder,
     address _titleEscrowFactoryAddress
   ) public initializer {
-      __initialize__holder(_holder);
-      __initialize__beneficiary(_beneficiary);
+    __initialize__holder(_holder);
+    __initialize__beneficiary(_beneficiary);
     tokenRegistry = ERC721(_tokenRegistry);
-    titleEscrowFactory = ITitleEscrowCreator(_titleEscrowFactoryAddress);
-    status  = StatusTypes.Uninitialised;
+    titleEscrowFactory = ITitleEscrowFactory(_titleEscrowFactoryAddress);
+    status = StatusTypes.Uninitialised;
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
@@ -63,16 +68,8 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
   }
 
-  function changeHolder(address newHolder) public override isHoldingToken onlyHolder {
+  function changeHolder(address newHolder) public override whenNotPaused isHoldingToken onlyHolder {
     _changeHolder(newHolder);
-  }
-
-  modifier allowTransferOwner(address newOwner) {
-    require(newOwner != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
-    if (holder != beneficiary) {
-      require(newOwner == approvedOwner, "TitleEscrow: New owner has not been approved by beneficiary");
-    }
-    _;
   }
 
   modifier allowTransferTitleEscrow(address newBeneficiary, address newHolder) {
@@ -92,9 +89,10 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
     _;
   }
 
-  function approveNewOwner(address newOwner) public override isHoldingToken onlyBeneficiary {
-    emit TransferOwnerApproval(_tokenId, beneficiary, newOwner);
-    approvedOwner = newOwner;
+  modifier whenNotPaused() {
+    bool paused = Pausable(address(tokenRegistry)).paused();
+    require(!paused, "TitleEscrow: Token Registry is paused");
+    _;
   }
 
   function _transferTo(address newOwner) internal {
@@ -103,7 +101,7 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
     tokenRegistry.safeTransferFrom(address(this), address(newOwner), _tokenId);
   }
 
-  function surrender() external override isHoldingToken onlyBeneficiary onlyHolder {
+  function surrender() external override whenNotPaused isHoldingToken onlyBeneficiary onlyHolder {
     _transferTo(address(tokenRegistry));
 
     emit Surrender(address(tokenRegistry), _tokenId, beneficiary);
@@ -112,21 +110,19 @@ contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolder
   function transferToNewEscrow(address newBeneficiary, address newHolder)
     public
     override
+    whenNotPaused
     isHoldingToken
     onlyHolder
     allowTransferTitleEscrow(newBeneficiary, newHolder)
   {
-    address newTitleEscrowAddress = titleEscrowFactory.deployNewTitleEscrow(
-      address(tokenRegistry),
-      newBeneficiary,
-      newHolder
-    );
+    address newTitleEscrowAddress = titleEscrowFactory.create(address(tokenRegistry), newBeneficiary, newHolder);
     _transferTo(newTitleEscrowAddress);
   }
 
   function approveNewTransferTargets(address newBeneficiary, address newHolder)
     public
     override
+    whenNotPaused
     onlyBeneficiary
     isHoldingToken
   {
