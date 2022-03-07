@@ -11,7 +11,7 @@ import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
 import "./access/MinterRole.sol";
 
-contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, IERC721Receiver, ERC721 {
+contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, ERC721 {
   using Address for address;
 
   event TokenBurnt(uint256 indexed tokenId);
@@ -27,7 +27,7 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, IERC721Receiver, ERC
     return;
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, MinterRole) returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, IERC165, MinterRole) returns (bool) {
     return
       interfaceId == type(ITitleEscrowCreator).interfaceId ||
       interfaceId == type(ITradeTrustERC721).interfaceId ||
@@ -58,7 +58,7 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, IERC721Receiver, ERC
    *
    * @param tokenId Token ID to be burnt
    */
-  function destroyToken(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function destroyToken(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) override {
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -72,13 +72,13 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, IERC721Receiver, ERC
     address beneficiary,
     address holder,
     uint256 tokenId
-  ) public virtual onlyMinter returns (address) {
+  ) public virtual onlyMinter override returns (address) {
     require(!_exists(tokenId), "TokenRegistry: Token already exists");
 
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
-  function restoreTitle(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) returns (address) {
+  function restoreTitle(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) override returns (address) {
     address previousOwner = _surrenderedOwners[tokenId];
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
