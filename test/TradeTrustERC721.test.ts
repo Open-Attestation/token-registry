@@ -13,7 +13,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { mintTokenFixture } from "./fixtures/mint-token.fixture";
-import { getTestUsers, toAccessControlRevertMessage } from "./utils";
+import { getTestUsers, toAccessControlRevertMessage, getTitleEscrowContract } from "./utils";
 import { AddressConstants, RoleConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
@@ -75,7 +75,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
                 users.beneficiary.address,
                 stubTitleEscrow.address
               );
-              await tradeTrustERC721Mock["mint(address,uint256)"](stubTitleEscrow.address, tokenId);
+              await tradeTrustERC721Mock["mintInternal(address,uint256)"](stubTitleEscrow.address, tokenId);
               await stubTitleEscrow.connect(users.beneficiary).surrender();
             });
 
@@ -177,6 +177,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
           });
         });
 
+        // Note: This test scenario is not applicable in actual use case but is useful for testing.
         describe("When previous owner is an EOA", () => {
           let eoa: SignerWithAddress;
 
@@ -185,7 +186,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
 
             await tradeTrustERC721Mock
               .connect(users.carrier)
-              ["mint(address,uint256)"](users.beneficiary.address, tokenId);
+              ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
 
             // EOA surrendering
             await tradeTrustERC721Mock
@@ -300,7 +301,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
     beforeEach(async () => {
       tokenId = faker.datatype.number();
 
-      await tradeTrustERC721Mock.connect(users.carrier)["mint(address,uint256)"](users.beneficiary.address, tokenId);
+      await tradeTrustERC721Mock
+        .connect(users.carrier)
+        ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
     });
 
     describe("Transferring of surrendered token to burn/zero addresses", () => {
@@ -415,7 +418,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
     beforeEach(async () => {
       tokenId = faker.datatype.hexaDecimal(64);
 
-      await tradeTrustERC721Mock.connect(users.carrier)["mint(address,uint256)"](users.beneficiary.address, tokenId);
+      await tradeTrustERC721Mock
+        .connect(users.carrier)
+        ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
     });
 
     describe("When a token has been surrendered", () => {
@@ -521,7 +526,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       it("should not allow minting of the same token ID to EOA again", async () => {
         const tx = tradeTrustERC721Mock
           .connect(users.carrier)
-          ["mint(address,uint256)"](users.beneficiary.address, tokenId);
+          ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
 
         await expect(tx).to.be.revertedWith("ERC721: token already minted");
       });
@@ -539,9 +544,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         .connect(users.carrier)
         .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-      const TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneable");
-      const titleEscrowAddr = await tradeTrustERC721Mock.ownerOf(tokenId);
-      titleEscrowContract = TitleEscrow.attach(titleEscrowAddr) as TitleEscrowCloneable;
+      titleEscrowContract = await getTitleEscrowContract(tradeTrustERC721Mock, tokenId);
     });
 
     it("should return false for an unsurrendered token", async () => {

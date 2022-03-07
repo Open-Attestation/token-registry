@@ -13,6 +13,11 @@ contract TradeTrustERC721Mock is TradeTrustERC721 {
     return _surrenderedOwners[tokenId];
   }
 
+  function mintInternal(address to, uint256 tokenId) public virtual onlyMinter returns (bool) {
+    _safeMint(to, tokenId);
+    return true;
+  }
+
   function burnInternal(uint256 tokenId) public virtual {
     _burn(tokenId);
   }

@@ -26,7 +26,7 @@ describe("TradeTrustErc721", async () => {
   before("Initialising contract factories and accounts for TradeTrustErc721 tests", async () => {
     [carrier1, owner1, owner2, nonMinter, holder1] = await ethers.getSigners();
     TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneableMock");
-    Erc721 = await ethers.getContractFactory("TradeTrustERC721");
+    Erc721 = await ethers.getContractFactory("TradeTrustERC721Mock");
   });
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
@@ -54,14 +54,14 @@ describe("TradeTrustErc721", async () => {
 
   it("should work without a wallet for read operations", async () => {
     const tokenRegistryInstanceWithShippingLine = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstanceWithShippingLine.mint(owner1.address, merkleRoot);
+    await tokenRegistryInstanceWithShippingLine.mintInternal(owner1.address, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
   });
 
   it("should not burn tokens that it receives", async () => {
     const tokenRegistryInstanceWithShippingLine = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstanceWithShippingLine.mint(owner1.address, merkleRoot);
+    await tokenRegistryInstanceWithShippingLine.mintInternal(owner1.address, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
 
@@ -78,14 +78,14 @@ describe("TradeTrustErc721", async () => {
 
   it("should be able to mint", async () => {
     const tokenRegistryInstance = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstance.mint(owner1.address, merkleRoot);
+    await tokenRegistryInstance.mintInternal(owner1.address, merkleRoot);
     const currentOwner = await tokenRegistryInstance.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
   });
 
   it("should be able to transfer", async () => {
     const tokenRegistryInstanceWithShippingLineWallet = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstanceWithShippingLineWallet.mint(owner1.address, merkleRoot);
+    await tokenRegistryInstanceWithShippingLineWallet.mintInternal(owner1.address, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
 
@@ -98,7 +98,7 @@ describe("TradeTrustErc721", async () => {
 
   it("non-owner should not be able to initiate a transfer", async () => {
     const tokenRegistryInstanceWithShippingLine = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstanceWithShippingLine.mint(owner1.address, merkleRoot);
+    await tokenRegistryInstanceWithShippingLine.mintInternal(owner1.address, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
 
@@ -114,7 +114,7 @@ describe("TradeTrustErc721", async () => {
     const tokenRegistryInstance = await Erc721.connect(carrier1).deploy("foo", "bar");
     const tokenRegistryInstanceAddress = tokenRegistryInstance.address;
     const mintTx = await (
-      await tokenRegistryInstance["mint(address,uint256)"](tokenRegistryInstanceAddress, merkleRoot)
+      await tokenRegistryInstance["mintInternal(address,uint256)"](tokenRegistryInstanceAddress, merkleRoot)
     ).wait();
     const receivedTokenLog = mintTx.events.find((log) => log.event === "TokenReceived");
     assertTokenReceivedLog(receivedTokenLog, carrier1.address, ZERO_ADDRESS, merkleRoot, null);
