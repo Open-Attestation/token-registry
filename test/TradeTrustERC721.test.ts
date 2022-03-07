@@ -1,580 +1,363 @@
-/* eslint-disable camelcase */
-import { ethers, waffle } from "hardhat";
-import {
-  TitleEscrowCloneable,
-  TitleEscrowCloneable__factory,
-  TradeTrustERC721,
-  TradeTrustERC721__factory,
-  TradeTrustERC721Mock,
-} from "@tradetrust/contracts";
-import * as faker from "faker";
+import { waffle, ethers } from "hardhat";
+import { TitleEscrow, TitleEscrowFactory, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
+import faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
-import { deployTokenFixture, deployEscrowFactoryFixture, mintTokenFixture } from "./fixtures";
-import { getTestUsers, getTitleEscrowContract, getEscrowFactoryFromToken, TestUsers } from "./utils";
+import { deployTokenFixture } from "./fixtures";
+import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./utils";
+import { computeInterfaceId } from "./utils/computeInterfaceId";
+import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
 import { AddressConstants } from "../src/common/constants";
+import { computeTitleEscrowAddress } from "../src/utils";
 
 const { loadFixture } = waffle;
 
-/*
- * This is a partial test file for TradeTrustERC721.
- * As we plan to migrate this repository and all of its test files to be fully in Typescript,
- * this will be carried out part by part through a gradual process.
- * All new test cases for TradeTrustERC721 should be added into this file.
- */
-
-describe("TradeTrustERC721 (TS Migration)", async () => {
+describe("TradeTrustERC721", async () => {
   let users: TestUsers;
-  let tradeTrustERC721Mock: TradeTrustERC721Mock;
+  let registryContract: TradeTrustERC721;
+
+  let registryName: string;
+  let registrySymbol: string;
+
+  let registryContractAsAdmin: TradeTrustERC721;
+
+  let mockTitleEscrowFactoryContract: MockContract<TitleEscrowFactory>;
+
+  let tokenId: string;
+  let titleEscrowImplAddr: string;
 
   beforeEach(async () => {
     users = await getTestUsers();
 
-    tradeTrustERC721Mock = await loadFixture(
-      deployTokenFixture<TradeTrustERC721Mock>({
-        tokenContractName: "TradeTrustERC721Mock",
-        tokenName: "The Great Shipping Company",
-        tokenInitials: "GSC",
+    registryName = "The Great Shipping Company";
+    registrySymbol = "GSC";
+
+    mockTitleEscrowFactoryContract = (await (
+      await smock.mock("TitleEscrowFactory", users.carrier)
+    ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
+
+    registryContract = await loadFixture(
+      deployTokenFixture<TradeTrustERC721>({
+        tokenContractName: "TradeTrustERC721",
+        tokenName: registryName,
+        tokenInitials: registrySymbol,
+        escrowFactoryAddress: mockTitleEscrowFactoryContract.address,
         deployer: users.carrier,
       })
     );
+
+    registryContractAsAdmin = registryContract.connect(users.carrier);
+
+    tokenId = faker.datatype.hexaDecimal(64);
+    titleEscrowImplAddr = await mockTitleEscrowFactoryContract.implementation();
   });
 
-  describe("Restore Surrendered Token", () => {
-    let tokenId: string;
+  describe("ERC165 Support", () => {
+    it("should support ITradeTrustERC721 interface", async () => {
+      const interfaceId = computeInterfaceId(ContractInterfaces.ITradeTrustERC721);
 
-    beforeEach(async () => {
-      tokenId = faker.datatype.hexaDecimal(64);
+      const res = await registryContract.supportsInterface(interfaceId);
+
+      expect(res).to.be.true;
     });
 
-    describe("When caller is a minter", () => {
-      beforeEach(async () => {
-        // Connect to minter who is the carrier
-        tradeTrustERC721Mock.connect(users.carrier);
-      });
+    it("should support ERC721 interface", async () => {
+      const interfaceId = computeInterfaceId(ContractInterfaces.ERC721);
 
-      it("should revert when token does not exist", async () => {
-        const tx = tradeTrustERC721Mock.restoreTitle(tokenId);
+      const res = await registryContract.supportsInterface(interfaceId);
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
-      });
+      expect(res).to.be.true;
+    });
 
+    it("should support AccessControl interface", async () => {
+      const interfaceId = computeInterfaceId(ContractInterfaces.AccessControl);
+
+      const res = await registryContract.supportsInterface(interfaceId);
+
+      expect(res).to.be.true;
+    });
+  });
+
+  describe("Initialisation", () => {
+    it("should deploy with token name", async () => {
+      expect(await registryContract.name()).to.equal(registryName);
+    });
+
+    it("should deploy with symbol", async () => {
+      expect(await registryContract.symbol()).to.equal(registrySymbol);
+    });
+
+    it("should deploy with genesis block", async () => {
+      const genesisBlock = registryContract.deployTransaction.blockNumber;
+      expect(await registryContract.genesisBlock()).to.equal(genesisBlock);
+    });
+
+    it("should deploy with title escrow factory address", async () => {
+      expect(await registryContract.titleEscrowFactory()).to.equal(mockTitleEscrowFactoryContract.address);
+    });
+  });
+
+  describe("IERC721Receiver Support", () => {
+    it("should have onERC721Received function", async () => {
+      const fakeAddress = faker.finance.ethereumAddress();
+
+      const tx = registryContract.onERC721Received(fakeAddress, fakeAddress, "123", "0x00");
+
+      await expect(tx).to.not.be.reverted;
+    });
+  });
+
+  describe("Registry Operation Behaviours", () => {
+    let titleEscrowContract: TitleEscrow;
+
+    beforeEach(async () => {
+      await registryContractAsAdmin.mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+      titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
+    });
+
+    describe("Burn Token", () => {
       describe("When token has been surrendered", () => {
-        describe("When previous owner is a Title Escrow", () => {
-          let stubTitleEscrow: MockContract<TitleEscrowCloneable>;
-
-          describe("Interface checking", () => {
-            beforeEach(async () => {
-              const stubTitleEscrowFactory = await smock.mock<TitleEscrowCloneable__factory>("TitleEscrowCloneable");
-              stubTitleEscrow = await stubTitleEscrowFactory.deploy();
-              await stubTitleEscrow.initialize(
-                tradeTrustERC721Mock.address,
-                users.beneficiary.address,
-                users.beneficiary.address,
-                stubTitleEscrow.address
-              );
-              await tradeTrustERC721Mock["mintInternal(address,uint256)"](stubTitleEscrow.address, tokenId);
-              await stubTitleEscrow.connect(users.beneficiary).surrender();
-            });
-
-            it("should check the interface on title escrow for support", async () => {
-              await tradeTrustERC721Mock.restoreTitle(tokenId);
-
-              expect(stubTitleEscrow.supportsInterface).to.have.been.calledOnce;
-            });
-
-            it("should not revert if the receiver contract supports Title Escrow interface", async () => {
-              stubTitleEscrow.supportsInterface.returns(true);
-
-              const tx = tradeTrustERC721Mock.restoreTitle(tokenId);
-
-              await expect(tx).to.not.be.reverted;
-            });
-
-            it("should revert if the receiver contract does not support Title Escrow interface", async () => {
-              stubTitleEscrow.supportsInterface.returns(false);
-
-              const tx = tradeTrustERC721Mock.restoreTitle(tokenId);
-
-              await expect(tx).to.be.revertedWith("TokenRegistry: Previous owner is an unsupported Title Escrow");
-            });
-
-            it("should revert if the receiver contract is a bad title escrow", async () => {
-              stubTitleEscrow.supportsInterface.reverts("kaboom");
-
-              const tx = tradeTrustERC721Mock.restoreTitle(tokenId);
-
-              await expect(tx).to.be.revertedWith("TokenRegistry: Previous owner is not a TitleEscrow implementer");
-            });
-          });
-
-          describe("Information restored", () => {
-            let titleEscrow: TitleEscrowCloneable;
-
-            beforeEach(async () => {
-              const { beneficiary } = users;
-              titleEscrow = (
-                await loadFixture(
-                  mintTokenFixture({
-                    token: tradeTrustERC721Mock,
-                    holder: beneficiary,
-                    beneficiary,
-                    tokenId,
-                  })
-                )
-              ).titleEscrow;
-
-              // Surrender by beneficiary
-              await titleEscrow.connect(beneficiary).surrender();
-            });
-
-            it("should perform surrender without revert", async () => {
-              const tx = tradeTrustERC721Mock.restoreTitle(tokenId);
-
-              await expect(tx).to.not.be.reverted;
-            });
-
-            it("should restore into a new title escrow contract", async () => {
-              const tx = await tradeTrustERC721Mock.restoreTitle(tokenId);
-
-              const escrowFactory = await getEscrowFactoryFromToken(tradeTrustERC721Mock);
-              const newTitleEscrowAddress = await tradeTrustERC721Mock.ownerOf(tokenId);
-              expect(titleEscrow.address).to.be.not.equal(newTitleEscrowAddress);
-              expect(tx)
-                .to.emit(escrowFactory, "TitleEscrowDeployed")
-                .withArgs(
-                  newTitleEscrowAddress,
-                  tradeTrustERC721Mock.address,
-                  users.beneficiary.address,
-                  users.beneficiary.address
-                );
-            });
-
-            it("should restore previous ownership correctly", async () => {
-              await tradeTrustERC721Mock.restoreTitle(tokenId);
-
-              const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
-              const titleEscrowFactory = await ethers.getContractFactory("TitleEscrowCloneable");
-              const newTitleEscrow = titleEscrowFactory.attach(newOwner) as TitleEscrowCloneable;
-              const restoredBeneficiary = await newTitleEscrow.beneficiary();
-              const restoredHolder = await newTitleEscrow.holder();
-
-              expect(restoredBeneficiary).to.be.equal(users.beneficiary.address);
-              expect(restoredHolder).to.be.equal(users.beneficiary.address);
-            });
-
-            it("should restore title escrow from the correct token registry", async () => {
-              await tradeTrustERC721Mock.restoreTitle(tokenId);
-
-              const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
-              const titleEscrowFactory = await ethers.getContractFactory("TitleEscrowCloneable");
-              const newTitleEscrow = titleEscrowFactory.attach(newOwner) as TitleEscrowCloneable;
-              const tokenRegistryAddress = await newTitleEscrow.tokenRegistry();
-
-              expect(tokenRegistryAddress).to.be.equal(tradeTrustERC721Mock.address);
-            });
-          });
+        beforeEach(async () => {
+          await titleEscrowContract.connect(users.beneficiary).surrender();
         });
 
-        // Note: This test scenario is not applicable in actual use case but is useful for testing.
-        describe("When previous owner is an EOA", () => {
-          let eoa: SignerWithAddress;
+        it("should shred the correct title escrow", async () => {
+          const initialActive = await titleEscrowContract.active();
 
-          beforeEach(async () => {
-            eoa = users.beneficiary;
+          await registryContractAsAdmin.destroyToken(tokenId);
+          const currentActive = await titleEscrowContract.active();
 
-            await tradeTrustERC721Mock
-              .connect(users.carrier)
-              ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
+          expect(initialActive).to.be.true;
+          expect(currentActive).to.be.false;
+        });
 
-            // EOA surrendering
-            await tradeTrustERC721Mock
-              .connect(eoa)
-              ["safeTransferFrom(address,address,uint256)"](eoa.address, tradeTrustERC721Mock.address, tokenId);
-          });
+        it("should transfer token to burn address", async () => {
+          await registryContractAsAdmin.destroyToken(tokenId);
 
-          it("should restore EOA to a new title escrow", async () => {
-            const currentOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
+          const res = await registryContract.ownerOf(tokenId);
 
-            await tradeTrustERC721Mock.connect(users.carrier).restoreTitle(tokenId);
+          expect(res).to.equal(AddressConstants.burn);
+        });
 
-            const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
-            expect(newOwner).to.be.not.equal(currentOwner);
-          });
+        it("should not allow burning a burnt token", async () => {
+          await registryContractAsAdmin.destroyToken(tokenId);
 
-          it("should restore the EOA into a new title escrow", async () => {
-            const currentOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
+          const tx = registryContractAsAdmin.destroyToken(tokenId);
 
-            const tx = await tradeTrustERC721Mock.connect(users.carrier).restoreTitle(tokenId);
+          await expect(tx).to.be.reverted;
+        });
 
-            const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
-            const escrowFactory = await getEscrowFactoryFromToken(tradeTrustERC721Mock);
+        it("should emit Transfer event with correct values", async () => {
+          const tx = await registryContractAsAdmin.destroyToken(tokenId);
 
-            expect(currentOwner).to.be.not.equal(newOwner);
-            expect(tx)
-              .to.emit(escrowFactory, "TitleEscrowDeployed")
-              .withArgs(newOwner, tradeTrustERC721Mock.address, eoa.address, eoa.address);
-          });
-
-          it("should make the EOA as the beneficiary and holder of the restored title escrow", async () => {
-            await tradeTrustERC721Mock.connect(users.carrier).restoreTitle(tokenId);
-
-            const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
-            const titleEscrowFactory = await ethers.getContractFactory("TitleEscrowCloneable");
-            const titleEscrow = titleEscrowFactory.attach(newOwner) as TitleEscrowCloneable;
-
-            const beneficiary = await titleEscrow.beneficiary();
-            const holder = await titleEscrow.holder();
-            expect(beneficiary).to.be.equal(eoa.address);
-            expect(holder).to.be.equal(eoa.address);
-          });
+          expect(tx)
+            .to.emit(registryContract, "Transfer")
+            .withArgs(registryContract.address, AddressConstants.burn, tokenId);
         });
       });
 
       describe("When token has not been surrendered", () => {
-        let stubTradeTrustERC721: MockContract<TradeTrustERC721>;
+        it("should not allow to burn the token even if registry is approved", async () => {
+          // Note: This is an edge case and not a normal flow.
+          const operator = users.carrier;
+          const titleEscrowSigner = await impersonateAccount({ address: titleEscrowContract.address });
+          await registryContract.connect(titleEscrowSigner).approve(operator.address, tokenId);
 
-        beforeEach(async () => {
-          tokenId = faker.datatype.hexaDecimal(2);
+          const tx = registryContract.connect(operator).destroyToken(tokenId);
 
-          const escrowFactory = await loadFixture(deployEscrowFactoryFixture({ deployer: users.carrier }));
-          const mockTradeTrustERC721Factory = await smock.mock<TradeTrustERC721__factory>("TradeTrustERC721");
-          stubTradeTrustERC721 = await mockTradeTrustERC721Factory.deploy("Mock Shipper", "MSC", escrowFactory.address);
-          await stubTradeTrustERC721
+          await expect(tx).to.be.reverted;
+        });
+
+        it("should revert when burn token", async () => {
+          const tx = registryContractAsAdmin.destroyToken(tokenId);
+
+          await expect(tx).to.be.revertedWith("TitleEscrow: Not surrendered yet");
+        });
+
+        it("should revert before transfer when forcefully sent to burn address", async () => {
+          // Note: This is only an additional defence and is not a normal flow.
+          const registryContractMock = await loadFixture(
+            deployTokenFixture<TradeTrustERC721Mock>({
+              tokenContractName: "TradeTrustERC721Mock",
+              tokenName: "The Great Shipping Company",
+              tokenInitials: "GSC",
+              deployer: users.carrier,
+            })
+          );
+          await registryContractMock.mintInternal(users.carrier.address, tokenId);
+
+          const tx = registryContractMock
             .connect(users.carrier)
-            .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
-        });
+            .transferFrom(users.carrier.address, AddressConstants.burn, tokenId);
 
-        it("should revert when restoring token", async () => {
-          const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
-
-          await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
-        });
-
-        describe("When _owners and _surrenderedOwners are out of sync", () => {
-          // This scenario should never happen unless something bad has really gone wrong in the transfer.
-          beforeEach(async () => {
-            const titleEscrowAddress = await stubTradeTrustERC721.ownerOf(tokenId);
-            const titleEscrowFactory = await ethers.getContractFactory("TitleEscrowCloneable");
-            const titleEscrow = titleEscrowFactory.attach(titleEscrowAddress) as TitleEscrowCloneable;
-            await titleEscrow.connect(users.beneficiary).surrender();
-          });
-
-          it("should revert if owner is not token registry", async () => {
-            await stubTradeTrustERC721.setVariable("_owners", {
-              [tokenId]: faker.finance.ethereumAddress(),
-            });
-
-            const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
-
-            await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
-          });
-
-          it("should revert if previous surrendered owner is zero", async () => {
-            await stubTradeTrustERC721.setVariable("_surrenderedOwners", {
-              [ethers.BigNumber.from(tokenId).toNumber()]: ethers.constants.AddressZero,
-            });
-
-            const tx = stubTradeTrustERC721.connect(users.carrier).restoreTitle(tokenId);
-
-            await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
-          });
+          await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered");
         });
       });
     });
 
-    describe("When caller is not a minter", () => {
-      describe("When token does not exist", () => {
-        it("should revert when restoring a token that does not exist", async () => {
-          const nonExistentTokenId = faker.datatype.hexaDecimal(64);
+    describe("Mint Token", () => {
+      it("should mint token to a title escrow", async () => {
+        const interfaceId = computeInterfaceId(ContractInterfaces.ITitleEscrow);
 
-          const tx = tradeTrustERC721Mock.connect(users.carrier).restoreTitle(nonExistentTokenId);
+        const res = await titleEscrowContract.supportsInterface(interfaceId);
 
-          await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
-        });
-      });
-    });
-  });
-
-  describe("Token Transfer Behaviour", () => {
-    let tokenId: number;
-
-    beforeEach(async () => {
-      tokenId = faker.datatype.number();
-
-      await tradeTrustERC721Mock
-        .connect(users.carrier)
-        ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
-    });
-
-    describe("Transferring of surrendered token to burn/zero addresses", () => {
-      beforeEach(async () => {
-        // Manual surrendering from beneficiary
-        await tradeTrustERC721Mock
-          .connect(users.beneficiary)
-          ["safeTransferFrom(address,address,uint256)"](
-            users.beneficiary.address,
-            tradeTrustERC721Mock.address,
-            tokenId
-          );
+        expect(res).to.be.true;
       });
 
-      describe("When caller is an approved operator", () => {
-        it("should not be possible for beneficiary to approve an operator after surrendering", async () => {
-          const operator = users.others[users.others.length - 1];
-
-          const tx = tradeTrustERC721Mock.connect(users.beneficiary).approve(operator.address, tokenId);
-
-          await expect(tx).to.be.revertedWith("ERC721: approve caller is not owner nor approved for all");
+      it("should mint token to a correct title escrow address", async () => {
+        const expectedTitleEscrowAddr = computeTitleEscrowAddress({
+          tokenId,
+          registryAddress: registryContract.address,
+          implementationAddress: titleEscrowImplAddr,
+          factoryAddress: mockTitleEscrowFactoryContract.address,
         });
+
+        const res = await registryContract.ownerOf(tokenId);
+
+        expect(res).to.equal(expectedTitleEscrowAddr);
       });
 
-      describe("When caller is an unapproved operator", () => {
-        it("should revert when transferring to burn address", async () => {
-          const unapprovedOperator = users.others[users.others.length - 1];
+      it("should not allow minting a token that has been burnt", async () => {
+        await titleEscrowContract.connect(users.beneficiary).surrender();
+        await registryContractAsAdmin.destroyToken(tokenId);
 
-          const tx = tradeTrustERC721Mock
-            .connect(unapprovedOperator)
-            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, AddressConstants.burn, tokenId);
-
-          await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
-        });
-
-        it("should revert when transferring to zero address", async () => {
-          const unapprovedOperator = users.others[users.others.length - 1];
-
-          const tx = tradeTrustERC721Mock
-            .connect(unapprovedOperator)
-            ["safeTransferFrom(address,address,uint256)"](
-              users.beneficiary.address,
-              ethers.constants.AddressZero,
-              tokenId
-            );
-
-          await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
-        });
-      });
-    });
-
-    describe("Transferring of unsurrendered token to burn/zero addresses", () => {
-      describe("When caller is an approved operator", () => {
-        let operator: SignerWithAddress;
-
-        beforeEach(async () => {
-          operator = users.others[users.others.length - 1];
-          await tradeTrustERC721Mock.connect(users.beneficiary).approve(operator.address, tokenId);
-          tradeTrustERC721Mock = tradeTrustERC721Mock.connect(operator);
-        });
-
-        it("should not allow transfer to burn address", async () => {
-          const tx = tradeTrustERC721Mock["safeTransferFrom(address,address,uint256)"](
-            users.beneficiary.address,
-            AddressConstants.burn,
-            tokenId
-          );
-
-          await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered for burning");
-        });
-
-        it("should not allow transfer to zero address", async () => {
-          const tx = tradeTrustERC721Mock["safeTransferFrom(address,address,uint256)"](
-            users.beneficiary.address,
-            ethers.constants.AddressZero,
-            tokenId
-          );
-
-          await expect(tx).to.be.revertedWith("ERC721: transfer to the zero address");
-        });
-
-        it("should put current owner to surrenderedOwners of token when transferring to token registry", async () => {
-          await tradeTrustERC721Mock["safeTransferFrom(address,address,uint256)"](
-            users.beneficiary.address,
-            tradeTrustERC721Mock.address,
-            tokenId
-          );
-
-          const previousOwner = await tradeTrustERC721Mock.surrenderedOwnersInternal(tokenId);
-
-          expect(previousOwner).to.equal(users.beneficiary.address);
-        });
-      });
-
-      describe("When caller is an unapproved operator", () => {
-        it("should revert if caller is an unapproved minter", async () => {
-          const unapprovedOperator = users.others[users.others.length - 1];
-
-          const tx = tradeTrustERC721Mock
-            .connect(unapprovedOperator)
-            ["safeTransferFrom(address,address,uint256)"](users.beneficiary.address, AddressConstants.burn, tokenId);
-
-          await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
-        });
-      });
-    });
-  });
-
-  describe("Permanent burning of tokens", () => {
-    let tokenId: string;
-
-    beforeEach(async () => {
-      tokenId = faker.datatype.hexaDecimal(64);
-
-      await tradeTrustERC721Mock
-        .connect(users.carrier)
-        ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
-    });
-
-    describe("When a token has been surrendered", () => {
-      beforeEach(async () => {
-        // Manual surrendering from beneficiary
-        await tradeTrustERC721Mock
-          .connect(users.beneficiary)
-          ["safeTransferFrom(address,address,uint256)"](
-            users.beneficiary.address,
-            tradeTrustERC721Mock.address,
-            tokenId
-          );
-      });
-
-      describe("When caller to burn token is minter", () => {
-        let tradeTrustERC721MockAsMinter: TradeTrustERC721Mock;
-
-        beforeEach(async () => {
-          tradeTrustERC721MockAsMinter = tradeTrustERC721Mock.connect(users.carrier);
-        });
-
-        it("should transfer token to burn address", async () => {
-          await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
-
-          const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
-
-          expect(newOwner).to.equal(AddressConstants.burn);
-        });
-
-        it("should emit TokenBurnt event on burning of token", async () => {
-          const tx = await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
-
-          expect(tx).to.emit(tradeTrustERC721Mock, "TokenBurnt").withArgs(tokenId);
-        });
-
-        it("should remove previous owner of token record", async () => {
-          await tradeTrustERC721MockAsMinter.destroyToken(tokenId);
-
-          const previousOwner = await tradeTrustERC721Mock.surrenderedOwnersInternal(tokenId);
-
-          expect(previousOwner).to.equal(ethers.constants.AddressZero);
-        });
-      });
-
-      describe("When caller to burn token is not a minter", () => {
-        it("should not allow a non-accepter to burn the token", async () => {
-          const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
-
-          await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Accepter role");
-        });
-      });
-    });
-
-    describe("When a token has not been surrendered", () => {
-      it("should not allow to burn the token even if registry is approved", async () => {
-        // Note that this is an edge case and not a normal flow.
-        await tradeTrustERC721Mock.connect(users.beneficiary).approve(tradeTrustERC721Mock.address, tokenId);
-        const tx = tradeTrustERC721Mock.connect(users.carrier).destroyToken(tokenId);
-
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered");
-      });
-
-      it("should not allow a non-accepter to burn the token", async () => {
-        const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
-
-        await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Accepter role");
-      });
-
-      it("should allow ERC721 burning of unsurrendered token internally", async () => {
-        await tradeTrustERC721Mock.burnInternal(tokenId);
-        const tx = tradeTrustERC721Mock.ownerOf(tokenId);
-
-        await expect(tx).to.be.revertedWith("ERC721: owner query for nonexistent token");
-      });
-    });
-
-    describe("When a token has been permanently burnt", () => {
-      beforeEach(async () => {
-        // Manual surrendering from beneficiary
-        await tradeTrustERC721Mock
-          .connect(users.beneficiary)
-          ["safeTransferFrom(address,address,uint256)"](
-            users.beneficiary.address,
-            tradeTrustERC721Mock.address,
-            tokenId
-          );
-
-        await tradeTrustERC721Mock.connect(users.carrier).destroyToken(tokenId);
-      });
-
-      it("should not allow mintTitle on the same token ID again", async () => {
-        const tx = tradeTrustERC721Mock
-          .connect(users.carrier)
-          .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+        const tx = registryContractAsAdmin.mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
 
         await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
       });
 
-      it("should not allow minting of the same token ID to EOA again", async () => {
-        const tx = tradeTrustERC721Mock
-          .connect(users.carrier)
-          ["mintInternal(address,uint256)"](users.beneficiary.address, tokenId);
+      it("should not allow minting an existing token", async () => {
+        const tx = registryContractAsAdmin.mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-        await expect(tx).to.be.revertedWith("ERC721: token already minted");
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
+      });
+
+      it("should create title escrow from factory", async () => {
+        expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnce;
+      });
+
+      it("should create title escrow with correct values", async () => {
+        expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnceWith(
+          users.beneficiary.address,
+          users.beneficiary.address,
+          tokenId
+        );
+      });
+
+      it("should emit Transfer event with correct values", async () => {
+        tokenId = faker.datatype.hexaDecimal(64);
+        const tx = await registryContractAsAdmin.mintTitle(users.beneficiary.address, users.holder.address, tokenId);
+        titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
+
+        expect(tx)
+          .to.emit(registryContract, "Transfer")
+          .withArgs(ethers.constants.AddressZero, titleEscrowContract.address, tokenId);
       });
     });
-  });
 
-  describe("Check is token surrendered status", () => {
-    let tokenId: string;
-    let titleEscrowContract: TitleEscrowCloneable;
+    describe("Restore Token", () => {
+      it("should revert if token does not exist", async () => {
+        const invalidTokenId = faker.datatype.hexaDecimal(64);
+        const tx = registryContractAsAdmin.restoreTitle(invalidTokenId);
 
-    beforeEach(async () => {
-      tokenId = faker.datatype.hexaDecimal(64);
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
+      });
 
-      await tradeTrustERC721Mock
-        .connect(users.carrier)
-        .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+      it("should revert if token is not surrendered", async () => {
+        const tx = registryContractAsAdmin.restoreTitle(tokenId);
 
-      titleEscrowContract = await getTitleEscrowContract(tradeTrustERC721Mock, tokenId);
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
+      });
+
+      it("should not allow to restore burnt token", async () => {
+        await titleEscrowContract.connect(users.beneficiary).surrender();
+        await registryContractAsAdmin.destroyToken(tokenId);
+
+        const tx = registryContractAsAdmin.restoreTitle(tokenId);
+
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token is already burnt");
+      });
+
+      it("should allow to restore after token is surrendered", async () => {
+        await titleEscrowContract.connect(users.beneficiary).surrender();
+
+        const tx = registryContractAsAdmin.restoreTitle(tokenId);
+
+        await expect(tx).to.not.be.reverted;
+      });
+
+      it("should restore to the correct title escrow", async () => {
+        const expectedTitleEscrowAddr = computeTitleEscrowAddress({
+          tokenId,
+          registryAddress: registryContract.address,
+          implementationAddress: titleEscrowImplAddr,
+          factoryAddress: mockTitleEscrowFactoryContract.address,
+        });
+        await titleEscrowContract.connect(users.beneficiary).surrender();
+
+        await registryContractAsAdmin.restoreTitle(tokenId);
+        const res = await registryContract.ownerOf(tokenId);
+
+        expect(res).to.equal(expectedTitleEscrowAddr);
+      });
+
+      it("should emit Transfer event with the correct values", async () => {
+        const titleEscrowAddress = computeTitleEscrowAddress({
+          tokenId,
+          registryAddress: registryContract.address,
+          implementationAddress: titleEscrowImplAddr,
+          factoryAddress: mockTitleEscrowFactoryContract.address,
+        });
+        await titleEscrowContract.connect(users.beneficiary).surrender();
+
+        const tx = await registryContractAsAdmin.restoreTitle(tokenId);
+
+        expect(tx)
+          .to.emit(registryContract, "Transfer")
+          .withArgs(registryContract.address, titleEscrowAddress, tokenId);
+      });
     });
 
-    it("should return false for an unsurrendered token", async () => {
-      const res = await tradeTrustERC721Mock.isSurrendered(tokenId);
+    describe("Surrender Status", () => {
+      it("should return false for an unsurrendered token", async () => {
+        const res = await registryContract.isSurrendered(tokenId);
 
-      expect(res).to.be.false;
-    });
+        expect(res).to.be.false;
+      });
 
-    it("should return true for a surrendered token", async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
+      it("should return true for a surrendered token", async () => {
+        await titleEscrowContract.connect(users.beneficiary).surrender();
 
-      const res = await tradeTrustERC721Mock.isSurrendered(tokenId);
+        const res = await registryContract.isSurrendered(tokenId);
 
-      expect(res).to.be.true;
-    });
+        expect(res).to.be.true;
+      });
 
-    it("should return true for an accepted token", async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
-      await tradeTrustERC721Mock.destroyToken(tokenId);
+      it("should return true for an accepted token", async () => {
+        await titleEscrowContract.connect(users.beneficiary).surrender();
+        await registryContract.destroyToken(tokenId);
 
-      const res = await tradeTrustERC721Mock.isSurrendered(tokenId);
+        const res = await registryContract.isSurrendered(tokenId);
 
-      expect(res).to.be.true;
-    });
+        expect(res).to.be.true;
+      });
 
-    it("should return false for a restored token", async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
-      await tradeTrustERC721Mock.restoreTitle(tokenId);
+      it("should return false for a restored token", async () => {
+        await titleEscrowContract.connect(users.beneficiary).surrender();
+        await registryContract.restoreTitle(tokenId);
 
-      const res = await tradeTrustERC721Mock.isSurrendered(tokenId);
+        const res = await registryContract.isSurrendered(tokenId);
 
-      expect(res).to.be.false;
+        expect(res).to.be.false;
+      });
+
+      it("should revert if a token does not exist", async () => {
+        const invalidTokenId = faker.datatype.hexaDecimal(64);
+
+        const tx = registryContract.isSurrendered(invalidTokenId);
+
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
+      });
     });
   });
 });

@@ -1,10 +1,14 @@
 import { waffle, ethers } from "hardhat";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
-import { TitleEscrowCloneable, TitleEscrowFactory } from "@tradetrust/contracts";
+import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployEscrowFactoryFixture } from "./fixtures";
 import { getEventFromTransaction, getTestUsers, TestUsers } from "./utils";
+import { computeTitleEscrowAddress } from "../src/utils";
+import { computeInterfaceId } from "./utils/computeInterfaceId";
+import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
 
 const { loadFixture } = waffle;
 
@@ -14,7 +18,7 @@ describe("TitleEscrowFactory", async () => {
   let titleEscrowFactory: TitleEscrowFactory;
 
   const createEventAbi = [
-    "event TitleEscrowDeployed (address indexed escrowAddress, address indexed tokenRegistry, address beneficiary, address holder)",
+    "event TitleEscrowCreated (address indexed titleEscrow, address indexed tokenRegistry, uint256 indexed tokenId, address beneficiary, address holder)",
   ];
 
   beforeEach(async () => {
@@ -23,29 +27,83 @@ describe("TitleEscrowFactory", async () => {
     titleEscrowFactory = await loadFixture(deployEscrowFactoryFixture({ deployer: users.carrier }));
   });
 
-  describe("Create Title Escrow Contract", () => {
-    let fakeRegistryAddress: string;
-    let titleEscrowFactoryCreateTx: ContractTransaction;
-    let titleEscrowContract: TitleEscrowCloneable;
+  describe("Implementation", () => {
+    let implAddr: string;
+    let titleEscrowContract: TitleEscrow;
 
     beforeEach(async () => {
-      fakeRegistryAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
-      titleEscrowFactoryCreateTx = await titleEscrowFactory.create(
-        fakeRegistryAddress,
-        users.beneficiary.address,
-        users.holder.address
-      );
+      implAddr = await titleEscrowFactory.implementation();
+      titleEscrowContract = (await ethers.getContractFactory("TitleEscrow")).attach(implAddr) as TitleEscrow;
+    });
 
-      const event = await getEventFromTransaction(titleEscrowFactoryCreateTx, createEventAbi, "TitleEscrowDeployed");
-      titleEscrowContract = (await ethers.getContractFactory("TitleEscrowCloneable")).attach(
-        event.escrowAddress as string
-      ) as TitleEscrowCloneable;
+    it("should have an implementation", async () => {
+      expect(implAddr).to.not.equal(ethers.constants.AddressZero);
+    });
+
+    it("should have the correct title escrow implementation", async () => {
+      const interfaceId = computeInterfaceId(ContractInterfaces.ITitleEscrow);
+
+      const res = await titleEscrowContract.supportsInterface(interfaceId);
+
+      expect(res).to.be.true;
+    });
+
+    it("should initialise implementation", async () => {
+      const zeroAddress = ethers.constants.AddressZero;
+      const [registry, beneficiary, holder, tokenId] = await Promise.all([
+        titleEscrowContract.registry(),
+        titleEscrowContract.beneficiary(),
+        titleEscrowContract.holder(),
+        titleEscrowContract.tokenId(),
+      ]);
+
+      expect(registry).to.equal(zeroAddress);
+      expect(beneficiary).to.equal(zeroAddress);
+      expect(holder).to.equal(zeroAddress);
+      expect(tokenId).to.equal(ethers.constants.HashZero);
+    });
+
+    it("should not allow initialising implementation externally", async () => {
+      const punk = users.others[faker.datatype.number(users.others.length - 1)];
+      const badAddress = faker.finance.ethereumAddress();
+
+      const tx = titleEscrowContract.connect(punk).initialize(badAddress, badAddress, badAddress, "123");
+
+      await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
+    });
+
+    it("should not allow calling shred on implementation", async () => {
+      const punk = users.others[faker.datatype.number(users.others.length - 1)];
+
+      const tx = titleEscrowContract.connect(punk).shred();
+
+      await expect(tx).to.be.reverted;
+    });
+  });
+
+  describe("Create Title Escrow Contract", () => {
+    let fakeRegistrySigner: SignerWithAddress;
+    let titleEscrowFactoryCreateTx: ContractTransaction;
+    let titleEscrowContract: TitleEscrow;
+    let tokenId: string;
+
+    beforeEach(async () => {
+      tokenId = faker.datatype.hexaDecimal(64);
+      fakeRegistrySigner = users.others[faker.datatype.number(users.others.length - 1)];
+      titleEscrowFactoryCreateTx = await titleEscrowFactory
+        .connect(fakeRegistrySigner)
+        .create(users.beneficiary.address, users.holder.address, tokenId);
+
+      const event = await getEventFromTransaction(titleEscrowFactoryCreateTx, createEventAbi, "TitleEscrowCreated");
+      titleEscrowContract = (await ethers.getContractFactory("TitleEscrow")).attach(
+        event.titleEscrow as string
+      ) as TitleEscrow;
     });
 
     it("should create with the correct token registry address", async () => {
-      const registryAddress = await titleEscrowContract.tokenRegistry();
+      const registryAddress = await titleEscrowContract.registry();
 
-      expect(registryAddress).to.equal(fakeRegistryAddress);
+      expect(registryAddress).to.equal(fakeRegistrySigner.address);
     });
 
     it("should create with the correct beneficiary", async () => {
@@ -60,16 +118,34 @@ describe("TitleEscrowFactory", async () => {
       expect(holder).to.equal(users.holder.address);
     });
 
-    it("should initialise with its own address", async () => {
-      const titleEscrowFactoryAddress = await titleEscrowContract.titleEscrowFactory();
-
-      expect(titleEscrowFactoryAddress).to.equal(titleEscrowFactory.address);
-    });
-
-    it("should emit TitleEscrowDeployed event", async () => {
+    it("should emit TitleEscrowCreated event", async () => {
       expect(titleEscrowFactoryCreateTx)
-        .to.emit(titleEscrowFactory, "TitleEscrowDeployed")
-        .withArgs(titleEscrowContract.address, fakeRegistryAddress, users.beneficiary.address, users.holder.address);
+        .to.emit(titleEscrowFactory, "TitleEscrowCreated")
+        .withArgs(
+          titleEscrowContract.address,
+          fakeRegistrySigner.address,
+          tokenId,
+          users.beneficiary.address,
+          users.holder.address
+        );
+    });
+  });
+
+  describe("Compute Title Escrow address", () => {
+    it("should return the correct title escrow address", async () => {
+      const fakeRegistryAddress = faker.finance.ethereumAddress();
+      const tokenId = faker.datatype.hexaDecimal(64);
+      const implementationAddr = await titleEscrowFactory.implementation();
+      const expectedAddress = computeTitleEscrowAddress({
+        registryAddress: fakeRegistryAddress,
+        tokenId,
+        implementationAddress: implementationAddr,
+        factoryAddress: titleEscrowFactory.address,
+      });
+
+      const res = await titleEscrowFactory.getAddress(fakeRegistryAddress, tokenId);
+
+      expect(res).to.equal(expectedAddress);
     });
   });
 });

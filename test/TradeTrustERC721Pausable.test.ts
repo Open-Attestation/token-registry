@@ -1,5 +1,5 @@
 import { waffle } from "hardhat";
-import { TitleEscrowCloneable, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
+import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import faker from "faker";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
@@ -19,7 +19,7 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
 
     registryContract = await loadFixture(
       deployTokenFixture<TradeTrustERC721>({
-        tokenContractName: "TradeTrustERC721Mock",
+        tokenContractName: "TradeTrustERC721",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
         deployer: users.carrier,
@@ -115,7 +115,7 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
     });
 
     describe("Token Registry and Title Escrow Behaviours", () => {
-      let titleEscrowContract: TitleEscrowCloneable;
+      let titleEscrowContract: TitleEscrow;
 
       beforeEach(async () => {
         titleEscrowContract = (
@@ -162,26 +162,50 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
           expect(paused).to.be.true;
         });
 
-        it("should not be allowed to call surrender", async () => {
+        it("should not allow surrendering", async () => {
           const tx = titleEscrowContract.connect(users.beneficiary).surrender();
 
           await expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
         });
 
-        it("should not allow approve of new owners", async () => {
-          const tx = titleEscrowContract.approveNewTransferTargets(users.beneficiary.address, users.holder.address);
+        it("should not allow shredding", async () => {
+          const tx = titleEscrowContract.shred();
 
           await expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
         });
 
-        it("should not allow transfer to new title escrow", async () => {
-          const tx = titleEscrowContract.transferToNewEscrow(users.beneficiary.address, users.holder.address);
+        it("should not allow nomination of beneficiary", async () => {
+          const tx = titleEscrowContract.nominateBeneficiary(users.beneficiary.address);
 
           await expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
         });
 
-        it("should not allow change of holdership", async () => {
-          const tx = titleEscrowContract.changeHolder(users.holder.address);
+        it("should not allow nomination of holder", async () => {
+          const tx = titleEscrowContract.nominateHolder(users.holder.address);
+
+          await expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
+        });
+
+        it("should not allow nomination of new owners", async () => {
+          const tx = titleEscrowContract.nominate(users.beneficiary.address, users.holder.address);
+
+          await expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
+        });
+
+        it("should not allow endorsement of beneficiary", async () => {
+          const tx = titleEscrowContract.endorseBeneficiary(users.beneficiary.address);
+
+          await expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
+        });
+
+        it("should not allow endorsement of holder", async () => {
+          const tx = titleEscrowContract.endorseHolder(users.holder.address);
+
+          await expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
+        });
+
+        it("should not allow endorsement to new title escrow", async () => {
+          const tx = titleEscrowContract.endorse(users.beneficiary.address, users.holder.address);
 
           await expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
         });
