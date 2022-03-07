@@ -4,9 +4,8 @@ pragma solidity ^0.8.0;
 import "./TitleEscrowCloneableMock.sol";
 import "../TitleEscrowCloner.sol";
 
-contract TitleEscrowClonerMock is TitleEscrowCloner {
-
+contract TitleEscrowFactoryMock is TitleEscrowFactory {
   constructor() {
-    titleEscrowImplementation = address(new TitleEscrowCloneableMock());
+    implementation = address(new TitleEscrowCloneableMock());
   }
 }

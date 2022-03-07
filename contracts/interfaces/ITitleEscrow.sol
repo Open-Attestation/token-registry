@@ -9,8 +9,11 @@ import "../access/IHasBeneficiary.sol";
 
 /// @title Title Escrow for Transferable Records
 interface ITitleEscrow is IHasHolder, IHasBeneficiary, IERC165, IERC721Receiver {
-
-  enum StatusTypes {Uninitialised, InUse, Exited}
+  enum StatusTypes {
+    Uninitialised,
+    InUse,
+    Exited
+  }
 
   /// @dev This emits when the escrow contract receives an ERC721 token.
   event TitleReceived(address indexed _tokenRegistry, address indexed _from, uint256 indexed _id);
@@ -41,19 +44,12 @@ interface ITitleEscrow is IHasHolder, IHasBeneficiary, IERC165, IERC721Receiver 
     bytes calldata data
   ) external override returns (bytes4);
 
-  /// @notice Used by beneficiary to approve an EOA or smart contract to be the next owner for the token
-  /// @param newOwner The address of the new holder
-  function approveNewOwner(address newOwner) external;
-
   /// @notice Handle the change of holdership by current holder
   /// @param newHolder The address of the new holder
   function changeHolder(address newHolder) external;
 
   /// @notice Surrender token back to registry
   function surrender() external;
-
-  /// @notice Public getter to access the approved owner if any
-  function approvedOwner() external returns (address);
 
   /// @notice Public getter to access the approved beneficiary if any
   function approvedBeneficiary() external returns (address);

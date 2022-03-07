@@ -1,6 +1,8 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
 const chai = require("chai");
-const { solidity } = require("ethereum-waffle");
+const { solidity, loadFixture } = require("ethereum-waffle");
+const { deployTokenFixture } = require("./fixtures/index.ts");
+const { getTitleEscrowContract } = require("./utils/index.ts");
 
 chai.use(solidity);
 
@@ -18,23 +20,33 @@ describe("TradeTrustErc721", async () => {
   let nonMinter;
   let holder1;
   let TitleEscrow;
-  let Erc721;
-
   let beneficiary;
   let holder;
 
   before("Initialising contract factories and accounts for TradeTrustErc721 tests", async () => {
     [carrier1, owner1, owner2, nonMinter, holder1] = await ethers.getSigners();
     TitleEscrow = await ethers.getContractFactory("TitleEscrowCloneableMock");
-    Erc721 = await ethers.getContractFactory("TradeTrustERC721Mock");
   });
 
   const merkleRoot = "0x624d0d7ae6f44d41d368d8280856dbaac6aa29fb3b35f45b80a7c1c90032eeb3";
   const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
+  let tradeTrustERC721Instance;
+  let tokenRegistryInstanceWithShippingLineWallet;
+
   beforeEach(async () => {
     beneficiary = owner1;
     holder = holder1;
+
+    tradeTrustERC721Instance = await loadFixture(
+      deployTokenFixture({
+        tokenContractName: "TradeTrustERC721Mock",
+        tokenName: "foo",
+        tokenInitials: "bar",
+        deployer: carrier1,
+      })
+    );
+    tokenRegistryInstanceWithShippingLineWallet = tradeTrustERC721Instance.connect(carrier1);
   });
 
   it("should have the correct ERC165 interface support", async () => {
@@ -43,8 +55,7 @@ describe("TradeTrustErc721", async () => {
     // 2. ITitleEscrowCreator (to act as a TE factory)
     // 3. IERC721 (basic so that someone expecting a token registry knows how to work with it)
 
-    const tradeTrustERC721Instance = await Erc721.connect(carrier1).deploy("foo", "bar");
-    const ITradeTrustERC721InterfaceId = "0x9be326ab";
+    const ITradeTrustERC721InterfaceId = "0xa9b5af52";
     const IERC721InterfaceId = "0x80ac58cd";
     const ITitleEscrowCreatorInterfaceId = "0xfcd7c1df";
     expect(await tradeTrustERC721Instance.supportsInterface(ITradeTrustERC721InterfaceId)).to.be.true;
@@ -53,38 +64,34 @@ describe("TradeTrustErc721", async () => {
   });
 
   it("should work without a wallet for read operations", async () => {
-    const tokenRegistryInstanceWithShippingLine = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstanceWithShippingLine.mintInternal(owner1.address, merkleRoot);
-    const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
+    await tokenRegistryInstanceWithShippingLineWallet.mintInternal(owner1.address, merkleRoot);
+    const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
   });
 
   it("should not burn tokens that it receives", async () => {
-    const tokenRegistryInstanceWithShippingLine = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstanceWithShippingLine.mintInternal(owner1.address, merkleRoot);
-    const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
+    await tokenRegistryInstanceWithShippingLineWallet.mintInternal(owner1.address, merkleRoot);
+    const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
 
-    await tokenRegistryInstanceWithShippingLine
+    await tokenRegistryInstanceWithShippingLineWallet
       .connect(owner1)
       ["safeTransferFrom(address,address,uint256)"](
         owner1.address,
-        tokenRegistryInstanceWithShippingLine.address,
+        tokenRegistryInstanceWithShippingLineWallet.address,
         merkleRoot
       );
-    const nextOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
-    expect(nextOwner).to.deep.equal(tokenRegistryInstanceWithShippingLine.address);
+    const nextOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
+    expect(nextOwner).to.deep.equal(tokenRegistryInstanceWithShippingLineWallet.address);
   });
 
   it("should be able to mint", async () => {
-    const tokenRegistryInstance = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstance.mintInternal(owner1.address, merkleRoot);
-    const currentOwner = await tokenRegistryInstance.ownerOf(merkleRoot);
+    await tokenRegistryInstanceWithShippingLineWallet.mintInternal(owner1.address, merkleRoot);
+    const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
   });
 
   it("should be able to transfer", async () => {
-    const tokenRegistryInstanceWithShippingLineWallet = await Erc721.connect(carrier1).deploy("foo", "bar");
     await tokenRegistryInstanceWithShippingLineWallet.mintInternal(owner1.address, merkleRoot);
     const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
@@ -97,65 +104,48 @@ describe("TradeTrustErc721", async () => {
   });
 
   it("non-owner should not be able to initiate a transfer", async () => {
-    const tokenRegistryInstanceWithShippingLine = await Erc721.connect(carrier1).deploy("foo", "bar");
-    await tokenRegistryInstanceWithShippingLine.mintInternal(owner1.address, merkleRoot);
-    const currentOwner = await tokenRegistryInstanceWithShippingLine.ownerOf(merkleRoot);
+    await tokenRegistryInstanceWithShippingLineWallet.mintInternal(owner1.address, merkleRoot);
+    const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
     expect(currentOwner).to.deep.equal(owner1.address);
 
-    const transferQuery = tokenRegistryInstanceWithShippingLine["safeTransferFrom(address,address,uint256)"](
+    const transferQuery = tokenRegistryInstanceWithShippingLineWallet["safeTransferFrom(address,address,uint256)"](
       owner1.address,
-      tokenRegistryInstanceWithShippingLine.address,
+      tokenRegistryInstanceWithShippingLineWallet.address,
       merkleRoot
     );
     await expect(transferQuery).to.be.revertedWith("transfer caller is not owner nor approved");
   });
 
   it("should emit TokenReceive event on mint", async () => {
-    const tokenRegistryInstance = await Erc721.connect(carrier1).deploy("foo", "bar");
-    const tokenRegistryInstanceAddress = tokenRegistryInstance.address;
+    const tokenRegistryInstanceAddress = tokenRegistryInstanceWithShippingLineWallet.address;
     const mintTx = await (
-      await tokenRegistryInstance["mintInternal(address,uint256)"](tokenRegistryInstanceAddress, merkleRoot)
+      await tokenRegistryInstanceWithShippingLineWallet["mintInternal(address,uint256)"](
+        tokenRegistryInstanceAddress,
+        merkleRoot
+      )
     ).wait();
     const receivedTokenLog = mintTx.events.find((log) => log.event === "TokenReceived");
     assertTokenReceivedLog(receivedTokenLog, carrier1.address, ZERO_ADDRESS, merkleRoot, null);
   });
 
   describe("Minting new title escrows", () => {
-    let tokenRegistryInstanceWithShippingLineWallet;
-
     beforeEach(async () => {
       beneficiary = owner1;
       holder = holder1;
-
-      // Starting test after the point of surrendering ERC721 Token
-      tokenRegistryInstanceWithShippingLineWallet = await Erc721.connect(carrier1).deploy("foo", "bar");
     });
 
     it("should mint a new title by a minter", async () => {
-      const tx = await tokenRegistryInstanceWithShippingLineWallet.mintTitle(
-        beneficiary.address,
-        holder.address,
-        merkleRoot
-      );
-      const receipt = await tx.wait();
-      const event = receipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
-      const titleEscrowAddr = event.args.escrowAddress;
+      await tokenRegistryInstanceWithShippingLineWallet.mintTitle(beneficiary.address, holder.address, merkleRoot);
 
+      const titleEscrowAddr = (await getTitleEscrowContract(tradeTrustERC721Instance, merkleRoot)).address;
       const currentOwner = await tokenRegistryInstanceWithShippingLineWallet.ownerOf(merkleRoot);
       expect(currentOwner).to.deep.equal(titleEscrowAddr);
     });
 
     it("should mint with the correct details in title escrow", async () => {
-      const tx = await tokenRegistryInstanceWithShippingLineWallet.mintTitle(
-        beneficiary.address,
-        holder.address,
-        merkleRoot
-      );
-      const receipt = await tx.wait();
-      const event = receipt.events.find((evt) => evt.event === "TitleEscrowDeployed");
-      const titleEscrowAddr = event.args.escrowAddress;
+      await tokenRegistryInstanceWithShippingLineWallet.mintTitle(beneficiary.address, holder.address, merkleRoot);
 
-      const newEscrowInstance = await TitleEscrow.attach(titleEscrowAddr);
+      const newEscrowInstance = await getTitleEscrowContract(tradeTrustERC721Instance, merkleRoot);
       const escrowBeneficiary = await newEscrowInstance.beneficiary();
       const escrowHolder = await newEscrowInstance.holder();
       const escrowTokenRegistry = await newEscrowInstance.tokenRegistry();
@@ -180,19 +170,17 @@ describe("TradeTrustErc721", async () => {
         .connect(nonMinter)
         .mintTitle(beneficiary.address, holder.address, merkleRoot);
 
-      await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Minter role");
     });
   });
 
   describe("Surrendering TradeTrustERC721 Work Flow", () => {
-    let tokenRegistryInstanceWithShippingLineWallet;
     let previousTitleEscrowAddress;
 
     beforeEach("Initialising fresh Token Registry and minting token for each test", async () => {
       beneficiary = owner1;
 
       // Starting test after the point of surrendering ERC721 Token
-      tokenRegistryInstanceWithShippingLineWallet = await Erc721.connect(carrier1).deploy("foo", "bar");
       const tx = await tokenRegistryInstanceWithShippingLineWallet.mintTitle(
         beneficiary.address,
         beneficiary.address,

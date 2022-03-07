@@ -6,7 +6,7 @@ import "./interfaces/ITitleEscrowCreator.sol";
 import "./TitleEscrowCloneable.sol";
 
 contract TitleEscrowCloner is ITitleEscrowCreator {
-  address public  titleEscrowImplementation;
+  address public titleEscrowImplementation;
 
   constructor() {
     titleEscrowImplementation = address(new TitleEscrowCloneable());

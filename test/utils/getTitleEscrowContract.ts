@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
-import { TitleEscrowCloneable, TradeTrustERC721 } from "@tradetrust/contracts";
+import { TitleEscrowCloneable, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 
 export const getTitleEscrowContract = async (
-  tokenContract: TradeTrustERC721,
+  tokenContract: TradeTrustERC721 | TradeTrustERC721Mock,
   tokenId: string | number
 ): Promise<TitleEscrowCloneable> => {
   const titleEscrowAddr = await tokenContract.ownerOf(tokenId);
