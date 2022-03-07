@@ -1,6 +1,8 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
-const { solidity } = require("ethereum-waffle");
+const { solidity, loadFixture } = require("ethereum-waffle");
 const chai = require("chai");
+const { deployTokenFixture } = require("./fixtures/index.ts");
+const { getTitleEscrowContract } = require("./utils/index.ts");
 
 chai.use(solidity);
 
@@ -11,16 +13,14 @@ describe("TitleEscrowCloner", async () => {
   let beneficiary1;
   let beneficiary2;
   let holder2;
-  let ERC721;
 
   let TitleEscrowClonerFactory;
   let TitleEscrowCloneableFactory;
 
   before("Initialising contract factories and accounts for TitleEscrowCreator tests", async () => {
     [carrier1, beneficiary1, beneficiary2, holder2] = await ethers.getSigners();
-    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowClonerMock");
+    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowFactoryMock");
     TitleEscrowCloneableFactory = await ethers.getContractFactory("TitleEscrowCloneableMock");
-    ERC721 = await ethers.getContractFactory("TradeTrustERC721Mock");
   });
 
   let ERC721Address = "";
@@ -28,15 +28,20 @@ describe("TitleEscrowCloner", async () => {
   let cloner;
 
   beforeEach("Initialising fresh Token Registry for each test", async () => {
-    ERC721Instance = await ERC721.connect(carrier1).deploy("foo", "bar");
+    ERC721Instance = await loadFixture(
+      deployTokenFixture({
+        tokenContractName: "TradeTrustERC721Mock",
+        tokenName: "foo",
+        tokenInitials: "bar",
+        deployer: carrier1,
+      })
+    );
     cloner = await TitleEscrowClonerFactory.connect(carrier1).deploy();
     ERC721Address = ERC721Instance.address;
   });
 
   it("should deploy new instance of TitleEscrow", async () => {
-    const txReceipt = await (
-      await cloner.deployNewTitleEscrow(ERC721Address, beneficiary1.address, beneficiary1.address)
-    ).wait();
+    const txReceipt = await (await cloner.create(ERC721Address, beneficiary1.address, beneficiary1.address)).wait();
     const escrowInstance = await TitleEscrowCloneableFactory.attach(txReceipt.events[1].args.escrowAddress);
     const escrowBeneficiary = await escrowInstance.beneficiary();
     const escrowHolder = await escrowInstance.holder();
@@ -48,7 +53,7 @@ describe("TitleEscrowCloner", async () => {
 
   it("two instances of TitleEscrow clones should not interfere with each other", async () => {
     const escrow1Receipt = await (
-      await cloner.deployNewTitleEscrow(ERC721Address, beneficiary1.address, beneficiary1.address)
+      await cloner.create(ERC721Address, beneficiary1.address, beneficiary1.address)
     ).wait();
     const escrow1Instance = await TitleEscrowCloneableFactory.attach(escrow1Receipt.events[1].args.escrowAddress);
     const escrow1Beneficiary = await escrow1Instance.beneficiary();
@@ -59,7 +64,7 @@ describe("TitleEscrowCloner", async () => {
     expect(escrow1TokenRegistry).to.be.equal(ERC721Address);
 
     const escrow2Receipt = await (
-      await cloner.deployNewTitleEscrow(ERC721Address, beneficiary2.address, beneficiary2.address)
+      await cloner.create(ERC721Address, beneficiary2.address, beneficiary2.address)
     ).wait();
     const escrow2Instance = await TitleEscrowCloneableFactory.attach(escrow2Receipt.events[1].args.escrowAddress);
     const escrow2Beneficiary = await escrow2Instance.beneficiary();
@@ -71,14 +76,9 @@ describe("TitleEscrowCloner", async () => {
   });
 
   it("should allow instances of TitleEscrow to have the function transferToNewEscrow", async () => {
-    const { events } = await (
-      await ERC721Instance.deployNewTitleEscrow(ERC721Address, beneficiary1.address, beneficiary1.address)
-    ).wait();
-    const { escrowAddress } = events[1].args;
+    await ERC721Instance.mintTitle(beneficiary1.address, beneficiary1.address, SAMPLE_TOKEN_ID);
 
-    await ERC721Instance["mintInternal(address,uint256)"](escrowAddress, SAMPLE_TOKEN_ID);
-
-    const escrowInstance = await TitleEscrowCloneableFactory.attach(escrowAddress);
+    const escrowInstance = await getTitleEscrowContract(ERC721Instance, SAMPLE_TOKEN_ID);
     const receipt = await (
       await escrowInstance.connect(beneficiary1).transferToNewEscrow(beneficiary2.address, holder2.address)
     ).wait();
@@ -86,7 +86,7 @@ describe("TitleEscrowCloner", async () => {
     const newAddress = titleCededLog.args._to; // eslint-disable-line no-underscore-dangle
     const ownerOnRegistry = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
 
-    expect(escrowAddress).not.to.be.equal(newAddress);
+    expect(escrowInstance.address).not.to.be.equal(newAddress);
     expect(newAddress).to.be.equal(ownerOnRegistry);
 
     const newEscrowInstance = await TitleEscrowCloneableFactory.attach(ownerOnRegistry);
@@ -100,7 +100,7 @@ describe("TitleEscrowCloner", async () => {
 
   // TODO: test that implementation's onERC721Received cannot be called
   it("should not be able to call onERC721Received on the implementation", async () => {
-    const implAddr = await cloner.titleEscrowImplementation();
+    const implAddr = await cloner.implementation();
     const implInstance = await TitleEscrowCloneableFactory.attach(implAddr);
 
     const onReceived = implInstance.onERC721Received(implAddr, implAddr, SAMPLE_TOKEN_ID, "0x");

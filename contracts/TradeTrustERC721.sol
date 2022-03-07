@@ -2,16 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "./TitleEscrowCloneable.sol";
-import "./TitleEscrowCloner.sol";
-import "./interfaces/ITitleEscrowCreator.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "./access/RegistryAccess.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
-import "./access/MinterRole.sol";
+import "./interfaces/ITitleEscrowFactory.sol";
 
-contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, ERC721 {
+contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, Pausable, ERC721 {
   using Address for address;
 
   event TokenBurnt(uint256 indexed tokenId);
@@ -20,19 +19,30 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
 
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
+  ITitleEscrowFactory public override titleEscrowFactory;
+
   // Mapping from token ID to previously surrendered title escrow address
   mapping(uint256 => address) internal _surrenderedOwners;
 
-  constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-    return;
+  constructor(
+    string memory name,
+    string memory symbol,
+    address _titleEscrowFactory
+  ) ERC721(name, symbol) {
+    titleEscrowFactory = ITitleEscrowFactory(_titleEscrowFactory);
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, IERC165, MinterRole) returns (bool) {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(ERC721, IERC165, RegistryAccess)
+    returns (bool)
+  {
     return
-      interfaceId == type(ITitleEscrowCreator).interfaceId ||
       interfaceId == type(ITradeTrustERC721).interfaceId ||
       ERC721.supportsInterface(interfaceId) ||
-      MinterRole.supportsInterface(interfaceId);
+      RegistryAccess.supportsInterface(interfaceId);
   }
 
   function onERC721Received(
@@ -58,7 +68,7 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
    *
    * @param tokenId Token ID to be burnt
    */
-  function destroyToken(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) override {
+  function destroyToken(uint256 tokenId) external override whenNotPaused onlyAccepter {
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -72,16 +82,17 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
     address beneficiary,
     address holder,
     uint256 tokenId
-  ) public virtual onlyMinter override returns (address) {
+  ) public virtual override whenNotPaused onlyMinter returns (address) {
     require(!_exists(tokenId), "TokenRegistry: Token already exists");
 
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
-  function restoreTitle(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) override returns (address) {
-    address previousOwner = _surrenderedOwners[tokenId];
+  function restoreTitle(uint256 tokenId) external override whenNotPaused onlyRestorer returns (address) {
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
+
+    address previousOwner = _surrenderedOwners[tokenId];
 
     // Remove the last surrendered token owner
     delete _surrenderedOwners[tokenId];
@@ -109,7 +120,7 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
       beneficiary = previousOwner;
       holder = previousOwner;
     }
-    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+    address newTitleEscrow = titleEscrowFactory.create(address(this), beneficiary, holder);
     _registrySafeTransformFrom(address(this), newTitleEscrow, tokenId);
 
     emit TokenRestored(tokenId, newTitleEscrow);
@@ -125,11 +136,19 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
     return false;
   }
 
+  function pause() external onlyAdmin {
+    _pause();
+  }
+
+  function unpause() external onlyAdmin {
+    _unpause();
+  }
+
   function _beforeTokenTransfer(
     address from,
     address to,
     uint256 tokenId
-  ) internal virtual override {
+  ) internal virtual override whenNotPaused {
     if (to == BURN_ADDRESS) {
       require(isSurrendered(tokenId), "TokenRegistry: Token has not been surrendered for burning");
     } else {
@@ -147,7 +166,7 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
     address holder,
     uint256 tokenId
   ) internal virtual returns (address) {
-    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+    address newTitleEscrow = titleEscrowFactory.create(address(this), beneficiary, holder);
     _safeMint(newTitleEscrow, tokenId);
 
     return newTitleEscrow;
@@ -158,15 +177,6 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
     address to,
     uint256 tokenId
   ) internal {
-    _registrySafeTransformFrom(from, to, tokenId, "");
-  }
-
-  function _registrySafeTransformFrom(
-    address from,
-    address to,
-    uint256 tokenId,
-    bytes memory data
-  ) internal {
-    this.safeTransferFrom(from, to, tokenId, data);
+    this.safeTransferFrom(from, to, tokenId, "");
   }
 }

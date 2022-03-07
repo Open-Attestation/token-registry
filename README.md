@@ -118,27 +118,38 @@ This repository provides a couple of Hardhat tasks to simplify the deployment pr
 ## Token Contract
 Deploying the token contract.
 ```
-Usage: hardhat [GLOBAL OPTIONS] deploy:token --network <STRING> --name <STRING> --symbol <STRING> [--verify]
+Usage: hardhat [GLOBAL OPTIONS] deploy:token --factory <STRING> --name <STRING> --symbol <STRING> [--verify]
 
 OPTIONS:
 
+  --factory  	Address of Title Escrow factory contract (Optional)
   --network     Name of network
   --name    	Name of the token
   --symbol  	Symbol of token
   --verify  	Verify on Etherscan
   
-deploy:token: Deploys the TradeTrustERC721 token  
+deploy:token: Deploys the TradeTrustERC721 token and, optionally, Title Escrow factory if not provided.
 ```
 
 > 💡 Remember to supply the`--network` argument with the name of the network you wish to deploy on. 
-> See section below for more info on the list of network names.
+> See [Network Configuration](#network-configuration) section for more info on the list of network names.
+ 
+> 💡 Tip: Note that the `--factory` argument is optional. If not provided, a Title Factory contract will be deployed alongside the token contract. 
+> You can reuse a Title Escrow Factory that you have previously deployed by passing its address to the `--factory` argument to save on deployment fees.
 
-#### Example
+#### Example 1
 ```
 npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symbol GSC --verify
 ```
 This will deploy the token with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon _mumbai_ network.
-The contract will also be _verified_ on Etherscan.
+The contract will also be _verified_ on Etherscan. A Title Escrow factory will also be deployed.
+
+#### Example 2
+```
+npx hardhat deploy:token --network mainnet --name "The Great Shipping Co." --symbol GSC --factory 0xfac7
+```
+This will deploy the token with the name _The Great Shipping Co._ under the symbol _GSC_ on the Ethereum _mainnet_ network.
+The token will be registered with an existing factory address of `0xfac7` and will not be verified.
 
 ## Network Configuration
 Here's a list of network names currently pre-configured:
