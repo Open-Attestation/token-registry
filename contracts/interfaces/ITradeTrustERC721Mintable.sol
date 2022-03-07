@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import {IERC721} from "../lib/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface ITradeTrustERC721Mintable is IERC721 {
   function mintTitle(

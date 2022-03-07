@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "./TitleEscrowCloneable.sol";
 import "./TitleEscrowCloner.sol";
 import "./interfaces/ITitleEscrowCreator.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
-import {ERC721Mintable, IERC721Receiver, Address, ERC721, MinterRole} from "./lib/ERC721.sol";
+import "./access/MinterRole.sol";
 
 abstract contract TradeTrustERC721Base is MinterRole, TitleEscrowCloner, IERC721Receiver, ERC721 {
   using Address for address;
