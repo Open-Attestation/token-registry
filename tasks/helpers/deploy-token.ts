@@ -1,13 +1,13 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Signer } from "ethers";
-import { TradeTrustERC721Base } from "@tradetrust/contracts";
+import { TradeTrustERC721 } from "@tradetrust/contracts";
 
 type DeployTokenConstructorParameters = {
   name: string;
   symbol: string;
 };
 
-export const deployToken = async <TToken extends TradeTrustERC721Base>({
+export const deployToken = async <TToken extends TradeTrustERC721>({
   constructorParams,
   contractName,
   hre,

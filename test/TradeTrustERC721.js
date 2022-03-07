@@ -172,7 +172,7 @@ describe("TradeTrustErc721", async () => {
 
       const tx = tokenRegistryInstanceWithShippingLineWallet.mintTitle(beneficiary.address, holder.address, merkleRoot);
 
-      await expect(tx).to.be.revertedWith("TradeTrustERC721Mintable: Token already exists");
+      await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
     });
 
     it("should revert when a non-minter attempts to mint a new title", async () => {
