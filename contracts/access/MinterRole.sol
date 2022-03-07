@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 interface IMinterRole {
@@ -12,7 +11,7 @@ interface IMinterRole {
   function renounceMinter() external;
 }
 
-abstract contract MinterRole is Context, IMinterRole, AccessControlEnumerable {
+abstract contract MinterRole is IMinterRole, AccessControlEnumerable {
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
   event MinterAdded(address indexed account);
