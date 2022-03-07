@@ -5,13 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 interface ITradeTrustERC721 is IERC721Receiver, IERC721 {
-  function destroyToken(
-    uint256 tokenId
-  ) external;
+  function destroyToken(uint256 tokenId) external;
 
-  function restoreTitle(
-    uint256 tokenId
-  ) external returns (address);
+  function restoreTitle(uint256 tokenId) external returns (address);
 
   function mintTitle(
     address beneficiary,

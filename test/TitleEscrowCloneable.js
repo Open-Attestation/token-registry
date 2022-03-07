@@ -34,11 +34,6 @@ describe("TitleEscrowCloneable", async () => {
     expect(log.args[0]).to.deep.equal(tokenRegistry);
     expect(log.args[1]).to.deep.equal(receiver);
   };
-  const assertTransferOwnerApprovalLog = (log, sender, receiver) => {
-    expect(log.event).to.deep.equal("TransferOwnerApproval");
-    expect(log.args[1]).to.deep.equal(sender);
-    expect(log.args[2]).to.deep.equal(receiver);
-  };
   const assertHolderChangedLog = (log, sender, receiver) => {
     expect(log.event).to.deep.equal("HolderChanged");
     expect(log.args[0]).to.deep.equal(sender);
@@ -72,7 +67,7 @@ describe("TitleEscrowCloneable", async () => {
 
   it("should have the correct ERC165 interface support", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address);
-    const ITitleEscrowInterfaceId = "0x1676e9e0";
+    const ITitleEscrowInterfaceId = "0x0a642a07";
     const interfaceSupported = await escrowInstance.supportsInterface(ITitleEscrowInterfaceId);
     expect(interfaceSupported).to.be.equal(true, `Expected selector: ${ITitleEscrowInterfaceId}`);
   });
@@ -102,13 +97,10 @@ describe("TitleEscrowCloneable", async () => {
   it("should indicate that it is not holding a token when it has not received one", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
-    const approveNewOwnerTx = escrowInstance.connect(beneficiary1).approveNewOwner(beneficiary2.address);
-
-    await expect(approveNewOwnerTx).to.be.revertedWith("TitleEscrow: Contract is not holding a token");
     const changeHolderTx = escrowInstance.connect(holder1).changeHolder(holder2.address);
 
     await expect(changeHolderTx).to.be.revertedWith("TitleEscrow: Contract is not holding a token");
-    const transferTx = escrowInstance.connect(holder1).transferTo(beneficiary2.address);
+    const transferTx = escrowInstance.connect(holder1).transferToInternal(beneficiary2.address);
 
     await expect(transferTx).to.be.revertedWith("TitleEscrow: Contract is not holding a token");
     const status = await escrowInstance.status();
@@ -148,53 +140,15 @@ describe("TitleEscrowCloneable", async () => {
 
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance1.address);
 
-    const transferTx = await (await escrowInstance1.connect(beneficiary1).transferTo(escrowInstance2.address)).wait();
+    const transferTx = await (
+      await escrowInstance1.connect(beneficiary1).transferToInternal(escrowInstance2.address)
+    ).wait();
 
     assertTitleCededLog(transferTx.events[0], ERC721Instance.address, escrowInstance2.address);
     const newOwner = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
     expect(newOwner).to.be.equal(escrowInstance2.address);
   });
 
-  it("should allow exit to ethereum wallet", async () => {
-    const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address);
-
-    const mintTx = await (
-      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
-    ).wait();
-
-    assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
-
-    const transferTx = await (await escrowInstance.connect(beneficiary1).transferTo(beneficiary2.address)).wait();
-
-    assertTitleCededLog(transferTx.events[0], ERC721Instance.address, beneficiary2.address);
-
-    const newOwner = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
-    expect(newOwner).to.be.equal(beneficiary2.address);
-  });
-  it("should allow holder to transfer with beneficiary approval", async () => {
-    const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
-
-    const mintTx = await (
-      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
-    ).wait();
-    assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
-
-    expect(await escrowInstance.holder()).to.be.equal(holder1.address);
-
-    const approveapproveNewOwnerTx = await (
-      await escrowInstance.connect(beneficiary1).approveNewOwner(beneficiary2.address)
-    ).wait();
-
-    assertTransferOwnerApprovalLog(approveapproveNewOwnerTx.events[0], beneficiary1.address, beneficiary2.address);
-
-    const tranferOwnerTx = await (await escrowInstance.connect(holder1).transferTo(beneficiary2.address)).wait();
-
-    assertTitleCededLog(tranferOwnerTx.events[0], ERC721Address, beneficiary2.address);
-
-    const newOwner = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
-
-    expect(newOwner).to.be.equal(beneficiary2.address);
-  });
   it("should allow holder to transfer to new holder", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
 
@@ -220,24 +174,10 @@ describe("TitleEscrowCloneable", async () => {
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
-    const attemptToTransferTx = escrowInstance.connect(beneficiary1).transferTo(ZERO_ADDRESS);
-    await expect(attemptToTransferTx).to.be.revertedWith("TitleEscrow: Transferring to 0x0 is not allowed");
+    const attemptToTransferTx = escrowInstance.connect(beneficiary1).transferToInternal(ZERO_ADDRESS);
+    await expect(attemptToTransferTx).to.be.revertedWith("ERC721: transfer to the zero address");
   });
-  it("should not allow holder to transfer to new beneficiary without endorsement", async () => {
-    const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
-    const mintTx = await (
-      await ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID)
-    ).wait();
-    assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
-    expect(await escrowInstance.holder()).to.be.equal(holder1.address);
-
-    const attemptToTransferOwnerTx = escrowInstance.connect(holder1).transferTo(beneficiary2.address);
-
-    await expect(attemptToTransferOwnerTx).to.be.revertedWith(
-      "TitleEscrow: New owner has not been approved by beneficiary"
-    );
-  });
   it("should not allow unauthorised party to execute any state change", async () => {
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, holder1.address);
     const mintTx = await (
@@ -245,17 +185,12 @@ describe("TitleEscrowCloneable", async () => {
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance.address);
 
-    const attemptToTransferOwnerTx = escrowInstance.connect(beneficiary2).transferTo(holder2.address);
+    const attemptToTransferOwnerTx = escrowInstance.connect(beneficiary2).transferToInternal(holder2.address);
 
     await expect(attemptToTransferOwnerTx).to.be.revertedWith("HasHolder: only the holder may invoke this function");
     const attemptToTransferHolderTx = escrowInstance.connect(beneficiary2).changeHolder(holder2.address);
 
     await expect(attemptToTransferHolderTx).to.be.revertedWith("HasHolder: only the holder may invoke this function");
-    const attemptToapproveNewOwnerTx = escrowInstance.connect(beneficiary2).approveNewOwner(holder2.address);
-
-    await expect(attemptToapproveNewOwnerTx).to.be.revertedWith(
-      "HasNamedBeneficiary: only the beneficiary may invoke this function"
-    );
   });
 
   it("should lock contract after it has been spent", async () => {
@@ -268,7 +203,7 @@ describe("TitleEscrowCloneable", async () => {
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance1.address);
 
-    const transferTx = escrowInstance1.transferTo(escrowInstance2.address);
+    const transferTx = escrowInstance1.transferToInternal(escrowInstance2.address);
     await expect(transferTx)
       .to.emit(escrowInstance1, "TitleCeded")
       .withArgs(ERC721Address, escrowInstance2.address, SAMPLE_TOKEN_ID);
@@ -293,7 +228,7 @@ describe("TitleEscrowCloneable", async () => {
     ).wait();
     assertTransferLog(mintTx.events[0], ZERO_ADDRESS, escrowInstance1.address);
 
-    const transferTx = escrowInstance1.connect(beneficiary1).transferTo(escrowInstance2.address);
+    const transferTx = escrowInstance1.connect(beneficiary1).transferToInternal(escrowInstance2.address);
     await expect(transferTx)
       .to.emit(escrowInstance1, "TitleCeded")
       .withArgs(ERC721Address, escrowInstance2.address, SAMPLE_TOKEN_ID);
@@ -304,7 +239,7 @@ describe("TitleEscrowCloneable", async () => {
     const newOwner = await ERC721Instance.ownerOf(SAMPLE_TOKEN_ID);
     expect(newOwner).to.be.equal(escrowInstance2.address);
 
-    const transferTx2 = escrowInstance2.connect(beneficiary2).transferTo(escrowInstance1.address);
+    const transferTx2 = escrowInstance2.connect(beneficiary2).transferToInternal(escrowInstance1.address);
 
     await expect(transferTx2).to.be.revertedWith("TitleEscrow: Contract has been used before");
   });

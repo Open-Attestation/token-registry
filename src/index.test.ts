@@ -83,9 +83,11 @@ describe("TitleEscrowCloneableFactory", () => {
   it("should be able to write to TitleEscrow", async () => {
     const escrowInstance = await deployTitleEscrow();
     await tokenRegistry.mintInternal(escrowInstance.address, tokenId);
-    await escrowInstance.approveNewOwner(account2);
-    const target = await escrowInstance.approvedOwner();
-    expect(target).toBe(account2);
+    await escrowInstance.approveNewTransferTargets(account1, account2);
+    const approvedBeneficiary = await escrowInstance.approvedBeneficiary();
+    const approvedHolder = await escrowInstance.approvedHolder();
+    expect(approvedBeneficiary).toBe(account1);
+    expect(approvedHolder).toBe(account2);
   });
 });
 

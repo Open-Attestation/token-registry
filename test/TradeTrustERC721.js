@@ -180,7 +180,7 @@ describe("TradeTrustErc721", async () => {
         .connect(nonMinter)
         .mintTitle(beneficiary.address, holder.address, merkleRoot);
 
-      await expect(tx).to.be.revertedWith("MinterRole: caller does not have the Minter role");
+      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Minter role");
     });
   });
 
