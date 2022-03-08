@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "./TitleEscrowCloneable.sol";
 import "./TitleEscrowCloner.sol";
 import "./interfaces/ITitleEscrowCreator.sol";
@@ -11,7 +12,7 @@ import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
 import "./access/MinterRole.sol";
 
-contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, ERC721 {
+contract TradeTrustERC721 is ITradeTrustERC721, MinterRole, TitleEscrowCloner, Pausable, ERC721 {
   using Address for address;
 
   event TokenBurnt(uint256 indexed tokenId);
@@ -58,7 +59,7 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
    *
    * @param tokenId Token ID to be burnt
    */
-  function destroyToken(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) override {
+  function destroyToken(uint256 tokenId) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) override {
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -72,16 +73,17 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
     address beneficiary,
     address holder,
     uint256 tokenId
-  ) public virtual onlyMinter override returns (address) {
+  ) public virtual whenNotPaused onlyMinter override returns (address) {
     require(!_exists(tokenId), "TokenRegistry: Token already exists");
 
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
-  function restoreTitle(uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) override returns (address) {
-    address previousOwner = _surrenderedOwners[tokenId];
+  function restoreTitle(uint256 tokenId) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) override returns (address) {
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
+
+    address previousOwner = _surrenderedOwners[tokenId];
 
     // Remove the last surrendered token owner
     delete _surrenderedOwners[tokenId];
@@ -125,11 +127,19 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
     return false;
   }
 
+  function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _pause();
+  }
+
+  function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _unpause();
+  }
+
   function _beforeTokenTransfer(
     address from,
     address to,
     uint256 tokenId
-  ) internal virtual override {
+  ) internal whenNotPaused virtual override {
     if (to == BURN_ADDRESS) {
       require(isSurrendered(tokenId), "TokenRegistry: Token has not been surrendered for burning");
     } else {
