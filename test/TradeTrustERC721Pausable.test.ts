@@ -2,9 +2,8 @@ import { ethers, waffle } from "hardhat";
 import { TitleEscrowCloneable, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import faker from "faker";
 import { expect } from ".";
-import { RoleConstants } from "../src/common/constants";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
-import { getTestUsers, toAccessControlRevertMessage } from "./utils";
+import { getTestUsers } from "./utils";
 
 const { loadFixture } = waffle;
 
@@ -52,9 +51,7 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       it("should not allow non-admin to unpause", async () => {
         const tx = registryContractAsNonAdmin.unpause();
 
-        await expect(tx).to.be.revertedWith(
-          toAccessControlRevertMessage(users.beneficiary.address, RoleConstants.defaultAdmin)
-        );
+        await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Admin role");
       });
     });
 
@@ -76,9 +73,7 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       it("should not allow non-admin to pause", async () => {
         const tx = registryContractAsNonAdmin.pause();
 
-        await expect(tx).to.be.revertedWith(
-          toAccessControlRevertMessage(users.beneficiary.address, RoleConstants.defaultAdmin)
-        );
+        await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Admin role");
       });
     });
   });
