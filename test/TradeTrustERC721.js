@@ -57,10 +57,8 @@ describe("TradeTrustErc721", async () => {
 
     const ITradeTrustERC721InterfaceId = "0xa9b5af52";
     const IERC721InterfaceId = "0x80ac58cd";
-    const ITitleEscrowCreatorInterfaceId = "0xfcd7c1df";
     expect(await tradeTrustERC721Instance.supportsInterface(ITradeTrustERC721InterfaceId)).to.be.true;
     expect(await tradeTrustERC721Instance.supportsInterface(IERC721InterfaceId)).to.be.true;
-    expect(await tradeTrustERC721Instance.supportsInterface(ITitleEscrowCreatorInterfaceId)).to.be.true;
   });
 
   it("should work without a wallet for read operations", async () => {

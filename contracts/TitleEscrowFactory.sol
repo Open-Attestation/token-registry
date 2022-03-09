@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "./interfaces/ITitleEscrowCreator.sol";
 import "./TitleEscrowCloneable.sol";
 import "./interfaces/ITitleEscrowFactory.sol";
 
