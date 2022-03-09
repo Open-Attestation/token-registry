@@ -9,8 +9,11 @@ import "../access/IHasBeneficiary.sol";
 
 /// @title Title Escrow for Transferable Records
 interface ITitleEscrow is IHasHolder, IHasBeneficiary, IERC165, IERC721Receiver {
-
-  enum StatusTypes {Uninitialised, InUse, Exited}
+  enum StatusTypes {
+    Uninitialised,
+    InUse,
+    Exited
+  }
 
   /// @dev This emits when the escrow contract receives an ERC721 token.
   event TitleReceived(address indexed _tokenRegistry, address indexed _from, uint256 indexed _id);

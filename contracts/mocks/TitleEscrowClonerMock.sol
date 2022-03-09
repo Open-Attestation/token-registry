@@ -5,7 +5,6 @@ import "./TitleEscrowCloneableMock.sol";
 import "../TitleEscrowCloner.sol";
 
 contract TitleEscrowClonerMock is TitleEscrowCloner {
-
   constructor() {
     titleEscrowImplementation = address(new TitleEscrowCloneableMock());
   }
