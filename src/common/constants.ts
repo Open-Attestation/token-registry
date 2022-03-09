@@ -5,7 +5,7 @@ export const AddressConstants = {
 };
 
 export const RoleConstants = {
-  defaultAdmin: "0x0000000000000000000000000000000000000000000000000000000000000000",
+  defaultAdmin: ethers.constants.HashZero,
   minterRole: ethers.utils.id("MINTER_ROLE"),
   accepterRole: ethers.utils.id("ACCEPTER_ROLE"),
   restorerRole: ethers.utils.id("RESTORER_ROLE"),
