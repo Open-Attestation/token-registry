@@ -13,10 +13,17 @@ export const verifyContract = async ({ hre, address, constructorArgsParams, cont
     return;
   }
   console.log(`[Status] Verifying contract ${address}...`);
-  await hre.run("verify", {
-    address,
-    constructorArgsParams,
-    contract,
-  });
-  console.log(`[Status] Verified contract at ${address}`);
+  try {
+    await hre.run("verify:verify", {
+      address,
+      constructorArguments: constructorArgsParams,
+      contract,
+    });
+  } catch (err: any) {
+    if ((err.message as string).indexOf("Reason: Already Verified") === -1) {
+      throw err;
+    }
+  } finally {
+    console.log(`[Status] Verified contract at ${address}`);
+  }
 };
