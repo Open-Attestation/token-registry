@@ -3,15 +3,17 @@
 
 # Token Registry
 
-The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
+The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract
+code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
 
 > ⚠️ **Beta Notice**
 >
-> Welcome to the beta branch of Token Registry! This branch is still in active development. Please expect bugs and breaking changes. Be warned but be brave!💪 
-> 
+> Welcome to the beta branch of Token Registry! This branch is still in active development. Please expect bugs and breaking changes. Be warned but be brave!💪
+>
 > Please report any issues or suggestions [here](https://github.com/Open-Attestation/token-registry/issues).
 
 ## Table of Contents
+
 - [Installation](#installation)
 - [Usage](#usage)
 - [Deployment](#deployment)
@@ -34,7 +36,9 @@ npm i @govtechsg/token-registry
 
 ## Usage
 
-To use the package, you will need to provide your own Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/) or [signer](https://docs.ethers.io/v5/api/signer/#Wallet) (if you are writing to the blockchain).
+To use the package, you will need to provide your own
+Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/)
+or [signer](https://docs.ethers.io/v5/api/signer/#Wallet) (if you are writing to the blockchain).
 
 ### TradeTrustERC721
 
@@ -89,7 +93,8 @@ import { TitleEscrowFactory } from "@govtechsg/token-registry";
 const connectedEscrow = TitleEscrowFactory.connect(existingTitleEscrowAddress, signer1);
 ```
 
-For list of available functions on TitleEscrow simply check the type definitions as they are automatically generated using typechain.
+For list of available functions on TitleEscrow simply check the type definitions as they are automatically generated
+using typechain.
 
 ### Provider & Signer
 
@@ -112,11 +117,14 @@ signerFromMnemonic.connect(provider);
 ```
 
 # Deployment
-Hardhat is used to manage the contract development environment and deployment.
-This repository provides a couple of Hardhat tasks to simplify the deployment process.
+
+Hardhat is used to manage the contract development environment and deployment. This repository provides a couple of
+Hardhat tasks to simplify the deployment process.
 
 ## Token Contract
+
 Deploying the token contract.
+
 ```
 Usage: hardhat [GLOBAL OPTIONS] deploy:token --factory <STRING> --name <STRING> --symbol <STRING> [--verify]
 
@@ -131,42 +139,52 @@ OPTIONS:
 deploy:token: Deploys the TradeTrustERC721 token and, optionally, Title Escrow factory if not provided.
 ```
 
-> 💡 Remember to supply the`--network` argument with the name of the network you wish to deploy on. 
+> 💡 Remember to supply the`--network` argument with the name of the network you wish to deploy on.
 > See [Network Configuration](#network-configuration) section for more info on the list of network names.
- 
-> 💡 Tip: Note that the `--factory` argument is optional. If not provided, a Title Factory contract will be deployed alongside the token contract. 
+
+> 💡 Tip: Note that the `--factory` argument is optional. If not provided, a Title Factory contract will be deployed alongside the token contract.
 > You can reuse a Title Escrow Factory that you have previously deployed by passing its address to the `--factory` argument to save on deployment fees.
 
 #### Example 1
+
 ```
 npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symbol GSC --verify
 ```
-This will deploy the token with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon _mumbai_ network.
-The contract will also be _verified_ on Etherscan. A Title Escrow factory will also be deployed.
+
+This will deploy the token with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon _mumbai_
+network. The contract will also be _verified_ on Etherscan. A Title Escrow factory will also be deployed.
 
 #### Example 2
+
 ```
 npx hardhat deploy:token --network mainnet --name "The Great Shipping Co." --symbol GSC --factory 0xfac7
 ```
-This will deploy the token with the name _The Great Shipping Co._ under the symbol _GSC_ on the Ethereum _mainnet_ network.
-The token will be registered with an existing factory address of `0xfac7` and will not be verified.
+
+This will deploy the token with the name _The Great Shipping Co._ under the symbol _GSC_ on the Ethereum _mainnet_
+network. The token will be registered with an existing factory address of `0xfac7` and will not be verified.
 
 ## Network Configuration
+
 Here's a list of network names currently pre-configured:
- * `mainnet` (Ethereum)
- * `ropsten`
- * `rinkeby`
- * `kovan`
- * `goerli`
- * `polygon` (Polygon Mainnet)
- * `mumbai` (Polygon Mumbai)
+
+* `mainnet` (Ethereum)
+* `ropsten`
+* `rinkeby`
+* `kovan`
+* `goerli`
+* `polygon` (Polygon Mainnet)
+* `mumbai` (Polygon Mumbai)
 
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
 
 ## Verification
-When verifying the contracts through either the Hardhat's verify plugin or passing the `--verify` flag to the deployment tasks (which internally uses the same plugin), you will need to set `ETHERSCAN_API_KEY` in your environment to your Etherscan API key.
+
+When verifying the contracts through either the Hardhat's verify plugin or passing the `--verify` flag to the deployment
+tasks (which internally uses the same plugin), you will need to set `ETHERSCAN_API_KEY` in your environment to your
+Etherscan API key.
 
 # Development
+
 This repository's development framework uses [HardHat](https://hardhat.org/getting-started/).
 
 Tests are run using `npm run test`, more development tasks can be found in the package.json scripts.
@@ -181,7 +199,10 @@ npx hardhat <command>
 ```
 
 ## Configuration
-Create a `.env` file and add your own keys into it. You can rename from the sample file `.env.sample` or copy the following into a new file:
+
+Create a `.env` file and add your own keys into it. You can rename from the sample file `.env.sample` or copy the
+following into a new file:
+
 ```
 # Infura
 INFURA_APP_ID=
@@ -197,10 +218,13 @@ DEPLOYER_PK=
 MNEMONIC=
 ```
 
-Only either the `DEPLOYER_PK` or `MNEMONIC` is needed. 
+Only either the `DEPLOYER_PK` or `MNEMONIC` is needed.
 
 ## Subgraph
-Check out our [Token Registry Subgraph](https://github.com/Open-Attestation/token-registry-subgraph) Github repository for more information on using and deploying your own subgraphs for the Token Registry contracts.
+
+Check out our [Token Registry Subgraph](https://github.com/Open-Attestation/token-registry-subgraph) Github repository
+for more information on using and deploying your own subgraphs for the Token Registry contracts.
 
 ## Notes
+
 * The contracts have not gone through formal audits yet. Please use them at your own discretion.
