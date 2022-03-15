@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "../access/IHasHolder.sol";
 import "../access/IHasBeneficiary.sol";
-import  { ERC721, IERC165, IERC721Receiver } from "../lib/ERC721.sol";
 
 /// @title Title Escrow for Transferable Records
 interface ITitleEscrow is IHasHolder, IHasBeneficiary, IERC165, IERC721Receiver {

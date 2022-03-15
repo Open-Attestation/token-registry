@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/ITitleEscrow.sol";
-import "../lib/Initializable.sol";
-import { Context } from "../lib/ERC721.sol";
 
 abstract contract HasHolderInitializable is Context, IHasHolder, Initializable {
   address public override holder;
