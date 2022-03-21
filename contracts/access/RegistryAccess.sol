@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-abstract contract RegistryAccess is AccessControl {
+abstract contract RegistryAccess is AccessControlUpgradeable {
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
   bytes32 public constant RESTORER_ROLE = keccak256("RESTORER_ROLE");
   bytes32 public constant ACCEPTER_ROLE = keccak256("ACCEPTER_ROLE");
 
-  constructor() {
-    _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-    _setupRole(MINTER_ROLE, _msgSender());
-    _setupRole(RESTORER_ROLE, _msgSender());
-    _setupRole(ACCEPTER_ROLE, _msgSender());
+  function __RegistryAccess_init(address deployer) internal onlyInitializing {
+    require(deployer != address(0), "RegistryAccess: Deployer is zero");
+    __AccessControl_init();
+    _setupRole(DEFAULT_ADMIN_ROLE, deployer);
+    _setupRole(MINTER_ROLE, deployer);
+    _setupRole(RESTORER_ROLE, deployer);
+    _setupRole(ACCEPTER_ROLE, deployer);
   }
 
   modifier onlyAdmin() {

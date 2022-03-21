@@ -31,6 +31,7 @@ describe("TradeTrustERC721", async () => {
 
     registryName = "The Great Shipping Company";
     registrySymbol = "GSC";
+    tokenId = faker.datatype.hexaDecimal(64);
 
     mockTitleEscrowFactoryContract = (await (
       await smock.mock("TitleEscrowFactory", users.carrier)
@@ -47,8 +48,6 @@ describe("TradeTrustERC721", async () => {
     );
 
     registryContractAsAdmin = registryContract.connect(users.carrier);
-
-    tokenId = faker.datatype.hexaDecimal(64);
     titleEscrowImplAddr = await mockTitleEscrowFactoryContract.implementation();
   });
 
