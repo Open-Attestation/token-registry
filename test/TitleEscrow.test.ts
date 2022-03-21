@@ -5,9 +5,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Signer } from "ethers";
 import { FakeContract, MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
-import { deployTokenFixture } from "./fixtures";
+import { deployTokenFixture, deployTitleEscrowFixture } from "./fixtures";
 import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./utils";
-import { deployTitleEscrowFixture } from "./fixtures/deploy-title-escrow.fixture";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
 import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
 
