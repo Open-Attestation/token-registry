@@ -162,6 +162,13 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
           expect(paused).to.be.true;
         });
 
+        it("should not allow onERC721Received", async () => {
+          const fakeAddress = faker.finance.ethereumAddress();
+          const tx = titleEscrowContract.onERC721Received(fakeAddress, fakeAddress, tokenId, "0x00");
+
+          expect(tx).to.be.revertedWith("TitleEscrow: Token Registry is paused");
+        });
+
         it("should not allow surrendering", async () => {
           const tx = titleEscrowContract.connect(users.beneficiary).surrender();
 
