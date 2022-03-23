@@ -17,20 +17,18 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
 
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
-  uint256 public genesisBlock;
-  ITitleEscrowFactory public override titleEscrowFactory;
+  function titleEscrowFactory() public view virtual returns (ITitleEscrowFactory);
+
+  function genesis() public view virtual returns (uint256);
 
   function __TradeTrustERC721Base_init(
     string memory name,
     string memory symbol,
-    address _titleEscrowFactory,
     address deployer
   ) internal initializer {
     __ERC721_init(name, symbol);
     __Pausable_init();
     __RegistryAccess_init(deployer);
-    genesisBlock = block.number;
-    titleEscrowFactory = ITitleEscrowFactory(_titleEscrowFactory);
   }
 
   function supportsInterface(bytes4 interfaceId)
@@ -73,7 +71,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
    * @param tokenId Token ID to be burnt
    */
   function destroyToken(uint256 tokenId) external override whenNotPaused onlyAccepter {
-    address titleEscrow = titleEscrowFactory.getAddress(address(this), tokenId);
+    address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
 
     ITitleEscrow(titleEscrow).shred();
 
@@ -98,7 +96,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
     require(ownerOf(tokenId) != BURN_ADDRESS, "TokenRegistry: Token is already burnt");
 
-    address titleEscrow = titleEscrowFactory.getAddress(address(this), tokenId);
+    address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
     //    require(escrowAddress.isContract(), "TokenRegistry: Escrow contract does not exist");
 
     _registryTransferTo(titleEscrow, tokenId);
@@ -138,7 +136,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     address holder,
     uint256 tokenId
   ) internal virtual returns (address) {
-    address newTitleEscrow = titleEscrowFactory.create(beneficiary, holder, tokenId);
+    address newTitleEscrow = titleEscrowFactory().create(beneficiary, holder, tokenId);
     _safeMint(newTitleEscrow, tokenId);
 
     return newTitleEscrow;

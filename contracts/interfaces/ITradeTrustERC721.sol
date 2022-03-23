@@ -6,6 +6,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradea
 import "./ITitleEscrowFactory.sol";
 
 interface ITradeTrustERC721 is IERC721ReceiverUpgradeable, IERC721Upgradeable {
+  function genesis() external view returns (uint256);
+
   function titleEscrowFactory() external view returns (ITitleEscrowFactory);
 
   function destroyToken(uint256 tokenId) external;

@@ -88,7 +88,7 @@ describe("TradeTrustERC721", async () => {
 
     it("should deploy with genesis block", async () => {
       const genesisBlock = registryContract.deployTransaction.blockNumber;
-      expect(await registryContract.genesisBlock()).to.equal(genesisBlock);
+      expect(await registryContract.genesis()).to.equal(genesisBlock);
     });
 
     it("should deploy with title escrow factory address", async () => {
