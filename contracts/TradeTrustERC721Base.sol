@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-//import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
@@ -25,7 +24,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     string memory name,
     string memory symbol,
     address deployer
-  ) internal initializer {
+  ) internal onlyInitializing {
     __ERC721_init(name, symbol);
     __Pausable_init();
     __RegistryAccess_init(deployer);
@@ -50,26 +49,9 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     uint256, /* _tokenId */
     bytes memory /* _data */
   ) public pure override returns (bytes4) {
-    //    address expectedOperator = titleEscrowFactory.getAddress(address(this), _tokenId);
-    //    require(_operator == expectedOperator, "TitleEscrow: Unexpected operator");
-    // TODO: Why event emit this event??
-    //    emit TokenReceived(_operator, _from, _tokenId, _data);
     return IERC721Receiver.onERC721Received.selector;
   }
 
-  /**
-   * @dev Permanently burns a token and does not allow the same ID to be minted again.
-   * This call is meant for a minter to accept a surrendered token. Token will be transferred to 0xdead address.
-   *
-   * Requirements:
-   *
-   * - the caller must be a `minter`.
-   * - the token is surrendered
-   *
-   * Emits a {TokenBurnt} event.
-   *
-   * @param tokenId Token ID to be burnt
-   */
   function destroyToken(uint256 tokenId) external override whenNotPaused onlyAccepter {
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
 
@@ -97,7 +79,6 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     require(ownerOf(tokenId) != BURN_ADDRESS, "TokenRegistry: Token is already burnt");
 
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
-    //    require(escrowAddress.isContract(), "TokenRegistry: Escrow contract does not exist");
 
     _registryTransferTo(titleEscrow, tokenId);
 

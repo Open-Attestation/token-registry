@@ -1,5 +1,5 @@
 import { ethers, waffle } from "hardhat";
-import { RegistryDeployer, TradeTrustERC721Impl } from "@tradetrust/contracts";
+import { ImplDeployer, TradeTrustERC721Impl } from "@tradetrust/contracts";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -7,40 +7,34 @@ import { expect } from ".";
 import { getEventFromTransaction, getTestUsers, TestUsers } from "./utils";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
 import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
-import { deployRegistryImplFixture } from "./fixtures";
+import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
 import { encodeInitParams } from "../src/utils";
 
 const { loadFixture } = waffle;
 
-const deployRegistryDeployer = (deployer: SignerWithAddress) => async () => {
-  return (await (await ethers.getContractFactory("RegistryDeployer")).connect(deployer).deploy()) as RegistryDeployer;
-};
-
-describe("RegistryDeployer", async () => {
+describe("ImplDeployer", async () => {
   let users: TestUsers;
   let deployer: SignerWithAddress;
 
-  let deployerContract: RegistryDeployer;
+  let deployerContract: ImplDeployer;
   let implContract: TradeTrustERC721Impl;
 
-  let deployerContractAsOwner: RegistryDeployer;
-  let deployerContractasNonOwner: RegistryDeployer;
+  let deployerContractAsOwner: ImplDeployer;
+  let deployerContractAsNonOwner: ImplDeployer;
 
-  const createEventAbi = [
-    "event RegistryCreated (address indexed registry, address indexed implementation, bytes params)",
-  ];
+  const createEventAbi = ["event Deployment (address indexed deployed, address indexed implementation, bytes params)"];
 
   beforeEach(async () => {
     users = await getTestUsers();
     deployer = users.carrier;
 
     [implContract, deployerContract] = await Promise.all([
-      loadFixture(deployRegistryImplFixture({ deployer })),
-      loadFixture(deployRegistryDeployer(deployer)),
+      loadFixture(deployTradeTrustERC721ImplFixture({ deployer })),
+      loadFixture(deployImplDeployerFixture({ deployer })),
     ]);
 
     deployerContractAsOwner = deployerContract.connect(deployer);
-    deployerContractasNonOwner = deployerContract.connect(users.beneficiary);
+    deployerContractAsNonOwner = deployerContract.connect(users.beneficiary);
   });
 
   describe("Implementation Administration", () => {
@@ -50,7 +44,7 @@ describe("RegistryDeployer", async () => {
       });
 
       it("should add implementation correctly", async () => {
-        const res = await deployerContractasNonOwner.implementations(implContract.address);
+        const res = await deployerContractAsNonOwner.implementations(implContract.address);
 
         expect(res).to.be.true;
       });
@@ -58,11 +52,11 @@ describe("RegistryDeployer", async () => {
       it("should not allow adding an already added implementation", async () => {
         const tx = deployerContractAsOwner.addImplementation(implContract.address);
 
-        await expect(tx).to.be.revertedWith("RegistryDeployer: Already added");
+        await expect(tx).to.be.revertedWith("ImplDeployer: Already added");
       });
 
       it("should not allow non-owner to add implementation", async () => {
-        const tx = deployerContractasNonOwner.addImplementation(implContract.address);
+        const tx = deployerContractAsNonOwner.addImplementation(implContract.address);
 
         await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
       });
@@ -81,14 +75,14 @@ describe("RegistryDeployer", async () => {
       });
 
       it("should not allow non-owner to remove implementation", async () => {
-        const tx = deployerContractasNonOwner.removeImplementation(implContract.address);
+        const tx = deployerContractAsNonOwner.removeImplementation(implContract.address);
 
         await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
       });
     });
   });
 
-  describe("Deployment", () => {
+  describe("Deployment Behaviours", () => {
     let fakeTokenName: string;
     let fakeTokenSymbol: string;
     let fakeTitleEscrowFactoryAddr: string;
@@ -111,9 +105,9 @@ describe("RegistryDeployer", async () => {
         titleEscrowFactory: fakeTitleEscrowFactoryAddr,
         deployer: registryAdmin.address,
       });
-      const tx = deployerContractasNonOwner.create(fakeAddress, initParams);
+      const tx = deployerContractAsNonOwner.create(fakeAddress, initParams);
 
-      await expect(tx).to.be.revertedWith("RegistryDeployer: Not whitelisted");
+      await expect(tx).to.be.revertedWith("ImplDeployer: Not whitelisted");
     });
 
     it("should revert when registry admin is zero address", async () => {
@@ -123,12 +117,12 @@ describe("RegistryDeployer", async () => {
         titleEscrowFactory: fakeTitleEscrowFactoryAddr,
         deployer: ethers.constants.AddressZero,
       });
-      const tx = deployerContractasNonOwner.create(implContract.address, initParams);
+      const tx = deployerContractAsNonOwner.create(implContract.address, initParams);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: Deployer is zero");
+      await expect(tx).to.be.revertedWith("ImplDeployer: Init fail");
     });
 
-    describe("Creation", () => {
+    describe("Deploy", () => {
       let createTx: ContractTransaction;
       let clonedRegistryContract: TradeTrustERC721Impl;
       let initParams: string;
@@ -140,10 +134,10 @@ describe("RegistryDeployer", async () => {
           titleEscrowFactory: fakeTitleEscrowFactoryAddr,
           deployer: registryAdmin.address,
         });
-        createTx = await deployerContractasNonOwner.create(implContract.address, initParams);
-        const registryCreatedEvent = await getEventFromTransaction(createTx, createEventAbi, "RegistryCreated");
+        createTx = await deployerContractAsNonOwner.create(implContract.address, initParams);
+        const registryCreatedEvent = await getEventFromTransaction(createTx, createEventAbi, "Deployment");
         clonedRegistryContract = (await ethers.getContractFactory("TradeTrustERC721Impl")).attach(
-          registryCreatedEvent.registry as string
+          registryCreatedEvent.deployed as string
         ) as TradeTrustERC721Impl;
       });
 
@@ -189,9 +183,9 @@ describe("RegistryDeployer", async () => {
         expect(res).to.be.true;
       });
 
-      it("should emit RegistryCreated event", async () => {
+      it("should emit Deployment event", async () => {
         expect(createTx)
-          .to.emit(deployerContract, "RegistryCreated")
+          .to.emit(deployerContract, "Deployment")
           .withArgs(clonedRegistryContract.address, implContract.address, initParams);
       });
     });

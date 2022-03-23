@@ -28,7 +28,4 @@ export const deployTokenFixture =
     return (await tradeTrustERC721Factory
       .connect(deployer)
       .deploy(tokenName, tokenInitials, escrowFactoryAddress)) as T;
-    // const registryContract = (await tradeTrustERC721Factory.connect(deployer).deploy()) as T;
-    // await registryContract.initialize(tokenName, tokenInitials, escrowFactoryAddress);
-    // return registryContract;
   };

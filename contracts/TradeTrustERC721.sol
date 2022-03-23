@@ -14,7 +14,15 @@ contract TradeTrustERC721 is TradeTrustERC721Base {
   ) {
     _genesis = block.number;
     _titleEscrowFactory = titleEscrowFactory_;
-    __TradeTrustERC721Base_init(name, symbol, _msgSender());
+    initialize(name, symbol, _msgSender());
+  }
+
+  function initialize(
+    string memory name,
+    string memory symbol,
+    address deployer
+  ) internal initializer {
+    __TradeTrustERC721Base_init(name, symbol, deployer);
   }
 
   function titleEscrowFactory() public view override returns (ITitleEscrowFactory) {

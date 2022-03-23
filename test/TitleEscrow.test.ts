@@ -9,6 +9,7 @@ import { deployTokenFixture, deployTitleEscrowFixture } from "./fixtures";
 import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./utils";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
 import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
+import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 
 const { loadFixture } = waffle;
 
@@ -35,14 +36,32 @@ describe("Title Escrow", async () => {
 
   describe("General Behaviours", () => {
     let deployer: SignerWithAddress;
+    let implContract: TitleEscrow;
     let titleEscrowContract: TitleEscrow;
 
     beforeEach(async () => {
       users = await getTestUsers();
 
       deployer = users.others[users.others.length - 1];
-      titleEscrowContract = await loadFixture(deployTitleEscrowFixture({ deployer }));
+      implContract = await loadFixture(deployTitleEscrowFixture({ deployer }));
+      titleEscrowContract = await loadFixture(
+        deployImplProxy<TitleEscrow>({
+          implementation: implContract,
+          deployer: users.carrier,
+        })
+      );
       tokenId = faker.datatype.hexaDecimal(64);
+    });
+
+    it("should initialise implementation", async () => {
+      const tx = implContract.initialize(
+        ethers.constants.AddressZero,
+        users.beneficiary.address,
+        users.holder.address,
+        tokenId
+      );
+
+      await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
     });
 
     describe("Initialisation", () => {
@@ -200,6 +219,7 @@ describe("Title Escrow", async () => {
           mockTitleEscrowContract = (await (
             await smock.mock("TitleEscrow")
           ).deploy()) as unknown as MockContract<TitleEscrow>;
+          await mockTitleEscrowContract.setVariable("_initialized", false);
 
           await mockTitleEscrowContract.initialize(
             fakeRegistry.address,
@@ -207,6 +227,7 @@ describe("Title Escrow", async () => {
             users.beneficiary.address,
             tokenId
           );
+
           await mockTitleEscrowContract.setVariable("active", false);
           fakeRegistry.ownerOf.returns(mockTitleEscrowContract.address);
         });
