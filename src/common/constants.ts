@@ -1,12 +1,12 @@
 import { ethers } from "ethers";
 
 export const AddressConstants = {
-  burn: "0x000000000000000000000000000000000000dEaD",
+  Burn: "0x000000000000000000000000000000000000dEaD",
 };
 
 export const RoleConstants = {
-  defaultAdmin: ethers.constants.HashZero,
-  minterRole: ethers.utils.id("MINTER_ROLE"),
-  accepterRole: ethers.utils.id("ACCEPTER_ROLE"),
-  restorerRole: ethers.utils.id("RESTORER_ROLE"),
+  DefaultAdmin: ethers.constants.HashZero,
+  MinterRole: ethers.utils.id("MINTER_ROLE"),
+  AccepterRole: ethers.utils.id("ACCEPTER_ROLE"),
+  RestorerRole: ethers.utils.id("RESTORER_ROLE"),
 };

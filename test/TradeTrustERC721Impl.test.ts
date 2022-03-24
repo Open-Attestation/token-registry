@@ -8,6 +8,7 @@ import { getTestUsers, TestUsers } from "./utils";
 import { deployTradeTrustERC721ImplFixture } from "./fixtures";
 import { encodeInitParams } from "../src/utils";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
+import { RoleConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 
@@ -63,8 +64,7 @@ describe("TradeTrustERC721Impl", async () => {
     });
 
     it("should not set deployer as admin", async () => {
-      const adminRole = await implContract.DEFAULT_ADMIN_ROLE();
-      const res = await implContract.hasRole(adminRole, users.carrier.address);
+      const res = await implContract.hasRole(RoleConstants.DefaultAdmin, users.carrier.address);
 
       await expect(res).to.be.false;
     });
@@ -131,22 +131,19 @@ describe("TradeTrustERC721Impl", async () => {
       });
 
       it("should initialise deployer account as admin", async () => {
-        const adminRole = await registryImplContract.DEFAULT_ADMIN_ROLE();
-        const res = await registryImplContract.hasRole(adminRole, registryAdmin.address);
+        const res = await registryImplContract.hasRole(RoleConstants.DefaultAdmin, registryAdmin.address);
 
         expect(res).to.be.true;
       });
 
       it("should not set initialiser as admin", async () => {
-        const adminRole = await registryImplContract.DEFAULT_ADMIN_ROLE();
-        const res = await registryImplContract.hasRole(adminRole, initialiserSigner.address);
+        const res = await registryImplContract.hasRole(RoleConstants.DefaultAdmin, initialiserSigner.address);
 
         expect(res).to.be.false;
       });
 
       it("should not set deployer as admin", async () => {
-        const adminRole = await registryImplContract.DEFAULT_ADMIN_ROLE();
-        const res = await registryImplContract.hasRole(adminRole, deployer.address);
+        const res = await registryImplContract.hasRole(RoleConstants.DefaultAdmin, deployer.address);
 
         expect(res).to.be.false;
       });

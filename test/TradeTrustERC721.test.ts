@@ -135,7 +135,7 @@ describe("TradeTrustERC721", async () => {
 
           const res = await registryContract.ownerOf(tokenId);
 
-          expect(res).to.equal(AddressConstants.burn);
+          expect(res).to.equal(AddressConstants.Burn);
         });
 
         it("should not allow burning a burnt token", async () => {
@@ -151,7 +151,7 @@ describe("TradeTrustERC721", async () => {
 
           expect(tx)
             .to.emit(registryContract, "Transfer")
-            .withArgs(registryContract.address, AddressConstants.burn, tokenId);
+            .withArgs(registryContract.address, AddressConstants.Burn, tokenId);
         });
       });
 
@@ -187,7 +187,7 @@ describe("TradeTrustERC721", async () => {
 
           const tx = registryContractMock
             .connect(users.carrier)
-            .transferFrom(users.carrier.address, AddressConstants.burn, tokenId);
+            .transferFrom(users.carrier.address, AddressConstants.Burn, tokenId);
 
           await expect(tx).to.be.revertedWith("Registry: Token unsurrendered");
         });
