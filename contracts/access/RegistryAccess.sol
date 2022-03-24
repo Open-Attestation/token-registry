@@ -8,13 +8,13 @@ abstract contract RegistryAccess is AccessControlUpgradeable {
   bytes32 public constant RESTORER_ROLE = keccak256("RESTORER_ROLE");
   bytes32 public constant ACCEPTER_ROLE = keccak256("ACCEPTER_ROLE");
 
-  function __RegistryAccess_init(address deployer) internal onlyInitializing {
-    require(deployer != address(0), "RegistryAccess: Deployer is zero");
+  function __RegistryAccess_init(address admin) internal onlyInitializing {
+    require(admin != address(0), "RegistryAccess: Deployer is zero");
     __AccessControl_init();
-    _setupRole(DEFAULT_ADMIN_ROLE, deployer);
-    _setupRole(MINTER_ROLE, deployer);
-    _setupRole(RESTORER_ROLE, deployer);
-    _setupRole(ACCEPTER_ROLE, deployer);
+    _setupRole(DEFAULT_ADMIN_ROLE, admin);
+    _setupRole(MINTER_ROLE, admin);
+    _setupRole(RESTORER_ROLE, admin);
+    _setupRole(ACCEPTER_ROLE, admin);
   }
 
   modifier onlyAdmin() {

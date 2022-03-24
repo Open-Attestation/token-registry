@@ -20,9 +20,9 @@ contract TradeTrustERC721 is TradeTrustERC721Base {
   function initialize(
     string memory name,
     string memory symbol,
-    address deployer
+    address admin
   ) internal initializer {
-    __TradeTrustERC721Base_init(name, symbol, deployer);
+    __TradeTrustERC721Base_init(name, symbol, admin);
   }
 
   function titleEscrowFactory() public view override returns (ITitleEscrowFactory) {

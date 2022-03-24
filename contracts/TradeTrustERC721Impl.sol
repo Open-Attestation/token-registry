@@ -17,13 +17,13 @@ contract TradeTrustERC721Impl is TradeTrustERC721Base {
   }
 
   function initialize(bytes memory params) public initializer {
-    (string memory name, string memory symbol, address titleEscrowFactory_, address deployer) = abi.decode(
+    (string memory name, string memory symbol, address titleEscrowFactory_, address admin) = abi.decode(
       params,
       (string, string, address, address)
     );
     _genesis = block.number;
     _titleEscrowFactory = titleEscrowFactory_;
-    __TradeTrustERC721Base_init(name, symbol, deployer);
+    __TradeTrustERC721Base_init(name, symbol, admin);
   }
 
   function titleEscrowFactory() public view override returns (ITitleEscrowFactory) {

@@ -189,7 +189,7 @@ describe("TradeTrustERC721", async () => {
             .connect(users.carrier)
             .transferFrom(users.carrier.address, AddressConstants.burn, tokenId);
 
-          await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered");
+          await expect(tx).to.be.revertedWith("Registry: Token unsurrendered");
         });
       });
     });
@@ -222,13 +222,13 @@ describe("TradeTrustERC721", async () => {
 
         const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
+        await expect(tx).to.be.revertedWith("Registry: Token exists");
       });
 
       it("should not allow minting an existing token", async () => {
         const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
+        await expect(tx).to.be.revertedWith("Registry: Token exists");
       });
 
       it("should create title escrow from factory", async () => {
@@ -255,17 +255,17 @@ describe("TradeTrustERC721", async () => {
     });
 
     describe("Restore Token", () => {
-      it("should revert if token does not exist", async () => {
+      it("should revert if Invalid token", async () => {
         const invalidTokenId = faker.datatype.hexaDecimal(64);
         const tx = registryContractAsAdmin.restore(invalidTokenId);
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
+        await expect(tx).to.be.revertedWith("Registry: Invalid token");
       });
 
       it("should revert if token is not surrendered", async () => {
         const tx = registryContractAsAdmin.restore(tokenId);
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
+        await expect(tx).to.be.revertedWith("Registry: Not surrendered");
       });
 
       it("should not allow to restore burnt token", async () => {
@@ -274,7 +274,7 @@ describe("TradeTrustERC721", async () => {
 
         const tx = registryContractAsAdmin.restore(tokenId);
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token is already burnt");
+        await expect(tx).to.be.revertedWith("Registry: Token burnt");
       });
 
       it("should allow to restore after token is surrendered", async () => {
@@ -350,12 +350,12 @@ describe("TradeTrustERC721", async () => {
         expect(res).to.be.false;
       });
 
-      it("should revert if a token does not exist", async () => {
+      it("should revert if a Invalid token", async () => {
         const invalidTokenId = faker.datatype.hexaDecimal(64);
 
         const tx = registryContract.isSurrendered(invalidTokenId);
 
-        await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
+        await expect(tx).to.be.revertedWith("Registry: Invalid token");
       });
     });
   });

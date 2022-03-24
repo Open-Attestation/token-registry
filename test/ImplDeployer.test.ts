@@ -105,7 +105,7 @@ describe("ImplDeployer", async () => {
         titleEscrowFactory: fakeTitleEscrowFactoryAddr,
         deployer: registryAdmin.address,
       });
-      const tx = deployerContractAsNonOwner.create(fakeAddress, initParams);
+      const tx = deployerContractAsNonOwner.deploy(fakeAddress, initParams);
 
       await expect(tx).to.be.revertedWith("ImplDeployer: Not whitelisted");
     });
@@ -117,7 +117,7 @@ describe("ImplDeployer", async () => {
         titleEscrowFactory: fakeTitleEscrowFactoryAddr,
         deployer: ethers.constants.AddressZero,
       });
-      const tx = deployerContractAsNonOwner.create(implContract.address, initParams);
+      const tx = deployerContractAsNonOwner.deploy(implContract.address, initParams);
 
       await expect(tx).to.be.revertedWith("ImplDeployer: Init fail");
     });
@@ -134,7 +134,7 @@ describe("ImplDeployer", async () => {
           titleEscrowFactory: fakeTitleEscrowFactoryAddr,
           deployer: registryAdmin.address,
         });
-        createTx = await deployerContractAsNonOwner.create(implContract.address, initParams);
+        createTx = await deployerContractAsNonOwner.deploy(implContract.address, initParams);
         const registryCreatedEvent = await getEventFromTransaction(createTx, createEventAbi, "Deployment");
         clonedRegistryContract = (await ethers.getContractFactory("TradeTrustERC721Impl")).attach(
           registryCreatedEvent.deployed as string

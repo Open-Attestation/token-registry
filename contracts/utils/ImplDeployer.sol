@@ -9,7 +9,7 @@ contract ImplDeployer is Ownable {
 
   mapping(address => bool) public implementations;
 
-  function create(address implementation, bytes memory params) external returns (address) {
+  function deploy(address implementation, bytes memory params) external returns (address) {
     require(implementations[implementation], "ImplDeployer: Not whitelisted");
 
     address deployed = Clones.clone(implementation);
