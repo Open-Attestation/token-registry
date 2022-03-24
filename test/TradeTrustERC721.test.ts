@@ -1,4 +1,4 @@
-import { waffle, ethers } from "hardhat";
+import { waffle } from "hardhat";
 import { TitleEscrow, TitleEscrowFactory, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
@@ -250,7 +250,7 @@ describe("TradeTrustERC721", async () => {
 
         expect(tx)
           .to.emit(registryContract, "Transfer")
-          .withArgs(ethers.constants.AddressZero, titleEscrowContract.address, tokenId);
+          .withArgs(AddressConstants.Zero, titleEscrowContract.address, tokenId);
       });
     });
 

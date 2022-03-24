@@ -9,6 +9,7 @@ import { computeInterfaceId } from "./utils/computeInterfaceId";
 import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
 import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
 import { encodeInitParams } from "../src/utils";
+import { AddressConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 
@@ -143,7 +144,7 @@ describe("ImplDeployer", async () => {
         name: fakeTokenName,
         symbol: fakeTokenSymbol,
         titleEscrowFactory: fakeTitleEscrowFactoryAddr,
-        deployer: ethers.constants.AddressZero,
+        deployer: AddressConstants.Zero,
       });
       const tx = deployerContractAsNonOwner.deploy(implContract.address, initParams);
 

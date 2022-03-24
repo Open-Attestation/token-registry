@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
 export const AddressConstants = {
+  Zero: ethers.constants.AddressZero,
   Burn: "0x000000000000000000000000000000000000dEaD",
 };
 

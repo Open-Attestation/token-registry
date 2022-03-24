@@ -8,7 +8,7 @@ import { getTestUsers, TestUsers } from "./utils";
 import { deployTradeTrustERC721ImplFixture } from "./fixtures";
 import { encodeInitParams } from "../src/utils";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
-import { RoleConstants } from "../src/common/constants";
+import { AddressConstants, RoleConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 
@@ -88,7 +88,7 @@ describe("TradeTrustERC721Impl", async () => {
         name: registryName,
         symbol: registrySymbol,
         titleEscrowFactory: fakeTitleEscrowFactory,
-        deployer: ethers.constants.AddressZero,
+        deployer: AddressConstants.Zero,
       });
 
       const tx = registryImplContract.connect(initialiserSigner).initialize(initParams);
