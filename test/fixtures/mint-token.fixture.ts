@@ -16,7 +16,7 @@ export const mintTokenFixture =
     tokenId: string;
   }) =>
   async () => {
-    const tx = await token.mintTitle(beneficiary.address, holder.address, tokenId);
+    const tx = await token.mint(beneficiary.address, holder.address, tokenId);
 
     const abi = [
       "event TitleEscrowCreated (address indexed titleEscrow, address indexed tokenRegistry, uint256 indexed tokenId, address beneficiary, address holder)",

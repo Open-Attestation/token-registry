@@ -2,9 +2,9 @@ export const ContractInterfaces = {
   ITradeTrustERC721: [
     "genesis()",
     "titleEscrowFactory()",
-    "destroyToken(uint256)",
-    "restoreTitle(uint256)",
-    "mintTitle(address,address,uint256)",
+    "burn(uint256)",
+    "restore(uint256)",
+    "mint(address,address,uint256)",
   ],
   ITitleEscrow: [
     "nominateBeneficiary(address)",

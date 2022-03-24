@@ -115,13 +115,13 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
 
   describe("Minter Role", () => {
     it("should allow a minter to mint new tokens", async () => {
-      const tx = registryContractAsMinter.mintTitle(users.beneficiary.address, users.holder.address, tokenId);
+      const tx = registryContractAsMinter.mint(users.beneficiary.address, users.holder.address, tokenId);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-minter to mint new tokens", async () => {
-      const tx = registryContractAsNoRole.mintTitle(users.beneficiary.address, users.holder.address, tokenId);
+      const tx = registryContractAsNoRole.mint(users.beneficiary.address, users.holder.address, tokenId);
 
       await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Minter role");
     });
@@ -143,13 +143,13 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     });
 
     it("should allow a restorer to restore tokens", async () => {
-      const tx = registryContractAsRestorer.restoreTitle(tokenId);
+      const tx = registryContractAsRestorer.restore(tokenId);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-restorer to restore tokens", async () => {
-      const tx = registryContractAsNoRole.restoreTitle(tokenId);
+      const tx = registryContractAsNoRole.restore(tokenId);
 
       await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Restorer role");
     });
@@ -171,13 +171,13 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     });
 
     it("should allow an accepter to burn tokens", async () => {
-      const tx = registryContractAsAccepter.destroyToken(tokenId);
+      const tx = registryContractAsAccepter.burn(tokenId);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-accepter to burn tokens", async () => {
-      const tx = registryContractAsNoRole.destroyToken(tokenId);
+      const tx = registryContractAsNoRole.burn(tokenId);
 
       await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Accepter role");
     });

@@ -52,7 +52,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     return IERC721Receiver.onERC721Received.selector;
   }
 
-  function destroyToken(uint256 tokenId) external override whenNotPaused onlyAccepter {
+  function burn(uint256 tokenId) external override whenNotPaused onlyAccepter {
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
 
     ITitleEscrow(titleEscrow).shred();
@@ -63,7 +63,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     emit TokenBurnt(tokenId, titleEscrow, _msgSender());
   }
 
-  function mintTitle(
+  function mint(
     address beneficiary,
     address holder,
     uint256 tokenId
@@ -73,7 +73,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
-  function restoreTitle(uint256 tokenId) external override whenNotPaused onlyRestorer returns (address) {
+  function restore(uint256 tokenId) external override whenNotPaused onlyRestorer returns (address) {
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
     require(ownerOf(tokenId) != BURN_ADDRESS, "TokenRegistry: Token is already burnt");

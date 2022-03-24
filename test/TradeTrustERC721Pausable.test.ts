@@ -89,7 +89,7 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       it("should not allow minting of tokens", async () => {
         await registryContractAsAdmin.pause();
 
-        const tx = registryContractAsAdmin.mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+        const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
         await expect(tx).to.be.revertedWith("Pausable: paused");
       });
@@ -141,13 +141,13 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
         });
 
         it("should not allow restoring token", async () => {
-          const tx = registryContractAsAdmin.restoreTitle(tokenId);
+          const tx = registryContractAsAdmin.restore(tokenId);
 
           await expect(tx).to.be.revertedWith("Pausable: paused");
         });
 
         it("should not allow accepting token", async () => {
-          const tx = registryContractAsAdmin.destroyToken(tokenId);
+          const tx = registryContractAsAdmin.burn(tokenId);
 
           await expect(tx).to.be.revertedWith("Pausable: paused");
         });

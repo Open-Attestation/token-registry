@@ -22,12 +22,12 @@ contract ImplDeployer is Ownable {
     return deployed;
   }
 
-  function addImplementation(address implementation) external onlyOwner {
+  function addImpl(address implementation) external onlyOwner {
     require(!implementations[implementation], "ImplDeployer: Already added");
     implementations[implementation] = true;
   }
 
-  function removeImplementation(address implementation) external onlyOwner {
+  function removeImpl(address implementation) external onlyOwner {
     delete implementations[implementation];
   }
 }

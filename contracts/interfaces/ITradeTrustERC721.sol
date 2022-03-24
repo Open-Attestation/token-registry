@@ -10,11 +10,11 @@ interface ITradeTrustERC721 is IERC721ReceiverUpgradeable, IERC721Upgradeable {
 
   function titleEscrowFactory() external view returns (ITitleEscrowFactory);
 
-  function destroyToken(uint256 tokenId) external;
+  function burn(uint256 tokenId) external;
 
-  function restoreTitle(uint256 tokenId) external returns (address);
+  function restore(uint256 tokenId) external returns (address);
 
-  function mintTitle(
+  function mint(
     address beneficiary,
     address holder,
     uint256 tokenId

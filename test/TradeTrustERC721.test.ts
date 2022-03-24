@@ -110,7 +110,7 @@ describe("TradeTrustERC721", async () => {
     let titleEscrowContract: TitleEscrow;
 
     beforeEach(async () => {
-      await registryContractAsAdmin.mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+      await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
     });
 
@@ -123,7 +123,7 @@ describe("TradeTrustERC721", async () => {
         it("should shred the correct title escrow", async () => {
           const initialActive = await titleEscrowContract.active();
 
-          await registryContractAsAdmin.destroyToken(tokenId);
+          await registryContractAsAdmin.burn(tokenId);
           const currentActive = await titleEscrowContract.active();
 
           expect(initialActive).to.be.true;
@@ -131,7 +131,7 @@ describe("TradeTrustERC721", async () => {
         });
 
         it("should transfer token to burn address", async () => {
-          await registryContractAsAdmin.destroyToken(tokenId);
+          await registryContractAsAdmin.burn(tokenId);
 
           const res = await registryContract.ownerOf(tokenId);
 
@@ -139,15 +139,15 @@ describe("TradeTrustERC721", async () => {
         });
 
         it("should not allow burning a burnt token", async () => {
-          await registryContractAsAdmin.destroyToken(tokenId);
+          await registryContractAsAdmin.burn(tokenId);
 
-          const tx = registryContractAsAdmin.destroyToken(tokenId);
+          const tx = registryContractAsAdmin.burn(tokenId);
 
           await expect(tx).to.be.reverted;
         });
 
         it("should emit Transfer event with correct values", async () => {
-          const tx = await registryContractAsAdmin.destroyToken(tokenId);
+          const tx = await registryContractAsAdmin.burn(tokenId);
 
           expect(tx)
             .to.emit(registryContract, "Transfer")
@@ -162,13 +162,13 @@ describe("TradeTrustERC721", async () => {
           const titleEscrowSigner = await impersonateAccount({ address: titleEscrowContract.address });
           await registryContract.connect(titleEscrowSigner).approve(operator.address, tokenId);
 
-          const tx = registryContract.connect(operator).destroyToken(tokenId);
+          const tx = registryContract.connect(operator).burn(tokenId);
 
           await expect(tx).to.be.reverted;
         });
 
         it("should revert when burn token", async () => {
-          const tx = registryContractAsAdmin.destroyToken(tokenId);
+          const tx = registryContractAsAdmin.burn(tokenId);
 
           await expect(tx).to.be.revertedWith("TitleEscrow: Not surrendered yet");
         });
@@ -218,15 +218,15 @@ describe("TradeTrustERC721", async () => {
 
       it("should not allow minting a token that has been burnt", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContractAsAdmin.destroyToken(tokenId);
+        await registryContractAsAdmin.burn(tokenId);
 
-        const tx = registryContractAsAdmin.mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+        const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
         await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
       });
 
       it("should not allow minting an existing token", async () => {
-        const tx = registryContractAsAdmin.mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
+        const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
         await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
       });
@@ -245,7 +245,7 @@ describe("TradeTrustERC721", async () => {
 
       it("should emit Transfer event with correct values", async () => {
         tokenId = faker.datatype.hexaDecimal(64);
-        const tx = await registryContractAsAdmin.mintTitle(users.beneficiary.address, users.holder.address, tokenId);
+        const tx = await registryContractAsAdmin.mint(users.beneficiary.address, users.holder.address, tokenId);
         titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
 
         expect(tx)
@@ -257,22 +257,22 @@ describe("TradeTrustERC721", async () => {
     describe("Restore Token", () => {
       it("should revert if token does not exist", async () => {
         const invalidTokenId = faker.datatype.hexaDecimal(64);
-        const tx = registryContractAsAdmin.restoreTitle(invalidTokenId);
+        const tx = registryContractAsAdmin.restore(invalidTokenId);
 
         await expect(tx).to.be.revertedWith("TokenRegistry: Token does not exist");
       });
 
       it("should revert if token is not surrendered", async () => {
-        const tx = registryContractAsAdmin.restoreTitle(tokenId);
+        const tx = registryContractAsAdmin.restore(tokenId);
 
         await expect(tx).to.be.revertedWith("TokenRegistry: Token is not surrendered");
       });
 
       it("should not allow to restore burnt token", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContractAsAdmin.destroyToken(tokenId);
+        await registryContractAsAdmin.burn(tokenId);
 
-        const tx = registryContractAsAdmin.restoreTitle(tokenId);
+        const tx = registryContractAsAdmin.restore(tokenId);
 
         await expect(tx).to.be.revertedWith("TokenRegistry: Token is already burnt");
       });
@@ -280,7 +280,7 @@ describe("TradeTrustERC721", async () => {
       it("should allow to restore after token is surrendered", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender();
 
-        const tx = registryContractAsAdmin.restoreTitle(tokenId);
+        const tx = registryContractAsAdmin.restore(tokenId);
 
         await expect(tx).to.not.be.reverted;
       });
@@ -294,7 +294,7 @@ describe("TradeTrustERC721", async () => {
         });
         await titleEscrowContract.connect(users.beneficiary).surrender();
 
-        await registryContractAsAdmin.restoreTitle(tokenId);
+        await registryContractAsAdmin.restore(tokenId);
         const res = await registryContract.ownerOf(tokenId);
 
         expect(res).to.equal(expectedTitleEscrowAddr);
@@ -309,7 +309,7 @@ describe("TradeTrustERC721", async () => {
         });
         await titleEscrowContract.connect(users.beneficiary).surrender();
 
-        const tx = await registryContractAsAdmin.restoreTitle(tokenId);
+        const tx = await registryContractAsAdmin.restore(tokenId);
 
         expect(tx)
           .to.emit(registryContract, "Transfer")
@@ -334,7 +334,7 @@ describe("TradeTrustERC721", async () => {
 
       it("should return true for an accepted token", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContract.destroyToken(tokenId);
+        await registryContract.burn(tokenId);
 
         const res = await registryContract.isSurrendered(tokenId);
 
@@ -343,7 +343,7 @@ describe("TradeTrustERC721", async () => {
 
       it("should return false for a restored token", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContract.restoreTitle(tokenId);
+        await registryContract.restore(tokenId);
 
         const res = await registryContract.isSurrendered(tokenId);
 
