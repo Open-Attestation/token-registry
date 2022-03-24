@@ -109,7 +109,7 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     it("should not allow a non-admin to set role admin", async () => {
       const tx = registryContractAsMinter.setRoleAdmin(RoleConstants.minterRole, fakeMinterAdminRole);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Admin role");
+      await expect(tx).to.be.revertedWith("RegAcc: Not Admin");
     });
   });
 
@@ -123,7 +123,7 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     it("should not allow a non-minter to mint new tokens", async () => {
       const tx = registryContractAsNoRole.mint(users.beneficiary.address, users.holder.address, tokenId);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Minter role");
+      await expect(tx).to.be.revertedWith("RegAcc: Not Minter");
     });
   });
 
@@ -151,7 +151,7 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     it("should not allow a non-restorer to restore tokens", async () => {
       const tx = registryContractAsNoRole.restore(tokenId);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Restorer role");
+      await expect(tx).to.be.revertedWith("RegAcc: Not Restorer");
     });
   });
 
@@ -179,7 +179,7 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     it("should not allow a non-accepter to burn tokens", async () => {
       const tx = registryContractAsNoRole.burn(tokenId);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Accepter role");
+      await expect(tx).to.be.revertedWith("RegAcc: Not Accepter");
     });
   });
 });

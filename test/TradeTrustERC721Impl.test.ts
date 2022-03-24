@@ -93,7 +93,7 @@ describe("TradeTrustERC721Impl", async () => {
 
       const tx = registryImplContract.connect(initialiserSigner).initialize(initParams);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: Deployer is zero");
+      await expect(tx).to.be.revertedWith("RegAcc: No admin");
     });
 
     describe("Initialised values", () => {

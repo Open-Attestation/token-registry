@@ -170,7 +170,7 @@ describe("TradeTrustERC721", async () => {
         it("should revert when burn token", async () => {
           const tx = registryContractAsAdmin.burn(tokenId);
 
-          await expect(tx).to.be.revertedWith("TitleEscrow: Not surrendered yet");
+          await expect(tx).to.be.revertedWith("TE: Not surrendered");
         });
 
         it("should revert before transfer when forcefully sent to burn address", async () => {

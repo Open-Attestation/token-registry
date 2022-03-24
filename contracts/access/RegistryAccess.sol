@@ -9,7 +9,7 @@ abstract contract RegistryAccess is AccessControlUpgradeable {
   bytes32 public constant ACCEPTER_ROLE = keccak256("ACCEPTER_ROLE");
 
   function __RegistryAccess_init(address admin) internal onlyInitializing {
-    require(admin != address(0), "RegistryAccess: Deployer is zero");
+    require(admin != address(0), "RegAcc: No admin");
     __AccessControl_init();
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
     _setupRole(MINTER_ROLE, admin);
@@ -18,22 +18,22 @@ abstract contract RegistryAccess is AccessControlUpgradeable {
   }
 
   modifier onlyAdmin() {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryAccess: caller does not have the Admin role");
+    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegAcc: Not Admin");
     _;
   }
 
   modifier onlyMinter() {
-    require(hasRole(MINTER_ROLE, _msgSender()), "RegistryAccess: caller does not have the Minter role");
+    require(hasRole(MINTER_ROLE, _msgSender()), "RegAcc: Not Minter");
     _;
   }
 
   modifier onlyRestorer() {
-    require(hasRole(RESTORER_ROLE, _msgSender()), "RegistryAccess: caller does not have the Restorer role");
+    require(hasRole(RESTORER_ROLE, _msgSender()), "RegAcc: Not Restorer");
     _;
   }
 
   modifier onlyAccepter() {
-    require(hasRole(ACCEPTER_ROLE, _msgSender()), "RegistryAccess: caller does not have the Accepter role");
+    require(hasRole(ACCEPTER_ROLE, _msgSender()), "RegAcc: Not Accepter");
     _;
   }
 
