@@ -1,73 +1,104 @@
+// noinspection ExceptionCaughtLocallyJS
+
 import { task } from "hardhat/config";
-import { TradeTrustERC721 } from "@tradetrust/contracts";
-import { deployToken } from "./helpers/deploy-token";
+import { ImplDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
 import { verifyContract } from "./helpers/verify-contract";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
-
-const wait = async (durationMs: number) => new Promise((resolve) => setTimeout(async () => resolve(true), durationMs));
+import { ContractAddress } from "../src";
+import { encodeInitParams, getEventFromTransaction, isSupportedTitleEscrowFactory } from "../src/utils";
+import { wait } from "./helpers/wait";
+import { deployContract } from "./helpers/deploy-contract";
 
 task(TASK_DEPLOY_TOKEN)
-  .setDescription("Deploys the TradeTrustERC721 token and, optionally, Title Escrow factory if not provided.")
+  .setDescription("Deploys the TradeTrustERC721 token")
   .addParam("name", "Name of the token")
   .addParam("symbol", "Symbol of token")
   .addFlag("verify", "Verify on Etherscan")
-  .addOptionalParam("factory", "Address of Title Escrow factory contract (Optional)")
-  .setAction(async ({ name, symbol, verify, factory }, hre) => {
-    const { ethers } = hre;
+  .addFlag("standalone", "Deploy as standalone token contract")
+  .addOptionalParam("factory", "Address of Title Escrow factory contract")
+  .setAction(async ({ name, symbol, verify, factory, standalone }, hre) => {
+    const { ethers, network } = hre;
     try {
       const [deployer] = await ethers.getSigners();
       const deployerAddress = await deployer.getAddress();
+      const chainId = await deployer.getChainId();
       let factoryAddress = factory;
-      let deployedNewFactory = false;
+      let registryAddress: string;
+
+      if (!chainId) {
+        throw new Error(`Invalid chain ID: ${chainId}`);
+      }
 
       console.log(`[Deployer] ${deployerAddress}`);
 
       if (!factoryAddress) {
-        console.log("[Status] No factory address provided, will deploy Title Escrow factory");
-        const titleEscrowFacFactory = await ethers.getContractFactory("TitleEscrowFactory");
-        const titleEscrowFactoryContract = await titleEscrowFacFactory.connect(deployer).deploy();
-        const factoryDeployTx = titleEscrowFactoryContract.deployTransaction;
-        console.log(`[Transaction - TitleEscrowFactory] Pending ${factoryDeployTx.hash}`);
-        await titleEscrowFactoryContract.deployed();
-        deployedNewFactory = true;
-        factoryAddress = titleEscrowFactoryContract.address;
-        console.log(`[Address - TitleEscrowFactory] Deployed to ${factoryAddress}`);
-      } else {
-        console.log(`[Status] Using ${factoryAddress} as Title Escrow factory`);
+        factoryAddress = ContractAddress.TitleEscrowFactory[chainId];
+        if (!factoryAddress) {
+          throw new Error(`Network ${network.name} currently is not supported. Supply a factory address.`);
+        }
+        console.log(`[Status] Using ${factoryAddress} as Title Escrow factory.`);
       }
 
-      const contractName = "TradeTrustERC721";
-      const token: TradeTrustERC721 = await deployToken({
-        constructorParams: { name, symbol, factoryAddress },
-        hre,
-        contractName,
-        deployer,
-      });
+      const supportedTitleEscrowFactory = await isSupportedTitleEscrowFactory(factoryAddress, ethers.provider);
+      if (!supportedTitleEscrowFactory) {
+        throw new Error(`Title Escrow Factory ${factoryAddress} is not supported.`);
+      }
+      console.log("[Status] Title Escrow Factory interface check is OK.");
 
-      if (verify) {
+      if (!standalone) {
+        const deployerContractAddress = ContractAddress.Deployer[chainId];
+        const implAddress = ContractAddress.TokenImplementation[chainId];
+        if (!deployerContractAddress || !implAddress) {
+          throw new Error(`Network ${network.name} currently is not supported. Use --standalone instead.`);
+        }
+        const deployerContract = (await ethers.getContractFactory("ImplDeployer")).attach(
+          deployerContractAddress
+        ) as ImplDeployer;
+        const initParam = encodeInitParams({
+          name,
+          symbol,
+          titleEscrowFactory: factoryAddress,
+          deployer: deployerAddress,
+        });
+        const tx = await deployerContract.deploy(implAddress, initParam);
+        console.log(`[Transaction] Pending ${tx.hash}`);
+        await tx.wait();
+        registryAddress = (
+          await getEventFromTransaction(
+            tx,
+            ["event Deployment (address indexed deployed, address indexed implementation, bytes params)"],
+            "Deployment"
+          )
+        ).deployed;
+      } else {
+        // Standalone deployment
+        const contractName = "TradeTrustERC721";
+        const token = await deployContract<TradeTrustERC721>({
+          params: [name, symbol, factoryAddress],
+          contractName,
+          hre,
+        });
+        registryAddress = token.address;
+      }
+
+      if (verify && standalone) {
         console.log("[Status] Waiting to verify (about a minute)...");
         await wait(60000);
         console.log("[Status] Start verification");
 
-        if (deployedNewFactory) {
-          await verifyContract({
-            address: factoryAddress,
-            constructorArgsParams: [],
-            contract: "contracts/TitleEscrowFactory.sol:TitleEscrowFactory",
-            hre,
-          });
-        }
         await verifyContract({
-          address: token.address,
+          address: registryAddress,
           constructorArgsParams: [name, symbol, factoryAddress],
           contract: "contracts/TradeTrustERC721.sol:TradeTrustERC721",
           hre,
         });
+      } else {
+        console.log("[Status] Skipped verification, already verified.");
       }
 
-      console.log("[Status] Completed deploying token");
+      console.log(`[Status] ✅ Completed deploying token contract at ${registryAddress}`);
     } catch (err: any) {
-      console.log("[Status] An error occurred while deploying token");
-      console.error(err.message);
+      console.log("[Status] ❌ An error occurred while deploying token");
+      console.error(err.error?.message ?? err.message);
     }
   });
