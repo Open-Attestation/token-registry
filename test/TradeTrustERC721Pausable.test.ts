@@ -3,7 +3,7 @@ import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust
 import faker from "faker";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
-import { getTestUsers, TestUsers } from "./utils";
+import { getTestUsers, TestUsers } from "./helpers";
 
 const { loadFixture } = waffle;
 

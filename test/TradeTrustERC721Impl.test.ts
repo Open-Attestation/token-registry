@@ -4,11 +4,11 @@ import { TradeTrustERC721Impl } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ContractTransaction } from "ethers";
 import { expect } from ".";
-import { getTestUsers, TestUsers } from "./utils";
+import { getTestUsers, TestUsers } from "./helpers";
 import { deployTradeTrustERC721ImplFixture } from "./fixtures";
 import { encodeInitParams } from "../src/utils";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
-import { AddressConstants, RoleConstants } from "../src/common/constants";
+import { AddressConstants, RoleConstants } from "../src/common";
 
 const { loadFixture } = waffle;
 

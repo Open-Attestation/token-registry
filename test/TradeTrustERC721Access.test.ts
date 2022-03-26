@@ -4,8 +4,8 @@ import faker from "faker";
 import { TradeTrustERC721 } from "@tradetrust/contracts";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
-import { getTestUsers, TestUsers } from "./utils";
-import { RoleConstants } from "../src/common/constants";
+import { getTestUsers, TestUsers } from "./helpers";
+import { RoleConstants } from "../src/common";
 
 const { loadFixture } = waffle;
 
