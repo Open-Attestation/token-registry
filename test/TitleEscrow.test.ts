@@ -7,7 +7,7 @@ import { FakeContract, MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture, deployTitleEscrowFixture } from "./fixtures";
 import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./helpers";
-import { computeInterfaceId } from "./helpers/computeInterfaceId";
+import { computeInterfaceId } from "../src/utils";
 import { ContractInterfaces, AddressConstants } from "../src/common";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 

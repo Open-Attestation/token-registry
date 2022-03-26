@@ -5,10 +5,9 @@ import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { getTestUsers, TestUsers } from "./helpers";
-import { computeInterfaceId } from "./helpers/computeInterfaceId";
+import { computeInterfaceId, encodeInitParams, getEventFromTransaction } from "../src/utils";
 import { ContractInterfaces, AddressConstants } from "../src/common";
 import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
-import { encodeInitParams, getEventFromTransaction } from "../src/utils";
 
 const { loadFixture } = waffle;
 

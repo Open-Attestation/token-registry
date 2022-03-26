@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
-import { computeInterfaceId } from "../../test/helpers/computeInterfaceId";
+import { computeInterfaceId } from "./computeInterfaceId";
 import { ContractInterfaces } from "../common";
 
 export const isSupportedTitleEscrowFactory = async (

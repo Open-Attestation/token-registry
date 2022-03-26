@@ -6,8 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployEscrowFactoryFixture } from "./fixtures";
 import { getTestUsers, TestUsers } from "./helpers";
-import { computeTitleEscrowAddress, getEventFromTransaction } from "../src/utils";
-import { computeInterfaceId } from "./helpers/computeInterfaceId";
+import { computeTitleEscrowAddress, getEventFromTransaction, computeInterfaceId } from "../src/utils";
 import { ContractInterfaces, AddressConstants } from "../src/common";
 
 const { loadFixture } = waffle;

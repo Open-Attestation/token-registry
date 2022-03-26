@@ -5,9 +5,8 @@ import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture } from "./fixtures";
 import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./helpers";
-import { computeInterfaceId } from "./helpers/computeInterfaceId";
+import { computeInterfaceId, computeTitleEscrowAddress } from "../src/utils";
 import { ContractInterfaces, AddressConstants } from "../src/common";
-import { computeTitleEscrowAddress } from "../src/utils";
 
 const { loadFixture } = waffle;
 
