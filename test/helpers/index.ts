@@ -20,4 +20,4 @@ export const toAccessControlRevertMessage = (account: string, role: string): str
 
 export { impersonateAccount, stopImpersonatingAccount } from "./impersonateAccount";
 export { getTitleEscrowContract } from "./getTitleEscrowContract";
-export { getEscrowFactoryFromToken } from "./getEscrowFactoryFromToken";
+export { getTitleEscrowFactoryFromToken } from "./getTitleEscrowFactoryFromToken";
