@@ -1,7 +1,7 @@
 import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import { getEventFromTransaction } from "../utils";
+import { getEventFromTransaction } from "../../src/utils";
 
 export const mintTokenFixture =
   ({

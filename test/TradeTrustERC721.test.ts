@@ -7,7 +7,7 @@ import { deployTokenFixture } from "./fixtures";
 import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./utils";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
 import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
-import { AddressConstants } from "../src/common/constants";
+import { AddressConstants } from "../src/common";
 import { computeTitleEscrowAddress } from "../src/utils";
 
 const { loadFixture } = waffle;

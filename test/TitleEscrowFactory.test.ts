@@ -5,11 +5,11 @@ import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployEscrowFactoryFixture } from "./fixtures";
-import { getEventFromTransaction, getTestUsers, TestUsers } from "./utils";
-import { computeTitleEscrowAddress } from "../src/utils";
+import { getTestUsers, TestUsers } from "./utils";
+import { computeTitleEscrowAddress, getEventFromTransaction } from "../src/utils";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
 import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
-import { AddressConstants } from "../src/common/constants";
+import { AddressConstants } from "../src/common";
 
 const { loadFixture } = waffle;
 

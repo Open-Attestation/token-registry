@@ -4,12 +4,12 @@ import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
-import { getEventFromTransaction, getTestUsers, TestUsers } from "./utils";
+import { getTestUsers, TestUsers } from "./utils";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
 import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
 import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
-import { encodeInitParams } from "../src/utils";
-import { AddressConstants } from "../src/common/constants";
+import { encodeInitParams, getEventFromTransaction } from "../src/utils";
+import { AddressConstants } from "../src/common";
 
 const { loadFixture } = waffle;
 
