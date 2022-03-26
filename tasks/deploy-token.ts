@@ -4,7 +4,7 @@ import { task } from "hardhat/config";
 import { ImplDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
 import { verifyContract } from "./helpers/verify-contract";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
-import { ContractAddress } from "../src";
+import { ContractAddress } from "../src/common";
 import { encodeInitParams, getEventFromTransaction, isSupportedTitleEscrowFactory } from "../src/utils";
 import { wait } from "./helpers/wait";
 import { deployContract } from "./helpers/deploy-contract";

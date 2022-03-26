@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { ChainId } from ".";
+import { ChainId } from "./enums";
 
 export const AddressConstants = {
   Zero: ethers.constants.AddressZero,
