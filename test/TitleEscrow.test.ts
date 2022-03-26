@@ -8,9 +8,8 @@ import { expect } from ".";
 import { deployTokenFixture, deployTitleEscrowFixture } from "./fixtures";
 import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./utils";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
-import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
+import { ContractInterfaces, AddressConstants } from "../src/common";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
-import { AddressConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 

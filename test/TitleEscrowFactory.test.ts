@@ -8,8 +8,7 @@ import { deployEscrowFactoryFixture } from "./fixtures";
 import { getTestUsers, TestUsers } from "./utils";
 import { computeTitleEscrowAddress, getEventFromTransaction } from "../src/utils";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
-import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
-import { AddressConstants } from "../src/common";
+import { ContractInterfaces, AddressConstants } from "../src/common";
 
 const { loadFixture } = waffle;
 

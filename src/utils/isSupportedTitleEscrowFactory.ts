@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
 import { computeInterfaceId } from "../../test/utils/computeInterfaceId";
-import { ContractInterfaces } from "../../test/fixtures/contract-interfaces.fixture";
+import { ContractInterfaces } from "../common";
 
 export const isSupportedTitleEscrowFactory = async (
   factoryAddress: string,
