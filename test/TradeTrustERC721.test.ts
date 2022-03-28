@@ -51,7 +51,7 @@ describe("TradeTrustERC721", async () => {
 
   describe("ERC165 Support", () => {
     it("should support ITradeTrustERC721 interface", async () => {
-      const interfaceId = contractInterfaceId.ITradeTrustERC721;
+      const interfaceId = contractInterfaceId.TradeTrustERC721;
 
       const res = await registryContract.supportsInterface(interfaceId);
 
@@ -194,7 +194,7 @@ describe("TradeTrustERC721", async () => {
 
     describe("Mint Token", () => {
       it("should mint token to a title escrow", async () => {
-        const interfaceId = contractInterfaceId.ITitleEscrow;
+        const interfaceId = contractInterfaceId.TitleEscrow;
 
         const res = await titleEscrowContract.supportsInterface(interfaceId);
 

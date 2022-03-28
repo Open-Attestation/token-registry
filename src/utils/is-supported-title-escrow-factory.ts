@@ -18,5 +18,5 @@ export const isSupportedTitleEscrowFactory = async (
     ["function supportsInterface(bytes4 interfaceId) view returns (bool)"],
     provider ?? ethers.getDefaultProvider()
   ) as TitleEscrow;
-  return implContract.supportsInterface(contractInterfaceId.ITitleEscrow);
+  return implContract.supportsInterface(contractInterfaceId.TitleEscrow);
 };

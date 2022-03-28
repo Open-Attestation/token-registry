@@ -40,7 +40,7 @@ describe("TitleEscrowFactory", async () => {
     });
 
     it("should have the correct title escrow implementation", async () => {
-      const interfaceId = contractInterfaceId.ITitleEscrow;
+      const interfaceId = contractInterfaceId.TitleEscrow;
 
       const res = await titleEscrowContract.supportsInterface(interfaceId);
 

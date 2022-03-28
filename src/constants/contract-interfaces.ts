@@ -1,12 +1,12 @@
 export const contractInterfaces = {
-  ITradeTrustERC721: [
+  TradeTrustERC721: [
     "genesis()",
     "titleEscrowFactory()",
     "burn(uint256)",
     "restore(uint256)",
     "mint(address,address,uint256)",
   ],
-  ITitleEscrow: [
+  TitleEscrow: [
     "nominateBeneficiary(address)",
     "nominateHolder(address)",
     "nominate(address,address)",
@@ -24,7 +24,7 @@ export const contractInterfaces = {
     "surrender()",
     "shred()",
   ],
-  ITitleEscrowFactory: ["create(address,address,uint256)", "getAddress(address,uint256)"],
+  TitleEscrowFactory: ["create(address,address,uint256)", "getAddress(address,uint256)"],
   AccessControl: [
     "hasRole(bytes32,address)",
     "getRoleAdmin(bytes32)",

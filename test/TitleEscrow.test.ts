@@ -24,7 +24,7 @@ describe("Title Escrow", async () => {
 
   describe("ERC165 Support", () => {
     it("should support ITitleEscrow interface", async () => {
-      const interfaceId = contractInterfaceId.ITitleEscrow;
+      const interfaceId = contractInterfaceId.TitleEscrow;
       const titleEscrowContract = await loadFixture(deployTitleEscrowFixture({ deployer: users.carrier }));
 
       const res = await titleEscrowContract.supportsInterface(interfaceId);

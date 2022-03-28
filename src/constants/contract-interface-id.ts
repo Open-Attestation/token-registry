@@ -2,9 +2,9 @@ import { computeInterfaceId } from "../utils/compute-interface-id";
 import { contractInterfaces } from "./contract-interfaces";
 
 export const contractInterfaceId = {
-  ITradeTrustERC721: computeInterfaceId(contractInterfaces.ITradeTrustERC721),
-  ITitleEscrow: computeInterfaceId(contractInterfaces.ITitleEscrow),
-  ITitleEscrowFactory: computeInterfaceId(contractInterfaces.ITitleEscrowFactory),
+  TradeTrustERC721: computeInterfaceId(contractInterfaces.TradeTrustERC721),
+  TitleEscrow: computeInterfaceId(contractInterfaces.TitleEscrow),
+  TitleEscrowFactory: computeInterfaceId(contractInterfaces.TitleEscrowFactory),
   AccessControl: computeInterfaceId(contractInterfaces.AccessControl),
   ERC721: computeInterfaceId(contractInterfaces.ERC721),
 };
