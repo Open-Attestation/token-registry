@@ -4,10 +4,10 @@ import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
-import { getTestUsers, TestUsers } from "./helpers";
 import { encodeInitParams, getEventFromTransaction } from "../src/utils";
 import { defaultAddress, contractInterfaceId } from "../src/constants";
 import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
+import { getTestUsers, TestUsers } from "./helpers";
 
 const { loadFixture } = waffle;
 

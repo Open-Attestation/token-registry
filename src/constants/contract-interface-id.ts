@@ -1,4 +1,4 @@
-import { computeInterfaceId } from "../utils/computeInterfaceId";
+import { computeInterfaceId } from "../utils/compute-interface-id";
 import { contractInterfaces } from "./contract-interfaces";
 
 export const contractInterfaceId = {

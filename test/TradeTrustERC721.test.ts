@@ -4,7 +4,7 @@ import faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture } from "./fixtures";
-import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./helpers";
+import { getTitleEscrowContract, impersonateAccount, getTestUsers, TestUsers } from "./helpers";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 

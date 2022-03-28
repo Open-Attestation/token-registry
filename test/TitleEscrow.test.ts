@@ -6,7 +6,7 @@ import { Signer } from "ethers";
 import { FakeContract, MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture, deployTitleEscrowFixture } from "./fixtures";
-import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./helpers";
+import { getTitleEscrowContract, impersonateAccount, getTestUsers, TestUsers } from "./helpers";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 

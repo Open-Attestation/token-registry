@@ -5,9 +5,9 @@ import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployEscrowFactoryFixture } from "./fixtures";
-import { getTestUsers, TestUsers } from "./helpers";
 import { computeTitleEscrowAddress, getEventFromTransaction } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
+import { getTestUsers, TestUsers } from "./helpers";
 
 const { loadFixture } = waffle;
 

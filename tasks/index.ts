@@ -1,3 +1,3 @@
 import "./deploy-token";
-import "./deployEscrowFactory";
-import "./deployTokenImpl";
+import "./deploy-escrow-factory";
+import "./deploy-token-impl";
