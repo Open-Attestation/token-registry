@@ -5,8 +5,8 @@ import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { getTestUsers, TestUsers } from "./helpers";
-import { computeInterfaceId, encodeInitParams, getEventFromTransaction } from "../src/utils";
-import { ContractInterfaces, AddressConstants } from "../src/common";
+import { encodeInitParams, getEventFromTransaction } from "../src/utils";
+import { defaultAddress, contractInterfaceId } from "../src/constants";
 import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
 
 const { loadFixture } = waffle;
@@ -142,7 +142,7 @@ describe("ImplDeployer", async () => {
         name: fakeTokenName,
         symbol: fakeTokenSymbol,
         titleEscrowFactory: fakeTitleEscrowFactoryAddr,
-        deployer: AddressConstants.Zero,
+        deployer: defaultAddress.Zero,
       });
       const tx = deployerContractAsNonOwner.deploy(implContract.address, initParams);
 
@@ -203,7 +203,7 @@ describe("ImplDeployer", async () => {
       });
 
       it("should clone TradeTrustERC721Impl", async () => {
-        const interfaceId = computeInterfaceId(ContractInterfaces.ITradeTrustERC721);
+        const interfaceId = contractInterfaceId.ITradeTrustERC721;
 
         const res = await clonedRegistryContract.supportsInterface(interfaceId);
 

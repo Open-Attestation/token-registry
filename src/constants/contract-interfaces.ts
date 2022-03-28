@@ -1,4 +1,4 @@
-export const ContractInterfaces = {
+export const contractInterfaces = {
   ITradeTrustERC721: [
     "genesis()",
     "titleEscrowFactory()",

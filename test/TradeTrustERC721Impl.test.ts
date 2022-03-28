@@ -8,7 +8,7 @@ import { getTestUsers, TestUsers } from "./helpers";
 import { deployTradeTrustERC721ImplFixture } from "./fixtures";
 import { encodeInitParams } from "../src/utils";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
-import { AddressConstants, RoleConstants } from "../src/common";
+import { defaultAddress, roleHash } from "../src/constants";
 
 const { loadFixture } = waffle;
 
@@ -64,7 +64,7 @@ describe("TradeTrustERC721Impl", async () => {
     });
 
     it("should not set deployer as admin", async () => {
-      const res = await implContract.hasRole(RoleConstants.DefaultAdmin, users.carrier.address);
+      const res = await implContract.hasRole(roleHash.DefaultAdmin, users.carrier.address);
 
       await expect(res).to.be.false;
     });
@@ -88,7 +88,7 @@ describe("TradeTrustERC721Impl", async () => {
         name: registryName,
         symbol: registrySymbol,
         titleEscrowFactory: fakeTitleEscrowFactory,
-        deployer: AddressConstants.Zero,
+        deployer: defaultAddress.Zero,
       });
 
       const tx = registryImplContract.connect(initialiserSigner).initialize(initParams);
@@ -131,19 +131,19 @@ describe("TradeTrustERC721Impl", async () => {
       });
 
       it("should initialise deployer account as admin", async () => {
-        const res = await registryImplContract.hasRole(RoleConstants.DefaultAdmin, registryAdmin.address);
+        const res = await registryImplContract.hasRole(roleHash.DefaultAdmin, registryAdmin.address);
 
         expect(res).to.be.true;
       });
 
       it("should not set initialiser as admin", async () => {
-        const res = await registryImplContract.hasRole(RoleConstants.DefaultAdmin, initialiserSigner.address);
+        const res = await registryImplContract.hasRole(roleHash.DefaultAdmin, initialiserSigner.address);
 
         expect(res).to.be.false;
       });
 
       it("should not set deployer as admin", async () => {
-        const res = await registryImplContract.hasRole(RoleConstants.DefaultAdmin, deployer.address);
+        const res = await registryImplContract.hasRole(roleHash.DefaultAdmin, deployer.address);
 
         expect(res).to.be.false;
       });

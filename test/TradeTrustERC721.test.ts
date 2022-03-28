@@ -5,8 +5,8 @@ import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture } from "./fixtures";
 import { getTestUsers, getTitleEscrowContract, impersonateAccount, TestUsers } from "./helpers";
-import { computeInterfaceId, computeTitleEscrowAddress } from "../src/utils";
-import { ContractInterfaces, AddressConstants } from "../src/common";
+import { computeTitleEscrowAddress } from "../src/utils";
+import { contractInterfaceId, defaultAddress } from "../src/constants";
 
 const { loadFixture } = waffle;
 
@@ -51,7 +51,7 @@ describe("TradeTrustERC721", async () => {
 
   describe("ERC165 Support", () => {
     it("should support ITradeTrustERC721 interface", async () => {
-      const interfaceId = computeInterfaceId(ContractInterfaces.ITradeTrustERC721);
+      const interfaceId = contractInterfaceId.ITradeTrustERC721;
 
       const res = await registryContract.supportsInterface(interfaceId);
 
@@ -59,7 +59,7 @@ describe("TradeTrustERC721", async () => {
     });
 
     it("should support ERC721 interface", async () => {
-      const interfaceId = computeInterfaceId(ContractInterfaces.ERC721);
+      const interfaceId = contractInterfaceId.ERC721;
 
       const res = await registryContract.supportsInterface(interfaceId);
 
@@ -67,7 +67,7 @@ describe("TradeTrustERC721", async () => {
     });
 
     it("should support AccessControl interface", async () => {
-      const interfaceId = computeInterfaceId(ContractInterfaces.AccessControl);
+      const interfaceId = contractInterfaceId.AccessControl;
 
       const res = await registryContract.supportsInterface(interfaceId);
 
@@ -133,7 +133,7 @@ describe("TradeTrustERC721", async () => {
 
           const res = await registryContract.ownerOf(tokenId);
 
-          expect(res).to.equal(AddressConstants.Burn);
+          expect(res).to.equal(defaultAddress.Burn);
         });
 
         it("should not allow burning a burnt token", async () => {
@@ -149,7 +149,7 @@ describe("TradeTrustERC721", async () => {
 
           expect(tx)
             .to.emit(registryContract, "Transfer")
-            .withArgs(registryContract.address, AddressConstants.Burn, tokenId);
+            .withArgs(registryContract.address, defaultAddress.Burn, tokenId);
         });
       });
 
@@ -185,7 +185,7 @@ describe("TradeTrustERC721", async () => {
 
           const tx = registryContractMock
             .connect(users.carrier)
-            .transferFrom(users.carrier.address, AddressConstants.Burn, tokenId);
+            .transferFrom(users.carrier.address, defaultAddress.Burn, tokenId);
 
           await expect(tx).to.be.revertedWith("Registry: Token unsurrendered");
         });
@@ -194,7 +194,7 @@ describe("TradeTrustERC721", async () => {
 
     describe("Mint Token", () => {
       it("should mint token to a title escrow", async () => {
-        const interfaceId = computeInterfaceId(ContractInterfaces.ITitleEscrow);
+        const interfaceId = contractInterfaceId.ITitleEscrow;
 
         const res = await titleEscrowContract.supportsInterface(interfaceId);
 
@@ -248,7 +248,7 @@ describe("TradeTrustERC721", async () => {
 
         expect(tx)
           .to.emit(registryContract, "Transfer")
-          .withArgs(AddressConstants.Zero, titleEscrowContract.address, tokenId);
+          .withArgs(defaultAddress.Zero, titleEscrowContract.address, tokenId);
       });
     });
 

@@ -2,10 +2,10 @@ import { waffle, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import faker from "faker";
 import { TradeTrustERC721 } from "@tradetrust/contracts";
+import { roleHash } from "../src/constants";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
 import { getTestUsers, TestUsers } from "./helpers";
-import { RoleConstants } from "../src/common";
 
 const { loadFixture } = waffle;
 
@@ -46,9 +46,9 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     registryContractAsAdmin = registryContract.connect(userAdmin);
 
     await Promise.all([
-      registryContractAsAdmin.grantRole(RoleConstants.MinterRole, userMinter.address),
-      registryContractAsAdmin.grantRole(RoleConstants.RestorerRole, userRestorer.address),
-      registryContractAsAdmin.grantRole(RoleConstants.AccepterRole, userAccepter.address),
+      registryContractAsAdmin.grantRole(roleHash.MinterRole, userMinter.address),
+      registryContractAsAdmin.grantRole(roleHash.RestorerRole, userRestorer.address),
+      registryContractAsAdmin.grantRole(roleHash.AccepterRole, userAccepter.address),
     ]);
 
     registryContractAsMinter = registryContract.connect(userMinter);
@@ -67,25 +67,25 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
 
   describe("Initial Setup", () => {
     it("should add deployer with admin role", async () => {
-      const res = await registryContract.hasRole(RoleConstants.DefaultAdmin, users.carrier.address);
+      const res = await registryContract.hasRole(roleHash.DefaultAdmin, users.carrier.address);
 
       expect(res).to.be.true;
     });
 
     it("should add deployer with minter role", async () => {
-      const res = await registryContract.hasRole(RoleConstants.MinterRole, users.carrier.address);
+      const res = await registryContract.hasRole(roleHash.MinterRole, users.carrier.address);
 
       expect(res).to.be.true;
     });
 
     it("should add deployer with restorer role", async () => {
-      const res = await registryContract.hasRole(RoleConstants.RestorerRole, users.carrier.address);
+      const res = await registryContract.hasRole(roleHash.RestorerRole, users.carrier.address);
 
       expect(res).to.be.true;
     });
 
     it("should add deployer with accepter role", async () => {
-      const res = await registryContract.hasRole(RoleConstants.AccepterRole, users.carrier.address);
+      const res = await registryContract.hasRole(roleHash.AccepterRole, users.carrier.address);
 
       expect(res).to.be.true;
     });
@@ -99,15 +99,15 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     });
 
     it("should allow admin to set role admin", async () => {
-      await registryContractAsAdmin.setRoleAdmin(RoleConstants.MinterRole, fakeMinterAdminRole);
+      await registryContractAsAdmin.setRoleAdmin(roleHash.MinterRole, fakeMinterAdminRole);
 
-      const res = await registryContract.getRoleAdmin(RoleConstants.MinterRole);
+      const res = await registryContract.getRoleAdmin(roleHash.MinterRole);
 
       expect(res).to.equal(fakeMinterAdminRole);
     });
 
     it("should not allow a non-admin to set role admin", async () => {
-      const tx = registryContractAsMinter.setRoleAdmin(RoleConstants.MinterRole, fakeMinterAdminRole);
+      const tx = registryContractAsMinter.setRoleAdmin(roleHash.MinterRole, fakeMinterAdminRole);
 
       await expect(tx).to.be.revertedWith("RegAcc: Not Admin");
     });
