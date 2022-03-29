@@ -39,24 +39,25 @@ npm install --save @govtechsg/token-registry
 To use the package, you will need to provide your own
 Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/)
 or [signer](https://docs.ethers.io/v5/api/signer/#Wallet) (if you are writing to the blockchain).
+This package exposes the [Typechain (Ethers)](https://github.com/dethcrypto/TypeChain/tree/master/packages/target-ethers-v5) bindings for the contracts.
 
 ### TradeTrustERC721
 
 #### Deploy new token registry
 
 ```ts
-import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
 
-const factory = new TradeTrustERC721Factory(signer1);
-const tokenRegistry = await tokenRegistryFactory.deploy("MY_TOKEN_REGISTRY", "TKN");
+const factory = new TradeTrustERC721__factory(signer);
+const tokenRegistry = await factory.deploy("The Great Shipping Co.", "GSC");
 ```
 
 #### Connect to existing token registry
 
 ```ts
-import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
 
-const connectedRegistry = TradeTrustERC721Factory.connect(existingERC721Address, signer1);
+const connectedRegistry = TradeTrustERC721__factory.connect(existingERC721Address, signer);
 ```
 
 #### List of available functions
@@ -70,27 +71,27 @@ The TradeTrustErc721 Token Registry will clone a new TitleEscrow internally when
 #### Minting Title Escrow
 
 ```ts
-import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721__factory } from "@govtechsg/token-registry";
 
-const connectedRegistry = TradeTrustERC721Factory.connect(existingERC721Address, signer);
+const connectedRegistry = TradeTrustERC721__factory.connect(existingERC721Address, signer);
 const tx = await connectedRegistry.mintTitle(beneficiaryAddress, holderAddress, tokenId);
 ```
 
 #### Restoring Title Escrow
 
 ```ts
-import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721__factory } from "@govtechsg/token-registry";
 
-const connectedRegistry = TradeTrustERC721Factory.connect(existingERC721Address, signer);
+const connectedRegistry = TradeTrustERC721__factory.connect(existingERC721Address, signer);
 const tx = await connectedRegistry.restoreTitle(beneficiaryAddress, holderAddress, existingTokenId);
 ```
 
 #### Connect to Title Escrow
 
 ```ts
-import { TitleEscrowFactory } from "@govtechsg/token-registry";
+import { TitleEscrow__factory } from "@govtechsg/token-registry";
 
-const connectedEscrow = TitleEscrowFactory.connect(existingTitleEscrowAddress, signer1);
+const connectedEscrow = TitleEscrow__factory.connect(existingTitleEscrowAddress, signer1);
 ```
 
 For list of available functions on TitleEscrow simply check the type definitions as they are automatically generated
