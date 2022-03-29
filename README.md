@@ -29,7 +29,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 ## Installation
 
 ```sh
-npm i @govtechsg/token-registry
+npm install --save @govtechsg/token-registry
 ```
 
 ---
