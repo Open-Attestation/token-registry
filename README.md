@@ -135,7 +135,7 @@ OPTIONS:
   --name    	Name of the token
   --symbol  	Symbol of token
   --verify  	Verify on Etherscan
-  
+
 deploy:token: Deploys the TradeTrustERC721 token and, optionally, Title Escrow factory if not provided.
 ```
 
@@ -167,13 +167,13 @@ network. The token will be registered with an existing factory address of `0xfac
 
 Here's a list of network names currently pre-configured:
 
-* `mainnet` (Ethereum)
-* `ropsten`
-* `rinkeby`
-* `kovan`
-* `goerli`
-* `polygon` (Polygon Mainnet)
-* `mumbai` (Polygon Mumbai)
+- `mainnet` (Ethereum)
+- `ropsten`
+- `rinkeby`
+- `kovan`
+- `goerli`
+- `polygon` (Polygon Mainnet)
+- `mumbai` (Polygon Mumbai)
 
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
 
@@ -227,4 +227,4 @@ for more information on using and deploying your own subgraphs for the Token Reg
 
 ## Notes
 
-* The contracts have not gone through formal audits yet. Please use them at your own discretion.
+- The contracts have not gone through formal audits yet. Please use them at your own discretion.
