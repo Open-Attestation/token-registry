@@ -27,9 +27,9 @@ code for token registry (in `/contracts`) as well as the node package for using 
   - [Verification](#verification)
   - [Network Configuration](#network-configuration)
 - [Configuration](#configuration)
-- [Subgraph](#subgraph)
 - [Development](#development)
   - [Scripts](#scripts)
+- [Subgraph](#subgraph)
 - [Notes](#notes)
 
 ## Installation
@@ -262,11 +262,6 @@ MNEMONIC=
 
 Only either the `DEPLOYER_PK` or `MNEMONIC` is needed.
 
-## Subgraph
-
-Check out our [Token Registry Subgraph](https://github.com/Open-Attestation/token-registry-subgraph) Github repository
-for more information on using and deploying your own subgraphs for the Token Registry contracts.
-
 # Development
 
 This repository's development framework uses [HardHat](https://hardhat.org/getting-started/).
@@ -286,6 +281,11 @@ npx hardhat deploy:token
 npx hardhat deploy:factory
 npx hardhat deploy:token:impl
 ```
+
+## Subgraph
+
+Check out our [Token Registry Subgraph](https://github.com/Open-Attestation/token-registry-subgraph) Github repository
+for more information on using and deploying your own subgraphs for the Token Registry contracts.
 
 ## Notes
 
