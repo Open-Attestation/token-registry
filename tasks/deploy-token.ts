@@ -15,7 +15,7 @@ task(TASK_DEPLOY_TOKEN)
   .addParam("symbol", "Symbol of token")
   .addFlag("verify", "Verify on Etherscan")
   .addFlag("standalone", "Deploy as standalone token contract")
-  .addOptionalParam("factory", "Address of Title Escrow factory contract")
+  .addOptionalParam("factory", "Address of Title Escrow factory (Optional)")
   .setAction(async ({ name, symbol, verify, factory, standalone }, hre) => {
     const { ethers, network } = hre;
     try {
