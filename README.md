@@ -16,6 +16,10 @@ code for token registry (in `/contracts`) as well as the node package for using 
 
 - [Installation](#installation)
 - [Usage](#usage)
+  - [TradeTrustERC721](#tradetrusterc721)
+  - [Title Escrow](#titleescrow)
+  - [Provider & Signer](#provider--signer)
+  - [Roles and Access](#roles-and-access)
 - [Deployment](#deployment)
   - [Quick Start](#quick-start)
   - [Advanced Usage](#advanced-usage)
@@ -122,6 +126,50 @@ signerFromEncryptedJson.connect(provider);
 const signerFromMnemonic = Wallet.fromMnemonic("MNEMONIC-HERE");
 signerFromMnemonic.connect(provider);
 ```
+
+### Roles and Access
+
+Roles are useful for granting users to access certain functions only. Currently, there are 4 designated roles meant for the different key operations.
+
+| Role           | Access                              |
+| -------------- | ----------------------------------- |
+| `DefaultAdmin` | Able to perform all operations      |
+| `MinterRole`   | Able to mint new tokens             |
+| `AccepterRole` | Able to accept a surrendered token  |
+| `RestorerRole` | Able to restore a surrendered token |
+
+A trusted user can be granted multiple roles by the admin user to perform different operations.
+The following functions can be called on the token contract by the admin user to grant and revoke roles to and from users.
+
+#### Grant a role to a user
+
+```ts
+import { constants } from "@govtechsg/token-registry";
+
+tokenRegistry.grantRole(constants.roleHash.MinterRole, "0xbabe");
+```
+
+Can only be called by default admin or role admin.
+
+#### Revoke a role from a user
+
+```ts
+import { constants } from "@govtechsg/token-registry";
+
+tokenRegistry.revokeRole(constants.roleHash.AccepterRole, "0xbabe");
+```
+
+Can only be called by default admin or role admin.
+
+#### Setting a user as a role admin
+
+```ts
+import { constants } from "@govtechsg/token-registry";
+
+tokenRegistry.setRoleAdmin(constants.roleHash.RestorerRole, "0xbabe");
+```
+
+Can only be called by default admin.
 
 # Deployment
 
