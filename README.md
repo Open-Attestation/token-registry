@@ -17,7 +17,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Deployment](#deployment)
-  - [Basic Usage](#basic-usage)
+  - [Quick Start](#quick-start)
   - [Advanced Usage](#advanced-usage)
     - [Token Contract](#token-contract)
       - [Stand-alone Contract](#stand-alone-contract)
@@ -133,7 +133,7 @@ Starting from v4 beta, we have included an easy and cost-effective way to deploy
 > 💡 Please ensure that you have setup your configuration file before deployment.
 > See [Configuration](#configuration) section for more details. The deployer (configured in your `.env` file) will be made the default admin.
 
-## Basic Usage
+## Quick Start
 
 For users who want to quickly deploy their contracts without too much hassle, you’ll only have to supply the name and symbol of your token to the command, and you’re ready to roll!
 
@@ -149,7 +149,7 @@ npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symb
 ## Advanced Usage
 
 For experienced users who would like to have more control over their setup (or have extra 💰 to spend 💸), we have provided a few other options and commands.
-However, you should be aware that, depending on what you’re doing, the gas costs could be higher than the method described in [Basic Usage](#basic-usage).
+However, you should be aware that, depending on what you’re doing, the gas costs could be higher than the method described in [Quick Start](#quick-start).
 You should already know what you are doing when using any of these options.
 
 ### Token Contract
