@@ -44,7 +44,7 @@ describe("TradeTrustErc721", async () => {
     // 3. IERC721 (basic so that someone expecting a token registry knows how to work with it)
 
     const tradeTrustERC721Instance = await Erc721.connect(carrier1).deploy("foo", "bar");
-    const ITradeTrustERC721InterfaceId = "0x14ac11d9";
+    const ITradeTrustERC721InterfaceId = "0x9be326ab";
     const IERC721InterfaceId = "0x80ac58cd";
     const ITitleEscrowCreatorInterfaceId = "0xfcd7c1df";
     expect(await tradeTrustERC721Instance.supportsInterface(ITradeTrustERC721InterfaceId)).to.be.true;
@@ -172,7 +172,7 @@ describe("TradeTrustErc721", async () => {
 
       const tx = tokenRegistryInstanceWithShippingLineWallet.mintTitle(beneficiary.address, holder.address, merkleRoot);
 
-      await expect(tx).to.be.revertedWith("TradeTrustERC721Mintable: Token already exists");
+      await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
     });
 
     it("should revert when a non-minter attempts to mint a new title", async () => {

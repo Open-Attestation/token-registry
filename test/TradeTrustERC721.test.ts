@@ -520,7 +520,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
           .connect(users.carrier)
           .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-        await expect(tx).to.be.revertedWith("TradeTrustERC721Mintable: Token already exists");
+        await expect(tx).to.be.revertedWith("TokenRegistry: Token already exists");
       });
 
       it("should not allow minting of the same token ID to EOA again", async () => {
