@@ -271,8 +271,10 @@ To verify the contract, pass in the `--verify` flag.
 ## Verification
 
 When verifying the contracts through either the Hardhat's verify plugin or passing the `--verify` flag to the deployment
-tasks (which internally uses the same plugin), you will need to set `ETHERSCAN_API_KEY` in your environment to your
-Etherscan API key.
+tasks (which internally uses the same plugin), you will need to include your correct API key, depending on the network, in your `.env` configuration. See [Configuration](#configuration) section for more info.
+
+- For Ethereum, set `ETHERSCAN_API_KEY`.
+- For Polygon, set `POLYGONSCAN_API_KEY`.
 
 ## Network Configuration
 
@@ -299,6 +301,7 @@ INFURA_APP_ID=
 
 # API Keys
 ETHERSCAN_API_KEY=
+POLYGONSCAN_API_KEY=
 COINMARKETCAP_API_KEY=
 
 # Deployer Private Key
