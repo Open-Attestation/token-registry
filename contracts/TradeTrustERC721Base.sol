@@ -112,7 +112,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     this.safeTransferFrom(address(this), to, tokenId, "");
   }
 
-  function genesis() public view virtual returns (uint256);
+  function genesis() public view virtual override returns (uint256);
 
-  function titleEscrowFactory() public view virtual returns (ITitleEscrowFactory);
+  function titleEscrowFactory() public view virtual override returns (ITitleEscrowFactory);
 }
