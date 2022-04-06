@@ -37,7 +37,35 @@ describe("ImplDeployer", async () => {
     deployerContractAsNonOwner = deployerContract.connect(users.beneficiary);
   });
 
+  describe("Deployer Implementation", () => {
+    let deployerImpl: ImplDeployer;
+
+    beforeEach(async () => {
+      deployerImpl = (await (await ethers.getContractFactory("ImplDeployer"))
+        .connect(deployer)
+        .deploy()) as ImplDeployer;
+    });
+
+    it("should initialise deployer implementation", async () => {
+      const tx = deployerImpl.initialize();
+
+      await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
+    });
+
+    it("should have zero address as owner", async () => {
+      const res = await deployerImpl.owner();
+
+      expect(res).to.equal(defaultAddress.Zero);
+    });
+  });
+
   describe("Implementation Administration", () => {
+    it("should have the correct owner", async () => {
+      const res = await deployerContract.owner();
+
+      expect(res).to.equal(deployer.address);
+    });
+
     describe("Adding Implementation", () => {
       beforeEach(async () => {
         await deployerContractAsOwner.addImpl(implContract.address);
