@@ -3,7 +3,8 @@ import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust
 import faker from "faker";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
-import { getTestUsers, TestUsers } from "./helpers";
+import { getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
+import { roleHash } from "../src/constants";
 
 const { loadFixture } = waffle;
 
@@ -51,7 +52,9 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       it("should not allow non-admin to unpause", async () => {
         const tx = registryContractAsNonAdmin.unpause();
 
-        await expect(tx).to.be.revertedWith("RegAcc: Not Admin");
+        await expect(tx).to.be.revertedWith(
+          toAccessControlRevertMessage(users.beneficiary.address, roleHash.DefaultAdmin)
+        );
       });
     });
 
@@ -73,7 +76,9 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       it("should not allow non-admin to pause", async () => {
         const tx = registryContractAsNonAdmin.pause();
 
-        await expect(tx).to.be.revertedWith("RegAcc: Not Admin");
+        await expect(tx).to.be.revertedWith(
+          toAccessControlRevertMessage(users.beneficiary.address, roleHash.DefaultAdmin)
+        );
       });
     });
   });

@@ -5,7 +5,7 @@ import { TradeTrustERC721 } from "@tradetrust/contracts";
 import { roleHash } from "../src/constants";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
-import { getTestUsers, TestUsers } from "./helpers";
+import { getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
 
 const { loadFixture } = waffle;
 
@@ -109,7 +109,7 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     it("should not allow a non-admin to set role admin", async () => {
       const tx = registryContractAsMinter.setRoleAdmin(roleHash.MinterRole, fakeMinterAdminRole);
 
-      await expect(tx).to.be.revertedWith("RegAcc: Not Admin");
+      await expect(tx).to.be.revertedWith(toAccessControlRevertMessage(userMinter.address, roleHash.DefaultAdmin));
     });
   });
 
@@ -123,7 +123,7 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     it("should not allow a non-minter to mint new tokens", async () => {
       const tx = registryContractAsNoRole.mint(users.beneficiary.address, users.holder.address, tokenId);
 
-      await expect(tx).to.be.revertedWith("RegAcc: Not Minter");
+      await expect(tx).to.be.revertedWith(toAccessControlRevertMessage(users.beneficiary.address, roleHash.MinterRole));
     });
   });
 
@@ -151,7 +151,9 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     it("should not allow a non-restorer to restore tokens", async () => {
       const tx = registryContractAsNoRole.restore(tokenId);
 
-      await expect(tx).to.be.revertedWith("RegAcc: Not Restorer");
+      await expect(tx).to.be.revertedWith(
+        toAccessControlRevertMessage(users.beneficiary.address, roleHash.RestorerRole)
+      );
     });
   });
 
@@ -179,7 +181,9 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     it("should not allow a non-accepter to burn tokens", async () => {
       const tx = registryContractAsNoRole.burn(tokenId);
 
-      await expect(tx).to.be.revertedWith("RegAcc: Not Accepter");
+      await expect(tx).to.be.revertedWith(
+        toAccessControlRevertMessage(users.beneficiary.address, roleHash.AccepterRole)
+      );
     });
   });
 });
