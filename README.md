@@ -129,7 +129,7 @@ signerFromMnemonic.connect(provider);
 
 ### Roles and Access
 
-Roles are useful for granting users to access certain functions only. Currently, there are 4 designated roles meant for the different key operations.
+Roles are useful for granting users to access certain functions only. Currently, here are the designated roles meant for the different key operations.
 
 | Role           | Access                              |
 | -------------- | ----------------------------------- |
@@ -146,7 +146,7 @@ The following functions can be called on the token contract by the admin user to
 ```ts
 import { constants } from "@govtechsg/token-registry";
 
-tokenRegistry.grantRole(constants.roleHash.MinterRole, "0xbabe");
+await tokenRegistry.grantRole(constants.roleHash.MinterRole, "0xbabe");
 ```
 
 Can only be called by default admin or role admin.
@@ -156,17 +156,23 @@ Can only be called by default admin or role admin.
 ```ts
 import { constants } from "@govtechsg/token-registry";
 
-tokenRegistry.revokeRole(constants.roleHash.AccepterRole, "0xbabe");
+await tokenRegistry.revokeRole(constants.roleHash.AccepterRole, "0xbabe");
 ```
 
 Can only be called by default admin or role admin.
 
-#### Setting a user as a role admin
+#### Setting a role admin
+
+The standard setup does not add the role-admin roles so that users don't deploy (and, hence, pay the gas for) more than what they need.
+If you need a more complex setup, you can add the admin roles to the designated roles.
 
 ```ts
 import { constants } from "@govtechsg/token-registry";
+const { roleHash } = constants;
 
-tokenRegistry.setRoleAdmin(constants.roleHash.RestorerRole, "0xbabe");
+await tokenRegistry.setRoleAdmin(roleHash.MinterRole, roleHash.MinterAdminRole);
+await tokenRegistry.setRoleAdmin(roleHash.RestorerRole, roleHash.RestorerAdminRole);
+await tokenRegistry.setRoleAdmin(roleHash.AccepterRole, roleHash.AccepterAdminRole);
 ```
 
 Can only be called by default admin.
