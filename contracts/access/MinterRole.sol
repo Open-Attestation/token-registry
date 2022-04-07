@@ -1,18 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./IMinterRole.sol";
 
-interface IMinterRole {
-  function isMinter(address account) external view returns (bool);
-
-  function addMinter(address account) external;
-
-  function renounceMinter() external;
-}
-
-abstract contract MinterRole is Context, IMinterRole, AccessControlEnumerable {
+abstract contract MinterRole is IMinterRole, AccessControl {
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
   event MinterAdded(address indexed account);
@@ -23,8 +15,8 @@ abstract contract MinterRole is Context, IMinterRole, AccessControlEnumerable {
     _setupRole(MINTER_ROLE, _msgSender());
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControlEnumerable) returns (bool) {
-    return interfaceId == type(IMinterRole).interfaceId || AccessControlEnumerable.supportsInterface(interfaceId);
+  function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl) returns (bool) {
+    return interfaceId == type(IMinterRole).interfaceId || AccessControl.supportsInterface(interfaceId);
   }
 
   modifier onlyMinter() {

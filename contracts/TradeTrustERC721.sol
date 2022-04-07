@@ -158,15 +158,6 @@ contract TradeTrustERC721 is MinterRole, TitleEscrowCloner, ITradeTrustERC721, E
     address to,
     uint256 tokenId
   ) internal {
-    _registrySafeTransformFrom(from, to, tokenId, "");
-  }
-
-  function _registrySafeTransformFrom(
-    address from,
-    address to,
-    uint256 tokenId,
-    bytes memory data
-  ) internal {
-    this.safeTransferFrom(from, to, tokenId, data);
+    this.safeTransferFrom(from, to, tokenId, "");
   }
 }
