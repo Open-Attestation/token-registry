@@ -81,7 +81,7 @@ The TradeTrustErc721 Token Registry will clone a new TitleEscrow internally when
 #### Minting Title Escrow
 
 ```ts
-import { TradeTrustERC721__factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
 
 const connectedRegistry = TradeTrustERC721__factory.connect(existingERC721Address, signer);
 const tx = await connectedRegistry.mintTitle(beneficiaryAddress, holderAddress, tokenId);
@@ -90,7 +90,7 @@ const tx = await connectedRegistry.mintTitle(beneficiaryAddress, holderAddress, 
 #### Restoring Title Escrow
 
 ```ts
-import { TradeTrustERC721__factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
 
 const connectedRegistry = TradeTrustERC721__factory.connect(existingERC721Address, signer);
 const tx = await connectedRegistry.restoreTitle(beneficiaryAddress, holderAddress, existingTokenId);
@@ -99,7 +99,7 @@ const tx = await connectedRegistry.restoreTitle(beneficiaryAddress, holderAddres
 #### Connect to Title Escrow
 
 ```ts
-import { TitleEscrow__factory } from "@govtechsg/token-registry";
+import { TitleEscrow__factory } from "@govtechsg/token-registry/contracts";
 
 const connectedEscrow = TitleEscrow__factory.connect(existingTitleEscrowAddress, signer1);
 ```
