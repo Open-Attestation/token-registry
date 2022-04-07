@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "files": [
     "dist",
-    "src",
-    "scripts"
+    "contracts"
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -15,9 +14,10 @@
     "build:sol": "TS_NODE_TRANSPILE_ONLY=1 hardhat compile",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
     "build:js": "tsc && npm run build:js:copy-src",
-    "build:js:copy-types": "mkdir -p ./dist/types/contracts && cp ./src/contracts/*.d.ts ./dist/types/contracts",
-    "build:abi:copy": "mkdir -p ./dist/abis && cp -a ./artifacts/contracts/. ./dist/abis && rm -f ./dist/abis/**/*.dbg.json",
-    "build": "npm run clean:build && npm run build:sol && npm run build:js && npm run build:js:copy-types && npm run build:abi:copy",
+    "build:js:copy-types": "mkdir -p ./dist/contracts && cp -a ./src/contracts/* ./dist/contracts",
+    "build:artifacts:copy": "mkdir -p ./dist/artifacts && cp -a ./artifacts/contracts/. ./dist/artifacts && rm -f ./dist/artifacts/**/*.dbg.json",
+    "build:arrange": "rm -r ./dist/types/test && rm -r ./dist/types/tasks && rm -r ./dist/types/src/contracts && cp -a ./dist/types/src/* ./dist/types && rm -r ./dist/types/src",
+    "build": "npm run clean:build && npm run build:sol && npm run build:js && npm run build:js:copy-types && npm run build:artifacts:copy && npm run build:arrange",
     "clean:build": "TS_NODE_TRANSPILE_ONLY=1 hardhat clean && rm -rf ./dist && rm -rf ./src/contracts",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
