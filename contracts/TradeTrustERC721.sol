@@ -28,7 +28,13 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowClone
     return;
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, IERC165, RegistryAccess) returns (bool) {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(ERC721, IERC165, RegistryAccess)
+    returns (bool)
+  {
     return
       interfaceId == type(ITitleEscrowCreator).interfaceId ||
       interfaceId == type(ITradeTrustERC721).interfaceId ||
@@ -59,7 +65,7 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowClone
    *
    * @param tokenId Token ID to be burnt
    */
-  function destroyToken(uint256 tokenId) external whenNotPaused onlyAccepter override {
+  function destroyToken(uint256 tokenId) external override whenNotPaused onlyAccepter {
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -73,13 +79,13 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowClone
     address beneficiary,
     address holder,
     uint256 tokenId
-  ) public virtual whenNotPaused onlyMinter override returns (address) {
+  ) public virtual override whenNotPaused onlyMinter returns (address) {
     require(!_exists(tokenId), "TokenRegistry: Token already exists");
 
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
-  function restoreTitle(uint256 tokenId) external whenNotPaused onlyRestorer override returns (address) {
+  function restoreTitle(uint256 tokenId) external override whenNotPaused onlyRestorer returns (address) {
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
 
@@ -139,7 +145,7 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowClone
     address from,
     address to,
     uint256 tokenId
-  ) internal whenNotPaused virtual override {
+  ) internal virtual override whenNotPaused {
     if (to == BURN_ADDRESS) {
       require(isSurrendered(tokenId), "TokenRegistry: Token has not been surrendered for burning");
     } else {

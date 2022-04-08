@@ -1,9 +1,10 @@
-import { ethers, waffle } from "hardhat";
+import { waffle } from "hardhat";
 import { TitleEscrowCloneable, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import faker from "faker";
 import { expect } from ".";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { getTestUsers } from "./utils";
+import { mintTokenFixture } from "./fixtures/mint-token.fixture";
 
 const { loadFixture } = waffle;
 
@@ -118,12 +119,16 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       let titleEscrowContract: TitleEscrowCloneable;
 
       beforeEach(async () => {
-        await registryContractAsAdmin.mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);
-        const titleEscrowAddr = await registryContract.ownerOf(tokenId);
-        const titleEscrowFactory = await ethers.getContractFactory("TitleEscrowCloneable");
-        titleEscrowContract = titleEscrowFactory
-          .attach(titleEscrowAddr)
-          .connect(users.beneficiary) as TitleEscrowCloneable;
+        titleEscrowContract = (
+          await loadFixture(
+            mintTokenFixture({
+              token: registryContractAsAdmin,
+              beneficiary: users.beneficiary,
+              holder: users.beneficiary,
+              tokenId,
+            })
+          )
+        ).titleEscrow;
       });
 
       describe("Token Registry Behaviour", () => {

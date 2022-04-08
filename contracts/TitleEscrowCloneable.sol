@@ -11,7 +11,14 @@ import "./access/HasHolderInitializable.sol";
 import "./interfaces/ITitleEscrowCreator.sol";
 import "./interfaces/ITitleEscrow.sol";
 
-contract TitleEscrowCloneable is Context, Initializable, ITitleEscrow, HasHolderInitializable, HasNamedBeneficiaryInitializable, ERC165  {
+contract TitleEscrowCloneable is
+  Context,
+  Initializable,
+  ITitleEscrow,
+  HasHolderInitializable,
+  HasNamedBeneficiaryInitializable,
+  ERC165
+{
   // Documentation on how this smart contract works: https://docs.tradetrust.io/docs/overview/title-transfer
 
   ITitleEscrow.StatusTypes public override status;
