@@ -34,9 +34,6 @@ contract TitleEscrowCloneable is
   address public override approvedBeneficiary;
   address public override approvedHolder;
 
-  // For exiting into non-title escrow contracts
-  address public override approvedOwner;
-
   function initialize(
     address _tokenRegistry,
     address _beneficiary,
@@ -75,14 +72,6 @@ contract TitleEscrowCloneable is
     _changeHolder(newHolder);
   }
 
-  modifier allowTransferOwner(address newOwner) {
-    require(newOwner != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
-    if (holder != beneficiary) {
-      require(newOwner == approvedOwner, "TitleEscrow: New owner has not been approved by beneficiary");
-    }
-    _;
-  }
-
   modifier allowTransferTitleEscrow(address newBeneficiary, address newHolder) {
     require(newBeneficiary != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
     require(newHolder != address(0), "TitleEscrow: Transferring to 0x0 is not allowed");
@@ -104,11 +93,6 @@ contract TitleEscrowCloneable is
     bool paused = Pausable(address(tokenRegistry)).paused();
     require(!paused, "TitleEscrow: Token Registry is paused");
     _;
-  }
-
-  function approveNewOwner(address newOwner) public override isHoldingToken onlyBeneficiary {
-    emit TransferOwnerApproval(_tokenId, beneficiary, newOwner);
-    approvedOwner = newOwner;
   }
 
   function _transferTo(address newOwner) internal {
