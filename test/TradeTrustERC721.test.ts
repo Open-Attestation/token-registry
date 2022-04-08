@@ -13,8 +13,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
 import { mintTokenFixture } from "./fixtures/mint-token.fixture";
-import { getTestUsers, toAccessControlRevertMessage, getTitleEscrowContract } from "./utils";
-import { AddressConstants, RoleConstants } from "../src/common/constants";
+import { getTestUsers, getTitleEscrowContract } from "./utils";
+import { AddressConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 
@@ -466,12 +466,10 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
       });
 
       describe("When caller to burn token is not a minter", () => {
-        it("should not allow a non-minter to burn the token", async () => {
+        it("should not allow a non-accepter to burn the token", async () => {
           const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
 
-          await expect(tx).to.be.revertedWith(
-            toAccessControlRevertMessage(users.beneficiary.address, RoleConstants.defaultAdmin)
-          );
+          await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Accepter role");
         });
       });
     });
@@ -485,12 +483,10 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         await expect(tx).to.be.revertedWith("TokenRegistry: Token has not been surrendered");
       });
 
-      it("should not allow a non-minter to burn the token", async () => {
+      it("should not allow a non-accepter to burn the token", async () => {
         const tx = tradeTrustERC721Mock.connect(users.beneficiary).destroyToken(tokenId);
 
-        await expect(tx).to.be.revertedWith(
-          toAccessControlRevertMessage(users.beneficiary.address, RoleConstants.defaultAdmin)
-        );
+        await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Accepter role");
       });
 
       it("should allow ERC721 burning of unsurrendered token internally", async () => {

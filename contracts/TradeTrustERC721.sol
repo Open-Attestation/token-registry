@@ -7,12 +7,12 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "./TitleEscrowCloneable.sol";
 import "./TitleEscrowCloner.sol";
+import "./access/RegistryAccess.sol";
 import "./interfaces/ITitleEscrowCreator.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
-import "./access/MinterRole.sol";
 
-contract TradeTrustERC721 is ITradeTrustERC721, MinterRole, TitleEscrowCloner, Pausable, ERC721 {
+contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowCloner, Pausable, ERC721 {
   using Address for address;
 
   event TokenBurnt(uint256 indexed tokenId);
@@ -28,12 +28,12 @@ contract TradeTrustERC721 is ITradeTrustERC721, MinterRole, TitleEscrowCloner, P
     return;
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, IERC165, MinterRole) returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, IERC165, RegistryAccess) returns (bool) {
     return
       interfaceId == type(ITitleEscrowCreator).interfaceId ||
       interfaceId == type(ITradeTrustERC721).interfaceId ||
       ERC721.supportsInterface(interfaceId) ||
-      MinterRole.supportsInterface(interfaceId);
+      RegistryAccess.supportsInterface(interfaceId);
   }
 
   function onERC721Received(
@@ -59,7 +59,7 @@ contract TradeTrustERC721 is ITradeTrustERC721, MinterRole, TitleEscrowCloner, P
    *
    * @param tokenId Token ID to be burnt
    */
-  function destroyToken(uint256 tokenId) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) override {
+  function destroyToken(uint256 tokenId) external whenNotPaused onlyAccepter override {
     emit TokenBurnt(tokenId);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
@@ -79,7 +79,7 @@ contract TradeTrustERC721 is ITradeTrustERC721, MinterRole, TitleEscrowCloner, P
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
-  function restoreTitle(uint256 tokenId) external whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) override returns (address) {
+  function restoreTitle(uint256 tokenId) external whenNotPaused onlyRestorer override returns (address) {
     require(_exists(tokenId), "TokenRegistry: Token does not exist");
     require(isSurrendered(tokenId), "TokenRegistry: Token is not surrendered");
 
@@ -127,11 +127,11 @@ contract TradeTrustERC721 is ITradeTrustERC721, MinterRole, TitleEscrowCloner, P
     return false;
   }
 
-  function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function pause() external onlyAdmin {
     _pause();
   }
 
-  function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function unpause() external onlyAdmin {
     _unpause();
   }
 
