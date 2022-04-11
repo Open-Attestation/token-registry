@@ -1,8 +1,9 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
+const { loadFixture } = require("ethereum-waffle");
+const { deployTokenFixture } = require("./fixtures/index.ts");
 
 describe("TitleEscrowCloneable", async () => {
   let TitleEscrowCloneableFactory;
-  let ERC721Factory;
   let TitleEscrowClonerFactory;
   let TitleEscrowCloner;
 
@@ -15,8 +16,7 @@ describe("TitleEscrowCloneable", async () => {
   before("Initialising contract factories and accounts for TitleEscrow tests", async () => {
     [carrier1, beneficiary1, beneficiary2, holder1, holder2] = await ethers.getSigners();
     TitleEscrowCloneableFactory = await ethers.getContractFactory("TitleEscrowCloneableMock");
-    ERC721Factory = await ethers.getContractFactory("TradeTrustERC721Mock");
-    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowClonerMock");
+    TitleEscrowClonerFactory = await ethers.getContractFactory("TitleEscrowFactoryMock");
 
     TitleEscrowCloner = await TitleEscrowClonerFactory.connect(carrier1).deploy();
   });
@@ -44,12 +44,19 @@ describe("TitleEscrowCloneable", async () => {
   let ERC721Instance;
 
   beforeEach("Initialising fresh Token Registry for each test", async () => {
-    ERC721Instance = await ERC721Factory.connect(carrier1).deploy("foo", "bar");
+    ERC721Instance = await loadFixture(
+      deployTokenFixture({
+        tokenContractName: "TradeTrustERC721Mock",
+        tokenName: "foo",
+        tokenInitials: "bar",
+        deployer: carrier1,
+      })
+    );
     ERC721Address = ERC721Instance.address;
   });
 
   const makeTitleEscrow = async (beneficiary, holder, registry = ERC721Address) => {
-    const tx = await (await TitleEscrowCloner.deployNewTitleEscrow(registry, beneficiary, holder)).wait();
+    const tx = await (await TitleEscrowCloner.create(registry, beneficiary, holder)).wait();
     const teLog = tx.events.find((e) => e.event === "TitleEscrowDeployed");
     const teAddr = teLog.args.escrowAddress;
     return TitleEscrowCloneableFactory.attach(teAddr);
@@ -121,7 +128,14 @@ describe("TitleEscrowCloneable", async () => {
   });
 
   it("should should fail to receive ERC721 if its from a different registry", async () => {
-    const newERC721Instance = await ERC721Factory.connect(beneficiary1).deploy("foo", "bar");
+    const newERC721Instance = await loadFixture(
+      deployTokenFixture({
+        tokenContractName: "TradeTrustERC721Mock",
+        tokenName: "foo",
+        tokenInitials: "bar",
+        deployer: beneficiary1,
+      })
+    );
 
     const escrowInstance = await makeTitleEscrow(beneficiary1.address, beneficiary1.address, newERC721Instance.address);
     const mintTx = ERC721Instance["mintInternal(address,uint256)"](escrowInstance.address, SAMPLE_TOKEN_ID);

@@ -3,10 +3,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import faker from "faker";
 import { TradeTrustERC721 } from "@tradetrust/contracts";
 import { expect } from ".";
-import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
-import { getTestUsers } from "./utils";
+import { deployTokenFixture, mintTokenFixture } from "./fixtures";
+import { getTestUsers, TestUsers } from "./utils";
 import { RoleConstants } from "../src/common/constants";
-import { mintTokenFixture } from "./fixtures/mint-token.fixture";
 
 const { loadFixture } = waffle;
 
@@ -35,7 +34,7 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
         tokenContractName: "TradeTrustERC721",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
-        users,
+        deployer: users.carrier,
       })
     );
 

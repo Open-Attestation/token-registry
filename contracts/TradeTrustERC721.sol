@@ -2,17 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "./TitleEscrowCloneable.sol";
-import "./TitleEscrowCloner.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./access/RegistryAccess.sol";
-import "./interfaces/ITitleEscrowCreator.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
+import "./interfaces/ITitleEscrowFactory.sol";
 
-contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowCloner, Pausable, ERC721 {
+contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, Pausable, ERC721 {
   using Address for address;
 
   event TokenBurnt(uint256 indexed tokenId);
@@ -21,11 +19,17 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowClone
 
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
+  ITitleEscrowFactory public override titleEscrowFactory;
+
   // Mapping from token ID to previously surrendered title escrow address
   mapping(uint256 => address) internal _surrenderedOwners;
 
-  constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-    return;
+  constructor(
+    string memory name,
+    string memory symbol,
+    address _titleEscrowFactory
+  ) ERC721(name, symbol) {
+    titleEscrowFactory = ITitleEscrowFactory(_titleEscrowFactory);
   }
 
   function supportsInterface(bytes4 interfaceId)
@@ -36,7 +40,6 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowClone
     returns (bool)
   {
     return
-      interfaceId == type(ITitleEscrowCreator).interfaceId ||
       interfaceId == type(ITradeTrustERC721).interfaceId ||
       ERC721.supportsInterface(interfaceId) ||
       RegistryAccess.supportsInterface(interfaceId);
@@ -117,7 +120,7 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowClone
       beneficiary = previousOwner;
       holder = previousOwner;
     }
-    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+    address newTitleEscrow = titleEscrowFactory.create(address(this), beneficiary, holder);
     _registrySafeTransformFrom(address(this), newTitleEscrow, tokenId);
 
     emit TokenRestored(tokenId, newTitleEscrow);
@@ -163,7 +166,7 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, TitleEscrowClone
     address holder,
     uint256 tokenId
   ) internal virtual returns (address) {
-    address newTitleEscrow = _deployNewTitleEscrow(address(this), beneficiary, holder);
+    address newTitleEscrow = titleEscrowFactory.create(address(this), beneficiary, holder);
     _safeMint(newTitleEscrow, tokenId);
 
     return newTitleEscrow;

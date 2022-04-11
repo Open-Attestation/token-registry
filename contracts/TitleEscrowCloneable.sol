@@ -8,8 +8,8 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "./access/HasNamedBeneficiaryInitializable.sol";
 import "./access/HasHolderInitializable.sol";
-import "./interfaces/ITitleEscrowCreator.sol";
 import "./interfaces/ITitleEscrow.sol";
+import "./TitleEscrowFactory.sol";
 
 contract TitleEscrowCloneable is
   Context,
@@ -28,7 +28,7 @@ contract TitleEscrowCloneable is
   uint256 public _tokenId;
 
   // Factory to clone this title escrow
-  ITitleEscrowCreator public titleEscrowFactory;
+  ITitleEscrowFactory public titleEscrowFactory;
 
   // For exiting into title escrow contracts
   address public override approvedBeneficiary;
@@ -43,7 +43,7 @@ contract TitleEscrowCloneable is
     __initialize__holder(_holder);
     __initialize__beneficiary(_beneficiary);
     tokenRegistry = ERC721(_tokenRegistry);
-    titleEscrowFactory = ITitleEscrowCreator(_titleEscrowFactoryAddress);
+    titleEscrowFactory = ITitleEscrowFactory(_titleEscrowFactoryAddress);
     status = StatusTypes.Uninitialised;
   }
 
@@ -115,11 +115,7 @@ contract TitleEscrowCloneable is
     onlyHolder
     allowTransferTitleEscrow(newBeneficiary, newHolder)
   {
-    address newTitleEscrowAddress = titleEscrowFactory.deployNewTitleEscrow(
-      address(tokenRegistry),
-      newBeneficiary,
-      newHolder
-    );
+    address newTitleEscrowAddress = titleEscrowFactory.create(address(tokenRegistry), newBeneficiary, newHolder);
     _transferTo(newTitleEscrowAddress);
   }
 

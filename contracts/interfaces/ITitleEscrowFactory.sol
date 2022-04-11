@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-/// @title Title Escrow for Transferable Records
-interface ITitleEscrowCreator {
+interface ITitleEscrowFactory {
   event TitleEscrowDeployed(
     address indexed escrowAddress,
     address indexed tokenRegistry,
@@ -10,8 +9,9 @@ interface ITitleEscrowCreator {
     address holder
   );
 
-  /// @notice Deploys an instance of a title escrow
-  function deployNewTitleEscrow(
+  function implementation() external view returns (address);
+
+  function create(
     address tokenRegistry,
     address beneficiary,
     address holder

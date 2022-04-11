@@ -11,9 +11,8 @@ import * as faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
-import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
-import { mintTokenFixture } from "./fixtures/mint-token.fixture";
-import { getTestUsers, getTitleEscrowContract } from "./utils";
+import { deployTokenFixture, deployEscrowFactoryFixture, mintTokenFixture } from "./fixtures";
+import { getTestUsers, getTitleEscrowContract, getEscrowFactoryFromToken, TestUsers } from "./utils";
 import { AddressConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
@@ -37,7 +36,7 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         tokenContractName: "TradeTrustERC721Mock",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
-        users,
+        deployer: users.carrier,
       })
     );
   });
@@ -139,10 +138,11 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
             it("should restore into a new title escrow contract", async () => {
               const tx = await tradeTrustERC721Mock.restoreTitle(tokenId);
 
+              const escrowFactory = await getEscrowFactoryFromToken(tradeTrustERC721Mock);
               const newTitleEscrowAddress = await tradeTrustERC721Mock.ownerOf(tokenId);
               expect(titleEscrow.address).to.be.not.equal(newTitleEscrowAddress);
               expect(tx)
-                .to.emit(tradeTrustERC721Mock, "TitleEscrowDeployed")
+                .to.emit(escrowFactory, "TitleEscrowDeployed")
                 .withArgs(
                   newTitleEscrowAddress,
                   tradeTrustERC721Mock.address,
@@ -209,10 +209,11 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
             const tx = await tradeTrustERC721Mock.connect(users.carrier).restoreTitle(tokenId);
 
             const newOwner = await tradeTrustERC721Mock.ownerOf(tokenId);
+            const escrowFactory = await getEscrowFactoryFromToken(tradeTrustERC721Mock);
 
             expect(currentOwner).to.be.not.equal(newOwner);
             expect(tx)
-              .to.emit(tradeTrustERC721Mock, "TitleEscrowDeployed")
+              .to.emit(escrowFactory, "TitleEscrowDeployed")
               .withArgs(newOwner, tradeTrustERC721Mock.address, eoa.address, eoa.address);
           });
 
@@ -237,8 +238,9 @@ describe("TradeTrustERC721 (TS Migration)", async () => {
         beforeEach(async () => {
           tokenId = faker.datatype.hexaDecimal(2);
 
+          const escrowFactory = await loadFixture(deployEscrowFactoryFixture({ deployer: users.carrier }));
           const mockTradeTrustERC721Factory = await smock.mock<TradeTrustERC721__factory>("TradeTrustERC721");
-          stubTradeTrustERC721 = await mockTradeTrustERC721Factory.deploy("Mock Shipper", "MSC");
+          stubTradeTrustERC721 = await mockTradeTrustERC721Factory.deploy("Mock Shipper", "MSC", escrowFactory.address);
           await stubTradeTrustERC721
             .connect(users.carrier)
             .mintTitle(users.beneficiary.address, users.beneficiary.address, tokenId);

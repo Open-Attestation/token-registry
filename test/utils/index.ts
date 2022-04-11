@@ -1,5 +1,12 @@
 import { ethers } from "hardhat";
-import { TestUsers } from "../fixtures/deploy-token.fixture";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+
+export type TestUsers = {
+  carrier: SignerWithAddress;
+  beneficiary: SignerWithAddress;
+  holder: SignerWithAddress;
+  others: SignerWithAddress[];
+};
 
 export const getTestUsers = async () => {
   const [carrier, beneficiary, holder, ...others] = await ethers.getSigners();
@@ -14,3 +21,4 @@ export const toAccessControlRevertMessage = (account: string, role: string): str
 export { impersonateAccount, stopImpersonatingAccount } from "./impersonateAccount";
 export { getEventFromTransaction } from "./getEventFromTransaction";
 export { getTitleEscrowContract } from "./getTitleEscrowContract";
+export { getEscrowFactoryFromToken } from "./getEscrowFactoryFromToken";

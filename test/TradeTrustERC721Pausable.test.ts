@@ -2,9 +2,8 @@ import { waffle } from "hardhat";
 import { TitleEscrowCloneable, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import faker from "faker";
 import { expect } from ".";
-import { deployTokenFixture, TestUsers } from "./fixtures/deploy-token.fixture";
-import { getTestUsers } from "./utils";
-import { mintTokenFixture } from "./fixtures/mint-token.fixture";
+import { deployTokenFixture, mintTokenFixture } from "./fixtures";
+import { getTestUsers, TestUsers } from "./utils";
 
 const { loadFixture } = waffle;
 
@@ -23,7 +22,7 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
         tokenContractName: "TradeTrustERC721Mock",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
-        users,
+        deployer: users.carrier,
       })
     );
 
@@ -101,7 +100,7 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
             tokenContractName: "TradeTrustERC721Mock",
             tokenName: "The Great Shipping Company",
             tokenInitials: "GSC",
-            users,
+            deployer: users.carrier,
           })
         );
         await registryContractMock.mintInternal(users.beneficiary.address, tokenId);

@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 export {
   TitleEscrowCloneable__factory as TitleEscrowCloneableFactory,
-  TitleEscrowCloner__factory as TitleEscrowClonerFactory,
+  TitleEscrowFactory__factory as TitleEscrowFactoryFactory,
   TradeTrustERC721__factory as TradeTrustERC721Factory,
   TitleEscrowCloneable,
-  TitleEscrowCloner,
+  TitleEscrowFactory,
   TradeTrustERC721,
 } from "./contracts";
