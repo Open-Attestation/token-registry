@@ -4,9 +4,10 @@ type Parameters = {
   hre: HardhatRuntimeEnvironment;
   address: string;
   constructorArgsParams: any[];
+  contract?: string;
 };
 
-export const verifyContract = async ({ hre, address, constructorArgsParams }: Parameters) => {
+export const verifyContract = async ({ hre, address, constructorArgsParams, contract }: Parameters) => {
   if (["localhost", "hardhat"].includes(hre.network.name)) {
     console.log(`[Status] Skipped verifying contract ${address} on local`);
     return;
@@ -15,6 +16,7 @@ export const verifyContract = async ({ hre, address, constructorArgsParams }: Pa
   await hre.run("verify", {
     address,
     constructorArgsParams,
+    contract,
   });
   console.log(`[Status] Verified contract at ${address}`);
 };
