@@ -50,10 +50,6 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, Pausable, ERC721
     uint256, /* _tokenId */
     bytes memory /* _data */
   ) public pure override returns (bytes4) {
-    //    address expectedOperator = titleEscrowFactory.getAddress(address(this), _tokenId);
-    //    require(_operator == expectedOperator, "TitleEscrow: Unexpected operator");
-    // TODO: Why event emit this event??
-    //    emit TokenReceived(_operator, _from, _tokenId, _data);
     return IERC721Receiver.onERC721Received.selector;
   }
 
@@ -97,7 +93,6 @@ contract TradeTrustERC721 is ITradeTrustERC721, RegistryAccess, Pausable, ERC721
     require(ownerOf(tokenId) != BURN_ADDRESS, "TokenRegistry: Token is already burnt");
 
     address titleEscrow = titleEscrowFactory.getAddress(address(this), tokenId);
-    //    require(escrowAddress.isContract(), "TokenRegistry: Escrow contract does not exist");
 
     _registryTransferTo(titleEscrow, tokenId);
 
