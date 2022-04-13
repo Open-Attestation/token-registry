@@ -1,7 +1,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import ERC1967Proxy from "@openzeppelin/contracts/proxy/ERC1967/artifacts/ERC1967Proxy.json";
 import { ImplDeployer } from "@tradetrust/contracts";
+import ERC1967Proxy from "./artifacts/ERC1967Proxy.json";
 
 export const deployImplDeployerFixture =
   ({ deployer }: { deployer: SignerWithAddress }) =>
