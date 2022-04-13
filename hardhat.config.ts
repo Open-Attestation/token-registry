@@ -11,7 +11,8 @@ import "./tasks";
 
 dotenv.config();
 
-const { INFURA_APP_ID, MNEMONIC, DEPLOYER_PK, COINMARKETCAP_API_KEY, ETHERSCAN_API_KEY } = process.env;
+const { INFURA_APP_ID, MNEMONIC, DEPLOYER_PK, COINMARKETCAP_API_KEY, ETHERSCAN_API_KEY, POLYGONSCAN_API_KEY } =
+  process.env;
 const IS_CI_ENV = process.env.NODE_ENV === "ci";
 
 if (!IS_CI_ENV && !INFURA_APP_ID) {
@@ -63,7 +64,21 @@ const config: HardhatUserConfig = {
     currency: "USD",
   },
   etherscan: {
-    apiKey: ETHERSCAN_API_KEY,
+    apiKey: {
+      /**
+       * Ethereum
+       */
+      mainnet: ETHERSCAN_API_KEY,
+      ropsten: ETHERSCAN_API_KEY,
+      goerli: ETHERSCAN_API_KEY,
+      rinkeby: ETHERSCAN_API_KEY,
+      kovan: ETHERSCAN_API_KEY,
+      /**
+       * Polygon
+       */
+      polygon: POLYGONSCAN_API_KEY,
+      polygonMumbai: POLYGONSCAN_API_KEY,
+    },
   },
   networks: {
     /**

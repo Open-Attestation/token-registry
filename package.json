@@ -63,7 +63,7 @@
     "@ls-age/commitlint-circle": "1.0.0",
     "@maticnetwork/fx-portal": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
-    "@nomiclabs/hardhat-etherscan": "^2.1.7",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/contracts": "^4.5.0",
     "@typechain/ethers-v5": "^7.1.2",

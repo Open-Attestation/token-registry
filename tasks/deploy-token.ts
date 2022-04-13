@@ -4,6 +4,8 @@ import { deployToken } from "./helpers/deploy-token";
 import { verifyContract } from "./helpers/verify-contract";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
 
+const wait = async (durationMs: number) => new Promise((resolve) => setTimeout(async () => resolve(true), durationMs));
+
 task(TASK_DEPLOY_TOKEN)
   .setDescription("Deploys the TradeTrustERC721 token and, optionally, Title Escrow factory if not provided.")
   .addParam("name", "Name of the token")
@@ -43,8 +45,8 @@ task(TASK_DEPLOY_TOKEN)
       });
 
       if (verify) {
-        console.log("[Status] Waiting to verify (may take a while)...");
-        await token.deployTransaction.wait(5);
+        console.log("[Status] Waiting to verify (about a minute)...");
+        await wait(60000);
         console.log("[Status] Start verification");
 
         if (deployedNewFactory) {
@@ -64,8 +66,8 @@ task(TASK_DEPLOY_TOKEN)
       }
 
       console.log("[Status] Completed deploying token");
-    } catch (err) {
+    } catch (err: any) {
       console.log("[Status] An error occurred while deploying token");
-      console.error(err);
+      console.error(err.message);
     }
   });
