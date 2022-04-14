@@ -2,26 +2,32 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "./TitleEscrowCloneable.sol";
+import "./TitleEscrow.sol";
 import "./interfaces/ITitleEscrowFactory.sol";
 
 contract TitleEscrowFactory is ITitleEscrowFactory {
   address public override implementation;
 
   constructor() {
-    implementation = address(new TitleEscrowCloneable());
+    implementation = address(new TitleEscrow());
+    TitleEscrow(implementation).initialize(address(0), address(0), address(0), 0x00);
   }
 
   function create(
-    address tokenRegistry,
     address beneficiary,
-    address holder
+    address holder,
+    uint256 tokenId
   ) external override returns (address) {
-    address clone = Clones.clone(implementation);
-    TitleEscrowCloneable(clone).initialize(tokenRegistry, beneficiary, holder, address(this));
+    bytes32 salt = keccak256(abi.encodePacked(msg.sender, tokenId));
+    address titleEscrow = Clones.cloneDeterministic(implementation, salt);
+    TitleEscrow(titleEscrow).initialize(msg.sender, beneficiary, holder, tokenId);
 
-    emit TitleEscrowDeployed(address(clone), tokenRegistry, beneficiary, holder);
+    emit TitleEscrowCreated(titleEscrow, msg.sender, tokenId, beneficiary, holder);
 
-    return address(clone);
+    return titleEscrow;
+  }
+
+  function getAddress(address tokenRegistry, uint256 tokenId) external view override returns (address) {
+    return Clones.predictDeterministicAddress(implementation, keccak256(abi.encodePacked(tokenRegistry, tokenId)));
   }
 }
