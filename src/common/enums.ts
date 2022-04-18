@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow,no-unused-vars */
 export enum ChainId {
   // Localhost
   Local = 1337,
