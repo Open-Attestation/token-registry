@@ -9,6 +9,7 @@ import { getEventFromTransaction, getTestUsers, TestUsers } from "./utils";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { computeInterfaceId } from "./utils/computeInterfaceId";
 import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
+import { AddressConstants } from "../src/common/constants";
 
 const { loadFixture } = waffle;
 
@@ -37,7 +38,7 @@ describe("TitleEscrowFactory", async () => {
     });
 
     it("should have an implementation", async () => {
-      expect(implAddr).to.not.equal(ethers.constants.AddressZero);
+      expect(implAddr).to.not.equal(AddressConstants.Zero);
     });
 
     it("should have the correct title escrow implementation", async () => {
@@ -49,7 +50,7 @@ describe("TitleEscrowFactory", async () => {
     });
 
     it("should initialise implementation", async () => {
-      const zeroAddress = ethers.constants.AddressZero;
+      const zeroAddress = AddressConstants.Zero;
       const [registry, beneficiary, holder, tokenId] = await Promise.all([
         titleEscrowContract.registry(),
         titleEscrowContract.beneficiary(),

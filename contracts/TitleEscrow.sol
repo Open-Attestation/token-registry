@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
@@ -21,29 +19,33 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
 
   bool public override active;
 
+  constructor() {
+    initialize(address(0), address(0), address(0), 0x00);
+  }
+
   modifier onlyBeneficiary() {
-    require(msg.sender == beneficiary, "TitleEscrow: Caller is not beneficiary");
+    require(msg.sender == beneficiary, "TE: Not beneficiary");
     _;
   }
 
   modifier onlyHolder() {
-    require(msg.sender == holder, "TitleEscrow: Caller is not holder");
+    require(msg.sender == holder, "TE: Not holder");
     _;
   }
 
   modifier whenHoldingToken() {
-    require(_isHoldingToken(), "TitleEscrow: Not holding token");
+    require(_isHoldingToken(), "TE: Not holding token");
     _;
   }
 
   modifier whenNotPaused() {
     bool paused = Pausable(registry).paused();
-    require(!paused, "TitleEscrow: Token Registry is paused");
+    require(!paused, "TE: Registry paused");
     _;
   }
 
   modifier whenActive() {
-    require(active, "TitleEscrow: Inactive");
+    require(active, "TE: Inactive");
     _;
   }
 
@@ -70,8 +72,8 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     uint256 _tokenId,
     bytes calldata /* data */
   ) external override whenNotPaused whenActive returns (bytes4) {
-    require(tokenId == _tokenId, "TitleEscrow: Unable to accept token");
-    require(msg.sender == address(registry), "TitleEscrow: Only tokens from predefined token registry can be accepted");
+    require(tokenId == _tokenId, "TE: Invalid token");
+    require(msg.sender == address(registry), "TE: Wrong registry");
 
     emit TokenReceived(registry, tokenId);
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
@@ -85,8 +87,8 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     whenHoldingToken
     whenActive
   {
-    require(beneficiary != _nominatedBeneficiary, "TitleEscrow: Nominee is already beneficiary");
-    require(nominatedBeneficiary != _nominatedBeneficiary, "TitleEscrow: Beneficiary nominee is already nominated");
+    require(beneficiary != _nominatedBeneficiary, "TE: Nominee is beneficiary");
+    require(nominatedBeneficiary != _nominatedBeneficiary, "TE: Already beneficiary nominee");
 
     nominatedBeneficiary = _nominatedBeneficiary;
 
@@ -101,8 +103,8 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     whenHoldingToken
     whenActive
   {
-    require(holder != _nominatedHolder, "TitleEscrow: Nominee is already holder");
-    require(nominatedHolder != _nominatedHolder, "TitleEscrow: Holder nominee is already nominated");
+    require(holder != _nominatedHolder, "TE: Nominee is holder");
+    require(nominatedHolder != _nominatedHolder, "TE: Already holder nominee");
 
     nominatedHolder = _nominatedHolder;
 
@@ -122,11 +124,8 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     whenHoldingToken
     whenActive
   {
-    require(_nominatedBeneficiary != address(0), "TitleEscrow: Cannot endorse address");
-    require(
-      beneficiary == holder || (nominatedBeneficiary == _nominatedBeneficiary),
-      "TitleEscrow: Cannot endorse non-nominee"
-    );
+    require(_nominatedBeneficiary != address(0), "TE: Endorsing zero");
+    require(beneficiary == holder || (nominatedBeneficiary == _nominatedBeneficiary), "TE: Endorse non-nominee");
 
     beneficiary = _nominatedBeneficiary;
     nominatedBeneficiary = address(0);
@@ -142,13 +141,10 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     whenHoldingToken
     whenActive
   {
-    require(_nominatedHolder != address(0), "TitleEscrow: Cannot endorse address");
-    require(holder != _nominatedHolder, "TitleEscrow: Endorsee is already holder");
+    require(_nominatedHolder != address(0), "TE: Endorsing zero");
+    require(holder != _nominatedHolder, "TE: Endorsee already holder");
     if (nominatedHolder != address(0)) {
-      require(
-        beneficiary == holder || (nominatedHolder == _nominatedHolder),
-        "TitleEscrow: Cannot endorse non-nominee"
-      );
+      require(beneficiary == holder || (nominatedHolder == _nominatedHolder), "TE: Endorse non-nominee");
     }
 
     holder = _nominatedHolder;
@@ -170,8 +166,8 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
   }
 
   function shred() external override whenNotPaused whenActive {
-    require(!_isHoldingToken(), "TitleEscrow: Not surrendered yet");
-    require(msg.sender == registry, "TitleEscrow: Caller is not registry");
+    require(!_isHoldingToken(), "TE: Not surrendered");
+    require(msg.sender == registry, "TE: Invalid registry");
 
     _resetNominees();
     beneficiary = address(0);

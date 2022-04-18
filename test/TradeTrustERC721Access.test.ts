@@ -46,9 +46,9 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     registryContractAsAdmin = registryContract.connect(userAdmin);
 
     await Promise.all([
-      registryContractAsAdmin.grantRole(RoleConstants.minterRole, userMinter.address),
-      registryContractAsAdmin.grantRole(RoleConstants.restorerRole, userRestorer.address),
-      registryContractAsAdmin.grantRole(RoleConstants.accepterRole, userAccepter.address),
+      registryContractAsAdmin.grantRole(RoleConstants.MinterRole, userMinter.address),
+      registryContractAsAdmin.grantRole(RoleConstants.RestorerRole, userRestorer.address),
+      registryContractAsAdmin.grantRole(RoleConstants.AccepterRole, userAccepter.address),
     ]);
 
     registryContractAsMinter = registryContract.connect(userMinter);
@@ -67,25 +67,25 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
 
   describe("Initial Setup", () => {
     it("should add deployer with admin role", async () => {
-      const res = await registryContract.hasRole(RoleConstants.defaultAdmin, users.carrier.address);
+      const res = await registryContract.hasRole(RoleConstants.DefaultAdmin, users.carrier.address);
 
       expect(res).to.be.true;
     });
 
     it("should add deployer with minter role", async () => {
-      const res = await registryContract.hasRole(RoleConstants.minterRole, users.carrier.address);
+      const res = await registryContract.hasRole(RoleConstants.MinterRole, users.carrier.address);
 
       expect(res).to.be.true;
     });
 
     it("should add deployer with restorer role", async () => {
-      const res = await registryContract.hasRole(RoleConstants.restorerRole, users.carrier.address);
+      const res = await registryContract.hasRole(RoleConstants.RestorerRole, users.carrier.address);
 
       expect(res).to.be.true;
     });
 
     it("should add deployer with accepter role", async () => {
-      const res = await registryContract.hasRole(RoleConstants.accepterRole, users.carrier.address);
+      const res = await registryContract.hasRole(RoleConstants.AccepterRole, users.carrier.address);
 
       expect(res).to.be.true;
     });
@@ -99,31 +99,31 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     });
 
     it("should allow admin to set role admin", async () => {
-      await registryContractAsAdmin.setRoleAdmin(RoleConstants.minterRole, fakeMinterAdminRole);
+      await registryContractAsAdmin.setRoleAdmin(RoleConstants.MinterRole, fakeMinterAdminRole);
 
-      const res = await registryContract.getRoleAdmin(RoleConstants.minterRole);
+      const res = await registryContract.getRoleAdmin(RoleConstants.MinterRole);
 
       expect(res).to.equal(fakeMinterAdminRole);
     });
 
     it("should not allow a non-admin to set role admin", async () => {
-      const tx = registryContractAsMinter.setRoleAdmin(RoleConstants.minterRole, fakeMinterAdminRole);
+      const tx = registryContractAsMinter.setRoleAdmin(RoleConstants.MinterRole, fakeMinterAdminRole);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Admin role");
+      await expect(tx).to.be.revertedWith("RegAcc: Not Admin");
     });
   });
 
   describe("Minter Role", () => {
     it("should allow a minter to mint new tokens", async () => {
-      const tx = registryContractAsMinter.mintTitle(users.beneficiary.address, users.holder.address, tokenId);
+      const tx = registryContractAsMinter.mint(users.beneficiary.address, users.holder.address, tokenId);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-minter to mint new tokens", async () => {
-      const tx = registryContractAsNoRole.mintTitle(users.beneficiary.address, users.holder.address, tokenId);
+      const tx = registryContractAsNoRole.mint(users.beneficiary.address, users.holder.address, tokenId);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Minter role");
+      await expect(tx).to.be.revertedWith("RegAcc: Not Minter");
     });
   });
 
@@ -143,15 +143,15 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     });
 
     it("should allow a restorer to restore tokens", async () => {
-      const tx = registryContractAsRestorer.restoreTitle(tokenId);
+      const tx = registryContractAsRestorer.restore(tokenId);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-restorer to restore tokens", async () => {
-      const tx = registryContractAsNoRole.restoreTitle(tokenId);
+      const tx = registryContractAsNoRole.restore(tokenId);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Restorer role");
+      await expect(tx).to.be.revertedWith("RegAcc: Not Restorer");
     });
   });
 
@@ -171,15 +171,15 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     });
 
     it("should allow an accepter to burn tokens", async () => {
-      const tx = registryContractAsAccepter.destroyToken(tokenId);
+      const tx = registryContractAsAccepter.burn(tokenId);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-accepter to burn tokens", async () => {
-      const tx = registryContractAsNoRole.destroyToken(tokenId);
+      const tx = registryContractAsNoRole.burn(tokenId);
 
-      await expect(tx).to.be.revertedWith("RegistryAccess: caller does not have the Accepter role");
+      await expect(tx).to.be.revertedWith("RegAcc: Not Accepter");
     });
   });
 });
