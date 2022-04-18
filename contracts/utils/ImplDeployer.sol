@@ -30,12 +30,12 @@ contract ImplDeployer is OwnableUpgradeable, UUPSUpgradeable {
     return deployed;
   }
 
-  function addImpl(address implementation) external onlyOwner {
+  function addImplementation(address implementation) external onlyOwner {
     require(!implementations[implementation], "ImplDeployer: Already added");
     implementations[implementation] = true;
   }
 
-  function removeImpl(address implementation) external onlyOwner {
+  function removeImplementation(address implementation) external onlyOwner {
     delete implementations[implementation];
   }
 }
