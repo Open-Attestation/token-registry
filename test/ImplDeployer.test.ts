@@ -54,7 +54,7 @@ describe("ImplDeployer", async () => {
     it("should have zero address as owner", async () => {
       const res = await deployerImpl.owner();
 
-      expect(res).to.equal(AddressConstants.Zero);
+      expect(res).to.equal(defaultAddress.Zero);
     });
   });
 
