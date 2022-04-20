@@ -58,6 +58,26 @@ describe("ImplDeployer", async () => {
     });
   });
 
+  describe("Upgrade Deployer", () => {
+    let mockDeployerImpl: ImplDeployer;
+
+    beforeEach(async () => {
+      mockDeployerImpl = (await (await ethers.getContractFactory("ImplDeployer")).deploy()) as ImplDeployer;
+    });
+
+    it("should allow owner to upgrade", async () => {
+      const tx = deployerContractAsOwner.upgradeTo(mockDeployerImpl.address);
+
+      await expect(tx).to.not.be.reverted;
+    });
+
+    it("should not allow non-owner to upgrade", async () => {
+      const tx = deployerContractAsNonOwner.upgradeTo(mockDeployerImpl.address);
+
+      await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+    });
+  });
+
   describe("Implementation Administration", () => {
     it("should have the correct owner", async () => {
       const res = await deployerContract.owner();
