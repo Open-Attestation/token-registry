@@ -5,11 +5,9 @@ import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { deployEscrowFactoryFixture } from "./fixtures";
-import { getEventFromTransaction, getTestUsers, TestUsers } from "./utils";
-import { computeTitleEscrowAddress } from "../src/utils";
-import { computeInterfaceId } from "./utils/computeInterfaceId";
-import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
-import { AddressConstants } from "../src/common/constants";
+import { computeTitleEscrowAddress, getEventFromTransaction } from "../src/utils";
+import { contractInterfaceId, defaultAddress } from "../src/constants";
+import { getTestUsers, TestUsers } from "./helpers";
 
 const { loadFixture } = waffle;
 
@@ -38,11 +36,11 @@ describe("TitleEscrowFactory", async () => {
     });
 
     it("should have an implementation", async () => {
-      expect(implAddr).to.not.equal(AddressConstants.Zero);
+      expect(implAddr).to.not.equal(defaultAddress.Zero);
     });
 
     it("should have the correct title escrow implementation", async () => {
-      const interfaceId = computeInterfaceId(ContractInterfaces.ITitleEscrow);
+      const interfaceId = contractInterfaceId.TitleEscrow;
 
       const res = await titleEscrowContract.supportsInterface(interfaceId);
 
@@ -50,7 +48,7 @@ describe("TitleEscrowFactory", async () => {
     });
 
     it("should initialise implementation", async () => {
-      const zeroAddress = AddressConstants.Zero;
+      const zeroAddress = defaultAddress.Zero;
       const [registry, beneficiary, holder, tokenId] = await Promise.all([
         titleEscrowContract.registry(),
         titleEscrowContract.beneficiary(),

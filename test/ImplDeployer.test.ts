@@ -4,12 +4,10 @@ import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
-import { getEventFromTransaction, getTestUsers, TestUsers } from "./utils";
-import { computeInterfaceId } from "./utils/computeInterfaceId";
-import { ContractInterfaces } from "./fixtures/contract-interfaces.fixture";
+import { encodeInitParams, getEventFromTransaction } from "../src/utils";
+import { defaultAddress, contractInterfaceId } from "../src/constants";
 import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
-import { encodeInitParams } from "../src/utils";
-import { AddressConstants } from "../src/common/constants";
+import { getTestUsers, TestUsers } from "./helpers";
 
 const { loadFixture } = waffle;
 
@@ -56,7 +54,27 @@ describe("ImplDeployer", async () => {
     it("should have zero address as owner", async () => {
       const res = await deployerImpl.owner();
 
-      expect(res).to.equal(AddressConstants.Zero);
+      expect(res).to.equal(defaultAddress.Zero);
+    });
+  });
+
+  describe("Upgrade Deployer", () => {
+    let mockDeployerImpl: ImplDeployer;
+
+    beforeEach(async () => {
+      mockDeployerImpl = (await (await ethers.getContractFactory("ImplDeployer")).deploy()) as ImplDeployer;
+    });
+
+    it("should allow owner to upgrade", async () => {
+      const tx = deployerContractAsOwner.upgradeTo(mockDeployerImpl.address);
+
+      await expect(tx).to.not.be.reverted;
+    });
+
+    it("should not allow non-owner to upgrade", async () => {
+      const tx = deployerContractAsNonOwner.upgradeTo(mockDeployerImpl.address);
+
+      await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
     });
   });
 
@@ -69,7 +87,7 @@ describe("ImplDeployer", async () => {
 
     describe("Adding Implementation", () => {
       beforeEach(async () => {
-        await deployerContractAsOwner.addImpl(implContract.address);
+        await deployerContractAsOwner.addImplementation(implContract.address);
       });
 
       it("should add implementation correctly", async () => {
@@ -79,13 +97,13 @@ describe("ImplDeployer", async () => {
       });
 
       it("should not allow adding an already added implementation", async () => {
-        const tx = deployerContractAsOwner.addImpl(implContract.address);
+        const tx = deployerContractAsOwner.addImplementation(implContract.address);
 
         await expect(tx).to.be.revertedWith("ImplDeployer: Already added");
       });
 
       it("should not allow non-owner to add implementation", async () => {
-        const tx = deployerContractAsNonOwner.addImpl(implContract.address);
+        const tx = deployerContractAsNonOwner.addImplementation(implContract.address);
 
         await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
       });
@@ -93,10 +111,10 @@ describe("ImplDeployer", async () => {
 
     describe("Removing Implementation", () => {
       it("should remove implementation correctly", async () => {
-        await deployerContractAsOwner.addImpl(implContract.address);
+        await deployerContractAsOwner.addImplementation(implContract.address);
         const initialRes = await deployerContract.implementations(implContract.address);
 
-        await deployerContractAsOwner.removeImpl(implContract.address);
+        await deployerContractAsOwner.removeImplementation(implContract.address);
         const currentRes = await deployerContract.implementations(implContract.address);
 
         expect(initialRes).to.be.true;
@@ -104,7 +122,7 @@ describe("ImplDeployer", async () => {
       });
 
       it("should not allow non-owner to remove implementation", async () => {
-        const tx = deployerContractAsNonOwner.removeImpl(implContract.address);
+        const tx = deployerContractAsNonOwner.removeImplementation(implContract.address);
 
         await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
       });
@@ -123,7 +141,7 @@ describe("ImplDeployer", async () => {
       fakeTitleEscrowFactoryAddr = ethers.utils.getAddress(faker.finance.ethereumAddress());
       registryAdmin = users.others[faker.datatype.number(users.others.length - 1)];
 
-      await deployerContractAsOwner.addImpl(implContract.address);
+      await deployerContractAsOwner.addImplementation(implContract.address);
     });
 
     it("should not allow non-whitelisted implementations", async () => {
@@ -144,7 +162,7 @@ describe("ImplDeployer", async () => {
         name: fakeTokenName,
         symbol: fakeTokenSymbol,
         titleEscrowFactory: fakeTitleEscrowFactoryAddr,
-        deployer: AddressConstants.Zero,
+        deployer: defaultAddress.Zero,
       });
       const tx = deployerContractAsNonOwner.deploy(implContract.address, initParams);
 
@@ -205,7 +223,7 @@ describe("ImplDeployer", async () => {
       });
 
       it("should clone TradeTrustERC721Impl", async () => {
-        const interfaceId = computeInterfaceId(ContractInterfaces.ITradeTrustERC721);
+        const interfaceId = contractInterfaceId.TradeTrustERC721;
 
         const res = await clonedRegistryContract.supportsInterface(interfaceId);
 

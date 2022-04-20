@@ -10,38 +10,17 @@ abstract contract RegistryAccess is AccessControlUpgradeable {
 
   function __RegistryAccess_init(address admin) internal onlyInitializing {
     require(admin != address(0), "RegAcc: No admin");
-    __AccessControl_init();
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
     _setupRole(MINTER_ROLE, admin);
     _setupRole(RESTORER_ROLE, admin);
     _setupRole(ACCEPTER_ROLE, admin);
   }
 
-  modifier onlyAdmin() {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegAcc: Not Admin");
-    _;
-  }
-
-  modifier onlyMinter() {
-    require(hasRole(MINTER_ROLE, _msgSender()), "RegAcc: Not Minter");
-    _;
-  }
-
-  modifier onlyRestorer() {
-    require(hasRole(RESTORER_ROLE, _msgSender()), "RegAcc: Not Restorer");
-    _;
-  }
-
-  modifier onlyAccepter() {
-    require(hasRole(ACCEPTER_ROLE, _msgSender()), "RegAcc: Not Accepter");
-    _;
-  }
-
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 
-  function setRoleAdmin(bytes32 role, bytes32 adminRole) public virtual onlyAdmin {
+  function setRoleAdmin(bytes32 role, bytes32 adminRole) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     _setRoleAdmin(role, adminRole);
   }
 }

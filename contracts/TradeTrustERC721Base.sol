@@ -43,7 +43,7 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     return IERC721Receiver.onERC721Received.selector;
   }
 
-  function burn(uint256 tokenId) external override whenNotPaused onlyAccepter {
+  function burn(uint256 tokenId) external override whenNotPaused onlyRole(ACCEPTER_ROLE) {
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
     ITitleEscrow(titleEscrow).shred();
 
@@ -55,13 +55,13 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     address beneficiary,
     address holder,
     uint256 tokenId
-  ) public virtual override whenNotPaused onlyMinter returns (address) {
+  ) public virtual override whenNotPaused onlyRole(MINTER_ROLE) returns (address) {
     require(!_exists(tokenId), "Registry: Token exists");
 
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
-  function restore(uint256 tokenId) external override whenNotPaused onlyRestorer returns (address) {
+  function restore(uint256 tokenId) external override whenNotPaused onlyRole(RESTORER_ROLE) returns (address) {
     require(_exists(tokenId), "Registry: Invalid token");
     require(isSurrendered(tokenId), "Registry: Not surrendered");
     require(ownerOf(tokenId) != BURN_ADDRESS, "Registry: Token burnt");
@@ -78,11 +78,11 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     return owner == address(this) || owner == BURN_ADDRESS;
   }
 
-  function pause() external onlyAdmin {
+  function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
     _pause();
   }
 
-  function unpause() external onlyAdmin {
+  function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
     _unpause();
   }
 

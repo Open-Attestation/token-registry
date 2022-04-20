@@ -19,9 +19,7 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
 
   bool public override active;
 
-  constructor() {
-    initialize(address(0), address(0), address(0), 0x00);
-  }
+  constructor() initializer {}
 
   modifier onlyBeneficiary() {
     require(msg.sender == beneficiary, "TE: Not beneficiary");

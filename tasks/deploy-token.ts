@@ -4,7 +4,7 @@ import { task } from "hardhat/config";
 import { ImplDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
 import { verifyContract } from "./helpers/verify-contract";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
-import { ContractAddress } from "../src/common";
+import { constants } from "../src";
 import { encodeInitParams, getEventFromTransaction, isSupportedTitleEscrowFactory } from "../src/utils";
 import { wait } from "./helpers/wait";
 import { deployContract } from "./helpers/deploy-contract";
@@ -18,6 +18,7 @@ task(TASK_DEPLOY_TOKEN)
   .addOptionalParam("factory", "Address of Title Escrow factory (Optional)")
   .setAction(async ({ name, symbol, verify, factory, standalone }, hre) => {
     const { ethers, network } = hre;
+    const { contractAddress } = constants;
     try {
       const [deployer] = await ethers.getSigners();
       const deployerAddress = await deployer.getAddress();
@@ -32,7 +33,7 @@ task(TASK_DEPLOY_TOKEN)
       console.log(`[Deployer] ${deployerAddress}`);
 
       if (!factoryAddress) {
-        factoryAddress = ContractAddress.TitleEscrowFactory[chainId];
+        factoryAddress = contractAddress.TitleEscrowFactory[chainId];
         if (!factoryAddress) {
           throw new Error(`Network ${network.name} currently is not supported. Supply a factory address.`);
         }
@@ -46,8 +47,8 @@ task(TASK_DEPLOY_TOKEN)
       console.log("[Status] Title Escrow Factory interface check is OK.");
 
       if (!standalone) {
-        const deployerContractAddress = ContractAddress.Deployer[chainId];
-        const implAddress = ContractAddress.TokenImplementation[chainId];
+        const deployerContractAddress = contractAddress.Deployer[chainId];
+        const implAddress = contractAddress.TokenImplementation[chainId];
         if (!deployerContractAddress || !implAddress) {
           throw new Error(`Network ${network.name} currently is not supported. Use --standalone instead.`);
         }
@@ -81,19 +82,21 @@ task(TASK_DEPLOY_TOKEN)
         registryAddress = token.address;
       }
 
-      if (verify && standalone) {
-        console.log("[Status] Waiting to verify (about a minute)...");
-        await wait(60000);
-        console.log("[Status] Start verification");
+      if (verify) {
+        if (standalone) {
+          console.log("[Status] Waiting to verify (about a minute)...");
+          await wait(60000);
+          console.log("[Status] Start verification");
 
-        await verifyContract({
-          address: registryAddress,
-          constructorArgsParams: [name, symbol, factoryAddress],
-          contract: "contracts/TradeTrustERC721.sol:TradeTrustERC721",
-          hre,
-        });
-      } else {
-        console.log("[Status] Skipped verification, already verified.");
+          await verifyContract({
+            address: registryAddress,
+            constructorArgsParams: [name, symbol, factoryAddress],
+            contract: "contracts/TradeTrustERC721.sol:TradeTrustERC721",
+            hre,
+          });
+        } else {
+          console.log("[Status] Skipped verification, already verified.");
+        }
       }
 
       console.log(`[Status] ✅ Completed deploying token contract at ${registryAddress}`);

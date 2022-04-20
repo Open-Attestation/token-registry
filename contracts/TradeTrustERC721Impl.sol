@@ -7,16 +7,9 @@ contract TradeTrustERC721Impl is TradeTrustERC721Base {
   address internal _titleEscrowFactory;
   uint256 internal _genesis;
 
-  constructor() {
-    _ctrInit();
-  }
+  constructor() initializer {}
 
-  function _ctrInit() private initializer {
-    // Cheapskate, I know.
-    __Pausable_init();
-  }
-
-  function initialize(bytes memory params) public initializer {
+  function initialize(bytes memory params) external initializer {
     (string memory name, string memory symbol, address titleEscrowFactory_, address admin) = abi.decode(
       params,
       (string, string, address, address)
