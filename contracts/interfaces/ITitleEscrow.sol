@@ -18,7 +18,7 @@ interface ITitleEscrow is IERC721Receiver {
     address indexed nominatedHolder,
     address nominator
   );
-  event BeneficiaryEndorsement(
+  event BeneficiaryTransfer(
     address indexed tokenRegistry,
     uint256 indexed tokenId,
     address newHolder,
@@ -35,11 +35,11 @@ interface ITitleEscrow is IERC721Receiver {
 
   function nominate(address _beneficiaryNominee) external;
 
-  function endorse(address _nominatedBeneficiary) external;
+  function transferBeneficiary(address _nominatedBeneficiary) external;
 
   function transferHolder(address _nominatedHolder) external;
 
-  function endorseAndTransferHolder(address _nominatedBeneficiary, address _nominatedHolder) external;
+  function transferOwners(address _nominatedBeneficiary, address _nominatedHolder) external;
 
   function beneficiary() external view returns (address);
 

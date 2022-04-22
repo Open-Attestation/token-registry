@@ -8,9 +8,9 @@ export const contractInterfaces = {
   ],
   TitleEscrow: [
     "nominate(address)",
-    "endorse(address)",
+    "transferBeneficiary(address)",
     "transferHolder(address)",
-    "endorseAndTransferHolder(address,address)",
+    "transferOwners(address,address)",
     "beneficiary()",
     "holder()",
     "active()",

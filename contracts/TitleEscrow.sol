@@ -95,31 +95,24 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     _nominateBeneficiary(_beneficiaryNominee);
   }
 
-  function endorse(address _beneficiaryNominee)
-    public
-    override
-    whenNotPaused
-    onlyHolder
-    whenHoldingToken
-    whenActive
-  {
+  function transferBeneficiary(address _beneficiaryNominee) public override whenNotPaused onlyHolder whenHoldingToken whenActive {
     require(_beneficiaryNominee != address(0), "TE: Endorsing zero");
-    require(beneficiary == holder || (nominatedBeneficiary == _beneficiaryNominee), "TE: Endorse non-nominee");
+    require(beneficiary == holder || (nominatedBeneficiary == _beneficiaryNominee), "TE: Recipient is non-nominee");
 
     beneficiary = _beneficiaryNominee;
     nominatedBeneficiary = address(0);
 
-    emit BeneficiaryEndorsement(registry, tokenId, beneficiary, msg.sender);
+    emit BeneficiaryTransfer(registry, tokenId, beneficiary, msg.sender);
   }
 
-  function endorseAndTransferHolder(address _beneficiaryNominee, address newHolder) external override {
-    endorse(_beneficiaryNominee);
+  function transferOwners(address _beneficiaryNominee, address newHolder) external override {
+    transferBeneficiary(_beneficiaryNominee);
     transferHolder(newHolder);
   }
 
   function transferHolder(address newHolder) public override whenNotPaused onlyHolder whenHoldingToken whenActive {
     require(newHolder != address(0), "TE: Transfer to zero");
-    require(holder != newHolder, "TE: Endorsee already holder");
+    require(holder != newHolder, "TE: Already holder");
 
     holder = newHolder;
 
