@@ -16,7 +16,7 @@ contract ImplDeployer is OwnableUpgradeable, UUPSUpgradeable {
     __Ownable_init();
   }
 
-  function _authorizeUpgrade(address) internal override onlyOwner {}
+  function _authorizeUpgrade(address) internal view override onlyOwner {}
 
   function deploy(address implementation, bytes memory params) external returns (address) {
     require(implementations[implementation], "ImplDeployer: Not whitelisted");
