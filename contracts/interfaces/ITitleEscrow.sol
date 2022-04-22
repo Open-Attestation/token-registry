@@ -12,12 +12,6 @@ interface ITitleEscrow is IERC721Receiver {
     address indexed nominatedBeneficiary,
     address nominator
   );
-  event HolderNomination(
-    address indexed tokenRegistry,
-    uint256 indexed tokenId,
-    address indexed nominatedHolder,
-    address nominator
-  );
   event BeneficiaryTransfer(
     address indexed tokenRegistry,
     uint256 indexed tokenId,
