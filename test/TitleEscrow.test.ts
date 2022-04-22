@@ -364,7 +364,7 @@ describe("Title Escrow", async () => {
 
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "BeneficiaryNomination")
-            .withArgs(registryContract.address, tokenId, beneficiaryNominee.address, users.beneficiary.address);
+            .withArgs(defaultAddress.Zero, beneficiaryNominee.address, registryContract.address, tokenId);
         });
       });
     });
@@ -452,7 +452,7 @@ describe("Title Escrow", async () => {
 
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "BeneficiaryTransfer")
-            .withArgs(registryContract.address, tokenId, beneficiaryNominee.address, users.holder.address);
+            .withArgs(users.beneficiary.address, beneficiaryNominee.address, registryContract.address, tokenId);
         });
       });
 
@@ -509,7 +509,7 @@ describe("Title Escrow", async () => {
 
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "HolderTransfer")
-            .withArgs(registryContract.address, tokenId, targetNewHolder.address, users.holder.address);
+            .withArgs(users.holder.address, targetNewHolder.address, registryContract.address, tokenId);
         });
       });
 
@@ -551,10 +551,10 @@ describe("Title Escrow", async () => {
 
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "BeneficiaryTransfer")
-            .withArgs(registryContract.address, tokenId, beneficiaryNominee.address, users.holder.address);
+            .withArgs(users.beneficiary.address, beneficiaryNominee.address, registryContract.address, tokenId);
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "HolderTransfer")
-            .withArgs(registryContract.address, tokenId, holderNominee.address, users.holder.address);
+            .withArgs(users.holder.address, holderNominee.address, registryContract.address, tokenId);
         });
       });
     });
@@ -642,10 +642,10 @@ describe("Title Escrow", async () => {
 
         expect(tx)
           .to.emit(titleEscrowOwnerContract, "Surrender")
-          .withArgs(registryContract.address, tokenId, beneficiary.address);
+          .withArgs(beneficiary.address, registryContract.address, tokenId);
         expect(tx)
           .to.emit(titleEscrowOwnerContract, "Surrender")
-          .withArgs(registryContract.address, tokenId, holder.address);
+          .withArgs(holder.address, registryContract.address, tokenId);
       });
     });
 
