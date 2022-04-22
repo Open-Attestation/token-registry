@@ -156,7 +156,7 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
   }
 
   function _setBeneficiaryNominee(address newBeneficiaryNominee) internal {
-    emit BeneficiaryNomination(beneficiaryNominee, newBeneficiaryNominee, registry, tokenId);
+    emit Nomination(beneficiaryNominee, newBeneficiaryNominee, registry, tokenId);
 
     beneficiaryNominee = newBeneficiaryNominee;
   }
