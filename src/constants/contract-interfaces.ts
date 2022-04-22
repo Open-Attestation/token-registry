@@ -14,7 +14,7 @@ export const contractInterfaces = {
     "beneficiary()",
     "holder()",
     "active()",
-    "nominatedBeneficiary()",
+    "beneficiaryNominee()",
     "registry()",
     "tokenId()",
     "isHoldingToken()",
