@@ -233,12 +233,28 @@ describe("TradeTrustERC721", async () => {
         expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnce;
       });
 
-      it("should create title escrow with correct values", async () => {
-        expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnceWith(
-          users.beneficiary.address,
-          users.beneficiary.address,
-          tokenId
-        );
+      it("should create title escrow with correct token ID", async () => {
+        expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnceWith(tokenId);
+      });
+
+      describe("Minting with correct beneficiary and holder", () => {
+        beforeEach(async () => {
+          tokenId = faker.datatype.hexaDecimal(64);
+          await registryContractAsAdmin.mint(users.beneficiary.address, users.holder.address, tokenId);
+          titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
+        });
+
+        it("should create title escrow with the correct beneficiary", async () => {
+          const beneficiary = await titleEscrowContract.beneficiary();
+
+          expect(beneficiary).to.equal(users.beneficiary.address);
+        });
+
+        it("should create title escrow with the correct holder", async () => {
+          const holder = await titleEscrowContract.holder();
+
+          expect(holder).to.equal(users.holder.address);
+        });
       });
 
       it("should emit Transfer event with correct values", async () => {
