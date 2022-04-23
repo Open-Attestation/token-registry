@@ -18,7 +18,8 @@
           "."
         ],
         "alias": {
-          "@tradetrust/contracts": "./src/contracts"
+          "@tradetrust/contracts": "./src/contracts",
+          "@tradetrust/contracts/*": "./src/contracts/*"
         },
         "extensions": [
           ".js",

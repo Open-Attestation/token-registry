@@ -2,12 +2,11 @@
 
 import { task } from "hardhat/config";
 import { ImplDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
-import { verifyContract } from "./helpers/verify-contract";
+import { DeploymentEvent } from "@tradetrust/contracts/ImplDeployer";
+import { verifyContract, wait, deployContract, isSupportedTitleEscrowFactory } from "./helpers";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
 import { constants } from "../src";
-import { encodeInitParams, getEventFromTransaction, isSupportedTitleEscrowFactory } from "../src/utils";
-import { wait } from "./helpers/wait";
-import { deployContract } from "./helpers/deploy-contract";
+import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 
 task(TASK_DEPLOY_TOKEN)
   .setDescription("Deploys the TradeTrustERC721 token")
@@ -63,14 +62,11 @@ task(TASK_DEPLOY_TOKEN)
         });
         const tx = await deployerContract.deploy(implAddress, initParam);
         console.log(`[Transaction] Pending ${tx.hash}`);
-        await tx.wait();
-        registryAddress = (
-          await getEventFromTransaction(
-            tx,
-            ["event Deployment (address indexed deployed, address indexed implementation, bytes params)"],
-            "Deployment"
-          )
-        ).deployed;
+        const receipt = await tx.wait();
+        registryAddress = getEventFromReceipt<DeploymentEvent>(
+          receipt,
+          deployerContract.interface.getEventTopic("Deployment")
+        ).args.deployed;
       } else {
         // Standalone deployment
         const contractName = "TradeTrustERC721";

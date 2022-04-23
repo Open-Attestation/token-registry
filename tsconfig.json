@@ -21,6 +21,9 @@
     "paths": {
       "@tradetrust/contracts": [
         "./src/contracts"
+      ],
+      "@tradetrust/contracts/*": [
+        "./src/contracts/*"
       ]
     }
   },

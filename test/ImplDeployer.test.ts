@@ -3,8 +3,9 @@ import { ImplDeployer, TradeTrustERC721Impl } from "@tradetrust/contracts";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { DeploymentEvent } from "@tradetrust/contracts/ImplDeployer";
 import { expect } from ".";
-import { encodeInitParams, getEventFromTransaction } from "../src/utils";
+import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 import { defaultAddress, contractInterfaceId } from "../src/constants";
 import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
 import { getTestUsers, TestUsers } from "./helpers";
@@ -20,8 +21,6 @@ describe("ImplDeployer", async () => {
 
   let deployerContractAsOwner: ImplDeployer;
   let deployerContractAsNonOwner: ImplDeployer;
-
-  const createEventAbi = ["event Deployment (address indexed deployed, address indexed implementation, bytes params)"];
 
   beforeEach(async () => {
     users = await getTestUsers();
@@ -182,9 +181,13 @@ describe("ImplDeployer", async () => {
           deployer: registryAdmin.address,
         });
         createTx = await deployerContractAsNonOwner.deploy(implContract.address, initParams);
-        const registryCreatedEvent = await getEventFromTransaction(createTx, createEventAbi, "Deployment");
+        const createReceipt = await createTx.wait();
+        const event = getEventFromReceipt<DeploymentEvent>(
+          createReceipt,
+          deployerContract.interface.getEventTopic("Deployment")
+        );
         clonedRegistryContract = (await ethers.getContractFactory("TradeTrustERC721Impl")).attach(
-          registryCreatedEvent.deployed as string
+          event.args.deployed
         ) as TradeTrustERC721Impl;
       });
 
