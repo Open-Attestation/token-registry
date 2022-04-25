@@ -187,37 +187,25 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
         });
 
         it("should not allow nomination of beneficiary", async () => {
-          const tx = titleEscrowContract.nominateBeneficiary(users.beneficiary.address);
+          const tx = titleEscrowContract.nominate(users.beneficiary.address);
 
           await expect(tx).to.be.revertedWith("TE: Registry paused");
         });
 
-        it("should not allow nomination of holder", async () => {
-          const tx = titleEscrowContract.nominateHolder(users.holder.address);
+        it("should not allow transfer of beneficiary", async () => {
+          const tx = titleEscrowContract.transferBeneficiary(users.beneficiary.address);
 
           await expect(tx).to.be.revertedWith("TE: Registry paused");
         });
 
-        it("should not allow nomination of new owners", async () => {
-          const tx = titleEscrowContract.nominate(users.beneficiary.address, users.holder.address);
+        it("should not allow transfer holder", async () => {
+          const tx = titleEscrowContract.transferHolder(users.holder.address);
 
           await expect(tx).to.be.revertedWith("TE: Registry paused");
         });
 
-        it("should not allow endorsement of beneficiary", async () => {
-          const tx = titleEscrowContract.endorseBeneficiary(users.beneficiary.address);
-
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
-        });
-
-        it("should not allow endorsement of holder", async () => {
-          const tx = titleEscrowContract.endorseHolder(users.holder.address);
-
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
-        });
-
-        it("should not allow endorsement to new title escrow", async () => {
-          const tx = titleEscrowContract.endorse(users.beneficiary.address, users.holder.address);
+        it("should not allow endorse beneficiary and transfer holder", async () => {
+          const tx = titleEscrowContract.transferOwners(users.beneficiary.address, users.holder.address);
 
           await expect(tx).to.be.revertedWith("TE: Registry paused");
         });
