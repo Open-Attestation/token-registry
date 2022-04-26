@@ -129,7 +129,7 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
   }
 
   function surrender() external virtual override whenNotPaused whenActive onlyBeneficiary onlyHolder whenHoldingToken {
-    beneficiaryNominee = address(0);
+    _setBeneficiaryNominee(address(0));
     ITradeTrustERC721(registry).safeTransferFrom(address(this), registry, tokenId);
 
     emit Surrender(msg.sender, registry, tokenId);
@@ -157,7 +157,6 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
 
   function _setBeneficiaryNominee(address newBeneficiaryNominee) internal {
     emit Nomination(beneficiaryNominee, newBeneficiaryNominee, registry, tokenId);
-
     beneficiaryNominee = newBeneficiaryNominee;
   }
 
