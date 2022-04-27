@@ -7,25 +7,25 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 interface ITitleEscrow is IERC721Receiver {
   event TokenReceived(address indexed tokenRegistry, uint256 indexed tokenId);
   event BeneficiaryNomination(
-    address indexed tokenRegistry,
-    uint256 indexed tokenId,
-    address indexed beneficiaryNominee,
-    address nominator
+    address indexed prevNominee,
+    address indexed nominee,
+    address tokenRegistry,
+    uint256 tokenId
   );
   event BeneficiaryTransfer(
-    address indexed tokenRegistry,
-    uint256 indexed tokenId,
-    address newHolder,
-    address prevHolder
+    address indexed fromBeneficiary,
+    address indexed toBeneficiary,
+    address tokenRegistry,
+    uint256 tokenId
   );
   event HolderTransfer(
-    address indexed tokenRegistry,
-    uint256 indexed tokenId,
-    address indexed endorsedHolder,
-    address endorser
+    address indexed fromHolder,
+    address indexed toHolder,
+    address tokenRegistry,
+    uint256 tokenId
   );
-  event Surrender(address indexed tokenRegistry, uint256 indexed tokenId, address surrenderer);
-  event Shred(address indexed tokenRegistry, uint256 indexed tokenId);
+  event Surrender(address indexed surrenderer, address tokenRegistry, uint256 tokenId);
+  event Shred(address tokenRegistry, uint256 tokenId);
 
   function nominate(address beneficiaryNominee) external;
 

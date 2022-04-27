@@ -53,10 +53,10 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     uint256 _tokenId
   ) public initializer {
     registry = _registry;
-    beneficiary = _beneficiary;
-    holder = _holder;
     tokenId = _tokenId;
     active = true;
+    _setBeneficiary(_beneficiary);
+    _setHolder(_holder);
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -86,9 +86,7 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     require(beneficiary != _beneficiaryNominee, "TE: Nominee is beneficiary");
     require(beneficiaryNominee != _beneficiaryNominee, "TE: Already beneficiary nominee");
 
-    beneficiaryNominee = _beneficiaryNominee;
-
-    emit BeneficiaryNomination(registry, tokenId, beneficiaryNominee, msg.sender);
+    _setBeneficiaryNominee(_beneficiaryNominee);
   }
 
   function nominate(address _beneficiaryNominee) public override {
@@ -106,10 +104,31 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     require(_beneficiaryNominee != address(0), "TE: Endorsing zero");
     require(beneficiary == holder || (beneficiaryNominee == _beneficiaryNominee), "TE: Recipient is non-nominee");
 
-    beneficiary = _beneficiaryNominee;
+    _setBeneficiary(_beneficiaryNominee);
     beneficiaryNominee = address(0);
+  }
 
-    emit BeneficiaryTransfer(registry, tokenId, beneficiary, msg.sender);
+  function transferHolder(address newHolder) public override whenNotPaused onlyHolder whenHoldingToken whenActive {
+    require(newHolder != address(0), "TE: Transfer to zero");
+    require(holder != newHolder, "TE: Already holder");
+
+    _setHolder(newHolder);
+  }
+
+  function _setBeneficiaryNominee(address newBeneficiaryNominee) internal {
+    emit BeneficiaryNomination(beneficiaryNominee, newBeneficiaryNominee, registry, tokenId);
+
+    beneficiaryNominee = newBeneficiaryNominee;
+  }
+
+  function _setBeneficiary(address newBeneficiary) internal {
+    emit BeneficiaryTransfer(beneficiary, newBeneficiary, registry, tokenId);
+    beneficiary = newBeneficiary;
+  }
+
+  function _setHolder(address newHolder) internal {
+    emit HolderTransfer(holder, newHolder, registry, tokenId);
+    holder = newHolder;
   }
 
   function transferOwners(address _beneficiaryNominee, address newHolder) external override {
@@ -117,29 +136,20 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     transferHolder(newHolder);
   }
 
-  function transferHolder(address newHolder) public override whenNotPaused onlyHolder whenHoldingToken whenActive {
-    require(newHolder != address(0), "TE: Transfer to zero");
-    require(holder != newHolder, "TE: Already holder");
-
-    holder = newHolder;
-
-    emit HolderTransfer(registry, tokenId, holder, msg.sender);
-  }
-
   function surrender() external override onlyBeneficiary onlyHolder whenNotPaused whenHoldingToken whenActive {
     beneficiaryNominee = address(0);
     ITradeTrustERC721(registry).safeTransferFrom(address(this), registry, tokenId);
 
-    emit Surrender(registry, tokenId, msg.sender);
+    emit Surrender(msg.sender, registry, tokenId);
   }
 
   function shred() external override whenNotPaused whenActive {
     require(!_isHoldingToken(), "TE: Not surrendered");
     require(msg.sender == registry, "TE: Invalid registry");
 
-    beneficiaryNominee = address(0);
-    beneficiary = address(0);
-    holder = address(0);
+    _setBeneficiaryNominee(address(0));
+    _setBeneficiary(address(0));
+    _setHolder(address(0));
     active = false;
 
     emit Shred(registry, tokenId);
