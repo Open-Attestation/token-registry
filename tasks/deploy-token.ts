@@ -51,16 +51,15 @@ task(TASK_DEPLOY_TOKEN)
         if (!deployerContractAddress || !implAddress) {
           throw new Error(`Network ${network.name} currently is not supported. Use --standalone instead.`);
         }
-        const deployerContract = (await ethers.getContractFactory("ImplDeployer")).attach(
+        const deployerContract = (await ethers.getContractFactory("TDocDeployer")).attach(
           deployerContractAddress
         ) as ImplDeployer;
         const initParam = encodeInitParams({
           name,
           symbol,
-          titleEscrowFactory: factoryAddress,
           deployer: deployerAddress,
         });
-        const tx = await deployerContract.deploy(implAddress, initParam);
+        const tx = await deployerContract.deploy(implAddress, initParam, factoryAddress);
         console.log(`[Transaction] Pending ${tx.hash}`);
         const receipt = await tx.wait();
         registryAddress = getEventFromReceipt<DeploymentEvent>(

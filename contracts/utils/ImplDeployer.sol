@@ -6,9 +6,15 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract ImplDeployer is OwnableUpgradeable, UUPSUpgradeable {
-  event Deployment(address indexed deployed, address indexed implementation, bytes params);
+  event Deployment(
+    address indexed deployed,
+    address indexed implementation,
+    address indexed titleEscrowFactory,
+    bytes params
+  );
 
-  mapping(address => bool) public implementations;
+  // mapping: implementation => title escrow factory
+  mapping(address => address) public implementations;
 
   constructor() initializer {}
 
@@ -19,20 +25,21 @@ contract ImplDeployer is OwnableUpgradeable, UUPSUpgradeable {
   function _authorizeUpgrade(address) internal view override onlyOwner {}
 
   function deploy(address implementation, bytes memory params) external returns (address) {
-    require(implementations[implementation], "ImplDeployer: Not whitelisted");
+    address titleEscrowFactory = implementations[implementation];
+    require(titleEscrowFactory != address(0), "ImplDeployer: Not whitelisted");
 
     address deployed = ClonesUpgradeable.clone(implementation);
-    bytes memory payload = abi.encodeWithSignature("initialize(bytes)", params);
+    bytes memory payload = abi.encodeWithSignature("initialize(bytes,address)", params, titleEscrowFactory);
     (bool success, ) = address(deployed).call(payload);
     require(success, "ImplDeployer: Init fail");
 
-    emit Deployment(deployed, implementation, params);
+    emit Deployment(deployed, implementation, titleEscrowFactory, params);
     return deployed;
   }
 
-  function addImplementation(address implementation) external onlyOwner {
-    require(!implementations[implementation], "ImplDeployer: Already added");
-    implementations[implementation] = true;
+  function addImplementation(address implementation, address titleEscrowFactory) external onlyOwner {
+    require(implementations[implementation] == address(0), "ImplDeployer: Already added");
+    implementations[implementation] = titleEscrowFactory;
   }
 
   function removeImplementation(address implementation) external onlyOwner {
