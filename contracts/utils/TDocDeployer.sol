@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract ImplDeployer is OwnableUpgradeable, UUPSUpgradeable {
+contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable {
   event Deployment(
     address indexed deployed,
     address indexed implementation,
@@ -26,19 +26,19 @@ contract ImplDeployer is OwnableUpgradeable, UUPSUpgradeable {
 
   function deploy(address implementation, bytes memory params) external returns (address) {
     address titleEscrowFactory = implementations[implementation];
-    require(titleEscrowFactory != address(0), "ImplDeployer: Not whitelisted");
+    require(titleEscrowFactory != address(0), "TDocDeployer: Not whitelisted");
 
     address deployed = ClonesUpgradeable.clone(implementation);
     bytes memory payload = abi.encodeWithSignature("initialize(bytes,address)", params, titleEscrowFactory);
     (bool success, ) = address(deployed).call(payload);
-    require(success, "ImplDeployer: Init fail");
+    require(success, "TDocDeployer: Init fail");
 
     emit Deployment(deployed, implementation, titleEscrowFactory, params);
     return deployed;
   }
 
   function addImplementation(address implementation, address titleEscrowFactory) external onlyOwner {
-    require(implementations[implementation] == address(0), "ImplDeployer: Already added");
+    require(implementations[implementation] == address(0), "TDocDeployer: Already added");
     implementations[implementation] = titleEscrowFactory;
   }
 

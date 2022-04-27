@@ -1,8 +1,8 @@
 // noinspection ExceptionCaughtLocallyJS
 
 import { task } from "hardhat/config";
-import { ImplDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
-import { DeploymentEvent } from "@tradetrust/contracts/ImplDeployer";
+import { TDocDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
+import { DeploymentEvent } from "@tradetrust/contracts/TDocDeployer";
 import { verifyContract, wait, deployContract, isSupportedTitleEscrowFactory } from "./helpers";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
 import { constants } from "../src";
@@ -53,7 +53,7 @@ task(TASK_DEPLOY_TOKEN)
         }
         const deployerContract = (await ethers.getContractFactory("TDocDeployer")).attach(
           deployerContractAddress
-        ) as ImplDeployer;
+        ) as TDocDeployer;
         const initParam = encodeInitParams({
           name,
           symbol,

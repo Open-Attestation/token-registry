@@ -1,27 +1,27 @@
 import { ethers, waffle } from "hardhat";
-import { ImplDeployer, TradeTrustERC721Impl } from "@tradetrust/contracts";
+import { TDocDeployer, TradeTrustERC721Impl } from "@tradetrust/contracts";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { DeploymentEvent } from "@tradetrust/contracts/ImplDeployer";
+import { DeploymentEvent } from "@tradetrust/contracts/TDocDeployer";
 import { expect } from ".";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 import { defaultAddress, contractInterfaceId } from "../src/constants";
-import { deployImplDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
+import { deployTDocDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
 import { getTestUsers, TestUsers } from "./helpers";
 
 const { loadFixture } = waffle;
 
-describe("ImplDeployer", async () => {
+describe("TDocDeployer", async () => {
   let users: TestUsers;
   let deployer: SignerWithAddress;
 
-  let deployerContract: ImplDeployer;
+  let deployerContract: TDocDeployer;
   let implContract: TradeTrustERC721Impl;
   let fakeTitleEscrowFactory: string;
 
-  let deployerContractAsOwner: ImplDeployer;
-  let deployerContractAsNonOwner: ImplDeployer;
+  let deployerContractAsOwner: TDocDeployer;
+  let deployerContractAsNonOwner: TDocDeployer;
 
   beforeEach(async () => {
     users = await getTestUsers();
@@ -31,7 +31,7 @@ describe("ImplDeployer", async () => {
 
     [implContract, deployerContract] = await Promise.all([
       loadFixture(deployTradeTrustERC721ImplFixture({ deployer })),
-      loadFixture(deployImplDeployerFixture({ deployer })),
+      loadFixture(deployTDocDeployerFixture({ deployer })),
     ]);
 
     deployerContractAsOwner = deployerContract.connect(deployer);
@@ -39,12 +39,12 @@ describe("ImplDeployer", async () => {
   });
 
   describe("Deployer Implementation", () => {
-    let deployerImpl: ImplDeployer;
+    let deployerImpl: TDocDeployer;
 
     beforeEach(async () => {
-      deployerImpl = (await (await ethers.getContractFactory("ImplDeployer"))
+      deployerImpl = (await (await ethers.getContractFactory("TDocDeployer"))
         .connect(deployer)
-        .deploy()) as ImplDeployer;
+        .deploy()) as TDocDeployer;
     });
 
     it("should initialise deployer implementation", async () => {
@@ -61,10 +61,10 @@ describe("ImplDeployer", async () => {
   });
 
   describe("Upgrade Deployer", () => {
-    let mockDeployerImpl: ImplDeployer;
+    let mockDeployerImpl: TDocDeployer;
 
     beforeEach(async () => {
-      mockDeployerImpl = (await (await ethers.getContractFactory("ImplDeployer")).deploy()) as ImplDeployer;
+      mockDeployerImpl = (await (await ethers.getContractFactory("TDocDeployer")).deploy()) as TDocDeployer;
     });
 
     it("should allow owner to upgrade", async () => {
@@ -101,7 +101,7 @@ describe("ImplDeployer", async () => {
       it("should not allow adding an already added implementation", async () => {
         const tx = deployerContractAsOwner.addImplementation(implContract.address, fakeTitleEscrowFactory);
 
-        await expect(tx).to.be.revertedWith("ImplDeployer: Already added");
+        await expect(tx).to.be.revertedWith("TDocDeployer: Already added");
       });
 
       it("should not allow non-owner to add implementation", async () => {
@@ -153,7 +153,7 @@ describe("ImplDeployer", async () => {
       });
       const tx = deployerContractAsNonOwner.deploy(fakeAddress, initParams);
 
-      await expect(tx).to.be.revertedWith("ImplDeployer: Not whitelisted");
+      await expect(tx).to.be.revertedWith("TDocDeployer: Not whitelisted");
     });
 
     it("should revert when registry admin is zero address", async () => {
@@ -164,7 +164,7 @@ describe("ImplDeployer", async () => {
       });
       const tx = deployerContractAsNonOwner.deploy(implContract.address, initParams);
 
-      await expect(tx).to.be.revertedWith("ImplDeployer: Init fail");
+      await expect(tx).to.be.revertedWith("TDocDeployer: Init fail");
     });
 
     describe("Deploy", () => {
