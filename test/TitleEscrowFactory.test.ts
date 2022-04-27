@@ -3,9 +3,10 @@ import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { TitleEscrowCreatedEvent } from "@tradetrust/contracts/ITitleEscrowFactory";
 import { expect } from ".";
 import { deployEscrowFactoryFixture } from "./fixtures";
-import { computeTitleEscrowAddress, getEventFromTransaction } from "../src/utils";
+import { computeTitleEscrowAddress, getEventFromReceipt } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { getTestUsers, TestUsers } from "./helpers";
 
@@ -87,13 +88,13 @@ describe("TitleEscrowFactory", async () => {
       fakeRegistrySigner = users.others[faker.datatype.number(users.others.length - 1)];
       titleEscrowFactoryCreateTx = await titleEscrowFactory.connect(fakeRegistrySigner).create(tokenId);
 
-      const eventAbi = titleEscrowFactory.interface
-        .getEvent("TitleEscrowCreated")
-        .format(ethers.utils.FormatTypes.full);
-      const event = await getEventFromTransaction(titleEscrowFactoryCreateTx, [eventAbi], "TitleEscrowCreated");
-      titleEscrowContract = (await ethers.getContractFactory("TitleEscrow")).attach(
-        event.titleEscrow as string
-      ) as TitleEscrow;
+      const receipt = await titleEscrowFactoryCreateTx.wait();
+      const titleEscrowAddress = getEventFromReceipt<TitleEscrowCreatedEvent>(
+        receipt,
+        titleEscrowFactory.interface.getEventTopic("TitleEscrowCreated")
+      ).args.titleEscrow;
+
+      titleEscrowContract = (await ethers.getContractFactory("TitleEscrow")).attach(titleEscrowAddress) as TitleEscrow;
     });
 
     it("should create with the correct token registry address", async () => {

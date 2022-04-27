@@ -1,7 +1,8 @@
 import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import { getEventFromTransaction } from "../../src/utils";
+import { TitleEscrowCreatedEvent } from "@tradetrust/contracts/ITitleEscrowFactory";
+import { getEventFromReceipt } from "../../src/utils";
 
 export const mintTokenFixture =
   ({
@@ -17,12 +18,16 @@ export const mintTokenFixture =
   }) =>
   async () => {
     const tx = await token.mint(beneficiary.address, holder.address, tokenId);
+    const receipt = await tx.wait();
 
-    const eventAbi = (await ethers.getContractFactory("TitleEscrowFactory")).interface
-      .getEvent("TitleEscrowCreated")
-      .format(ethers.utils.FormatTypes.full);
-    const event = await getEventFromTransaction(tx, [eventAbi], "TitleEscrowCreated");
-    const escrowAddress = event.titleEscrow as string;
+    const titleEscrowFactoryInterface = (await ethers.getContractFactory("TitleEscrowFactory")).interface;
+    const event = getEventFromReceipt<TitleEscrowCreatedEvent>(
+      receipt,
+      titleEscrowFactoryInterface.getEventTopic("TitleEscrowCreated"),
+      titleEscrowFactoryInterface
+    );
+
+    const escrowAddress = event.args.titleEscrow;
 
     const titleEscrowFactory = await ethers.getContractFactory("TitleEscrow");
     const titleEscrow = titleEscrowFactory.attach(escrowAddress) as TitleEscrow;

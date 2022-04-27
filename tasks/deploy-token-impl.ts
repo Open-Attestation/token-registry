@@ -1,9 +1,7 @@
 import { task } from "hardhat/config";
 import { TradeTrustERC721Impl } from "@tradetrust/contracts";
-import { verifyContract } from "./helpers/verify-contract";
+import { verifyContract, wait, deployContract } from "./helpers";
 import { TASK_DEPLOY_TOKEN_IMPL } from "./task-names";
-import { wait } from "./helpers/wait";
-import { deployContract } from "./helpers/deploy-contract";
 
 task(TASK_DEPLOY_TOKEN_IMPL)
   .setDescription("Deploys the token implementation contract")

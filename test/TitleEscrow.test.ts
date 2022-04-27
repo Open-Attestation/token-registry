@@ -449,11 +449,11 @@ describe("Title Escrow", async () => {
           await expect(tx).to.be.revertedWith("TE: Not holding token");
         });
 
-        it("should emit BeneficiaryNomination event", async () => {
+        it("should emit Nomination event", async () => {
           const tx = await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
 
           expect(tx)
-            .to.emit(titleEscrowOwnerContract, "BeneficiaryNomination")
+            .to.emit(titleEscrowOwnerContract, "Nomination")
             .withArgs(defaultAddress.Zero, beneficiaryNominee.address, registryContract.address, tokenId);
         });
       });
