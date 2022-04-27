@@ -50,15 +50,14 @@ describe("TradeTrustERC721Impl", async () => {
       initParams = encodeInitParams({
         name: registryName,
         symbol: registrySymbol,
-        titleEscrowFactory: fakeTitleEscrowFactory,
         deployer: users.carrier.address,
       });
 
-      initTx = await registryImplContract.connect(initialiserSigner).initialize(initParams);
+      initTx = await registryImplContract.connect(initialiserSigner).initialize(initParams, fakeTitleEscrowFactory);
     });
 
     it("should initialise implementation", async () => {
-      const tx = implContract.initialize(initParams);
+      const tx = implContract.initialize(initParams, fakeTitleEscrowFactory);
 
       expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
     });
@@ -87,11 +86,10 @@ describe("TradeTrustERC721Impl", async () => {
       const initParams = encodeInitParams({
         name: registryName,
         symbol: registrySymbol,
-        titleEscrowFactory: fakeTitleEscrowFactory,
         deployer: defaultAddress.Zero,
       });
 
-      const tx = registryImplContract.connect(initialiserSigner).initialize(initParams);
+      const tx = registryImplContract.connect(initialiserSigner).initialize(initParams, fakeTitleEscrowFactory);
 
       await expect(tx).to.be.revertedWith("RegAcc: No admin");
     });
@@ -105,11 +103,10 @@ describe("TradeTrustERC721Impl", async () => {
         initParams = encodeInitParams({
           name: registryName,
           symbol: registrySymbol,
-          titleEscrowFactory: fakeTitleEscrowFactory,
           deployer: registryAdmin.address,
         });
 
-        await registryImplContract.connect(initialiserSigner).initialize(initParams);
+        await registryImplContract.connect(initialiserSigner).initialize(initParams, fakeTitleEscrowFactory);
       });
 
       it("should initialise token name", async () => {
