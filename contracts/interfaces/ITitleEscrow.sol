@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /// @title Title Escrow for Transferable Records
 interface ITitleEscrow is IERC721Receiver {
-  event TokenReceived(address indexed tokenRegistry, uint256 indexed tokenId);
+  event TokenReceived(address indexed beneficiary, address indexed holder, bool indexed isMinting, address tokenRegistry, uint256 tokenId);
   event BeneficiaryNomination(
     address indexed prevNominee,
     address indexed nominee,
@@ -18,12 +18,7 @@ interface ITitleEscrow is IERC721Receiver {
     address tokenRegistry,
     uint256 tokenId
   );
-  event HolderTransfer(
-    address indexed fromHolder,
-    address indexed toHolder,
-    address tokenRegistry,
-    uint256 tokenId
-  );
+  event HolderTransfer(address indexed fromHolder, address indexed toHolder, address tokenRegistry, uint256 tokenId);
   event Surrender(address indexed surrenderer, address tokenRegistry, uint256 tokenId);
   event Shred(address tokenRegistry, uint256 tokenId);
 

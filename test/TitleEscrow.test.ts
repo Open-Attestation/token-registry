@@ -53,7 +53,7 @@ describe("Title Escrow", async () => {
     });
 
     it("should initialise implementation", async () => {
-      const tx = implContract.initialize(defaultAddress.Zero, users.beneficiary.address, users.holder.address, tokenId);
+      const tx = implContract.initialize(defaultAddress.Zero, tokenId);
 
       await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
     });
@@ -64,24 +64,23 @@ describe("Title Escrow", async () => {
       beforeEach(async () => {
         fakeRegistryAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
 
-        await titleEscrowContract.initialize(
-          fakeRegistryAddress,
-          users.beneficiary.address,
-          users.holder.address,
-          tokenId
-        );
+        await titleEscrowContract.initialize(fakeRegistryAddress, tokenId);
       });
 
       it("should be initialised with the correct registry address", async () => {
         expect(await titleEscrowContract.registry()).to.equal(fakeRegistryAddress);
       });
 
-      it("should initialise with the correct beneficiary address", async () => {
-        expect(await titleEscrowContract.beneficiary()).to.equal(users.beneficiary.address);
+      it("should set active as true", async () => {
+        expect(await titleEscrowContract.active()).to.be.true;
       });
 
-      it("should initialise with the correct holder address", async () => {
-        expect(await titleEscrowContract.holder()).to.equal(users.holder.address);
+      it("should keep beneficiary intact", async () => {
+        expect(await titleEscrowContract.beneficiary()).to.equal(defaultAddress.Zero);
+      });
+
+      it("should keep holder intact", async () => {
+        expect(await titleEscrowContract.holder()).to.equal(defaultAddress.Zero);
       });
 
       it("should initialise with the correct token ID", async () => {
@@ -99,15 +98,9 @@ describe("Title Escrow", async () => {
 
       beforeEach(async () => {
         fakeRegistry = (await smock.fake("TradeTrustERC721")) as FakeContract<TradeTrustERC721>;
-        fakeRegistry.ownerOf.returns(titleEscrowContract.address);
         fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
 
-        await titleEscrowContract.initialize(
-          fakeRegistry.address,
-          users.beneficiary.address,
-          users.holder.address,
-          tokenId
-        );
+        await titleEscrowContract.initialize(fakeRegistry.address, tokenId);
       });
 
       it("should only be able to receive designated token ID", async () => {
@@ -128,17 +121,124 @@ describe("Title Escrow", async () => {
         await expect(tx).to.be.revertedWith("TE: Wrong registry");
       });
 
-      it("should emit TokenReceived event when successfully receiving token", async () => {
-        await users.carrier.sendTransaction({
-          to: fakeRegistry.address,
-          value: ethers.utils.parseEther("0.1"),
+      describe("onERC721Received Data", () => {
+        let data: string;
+
+        beforeEach(async () => {
+          data = new ethers.utils.AbiCoder().encode(
+            ["address", "address"],
+            [users.beneficiary.address, users.holder.address]
+          );
+
+          await users.carrier.sendTransaction({
+            to: fakeRegistry.address,
+            value: ethers.utils.parseEther("0.1"),
+          });
         });
 
-        const tx = await titleEscrowContract
-          .connect(fakeRegistry.wallet)
-          .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x00");
+        describe("Minting Token Receive", () => {
+          it("should initialise beneficiary correctly on minting token receive", async () => {
+            await titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+            const beneficiary = await titleEscrowContract.beneficiary();
 
-        expect(tx).to.emit(titleEscrowContract, "TokenReceived").withArgs(fakeRegistry.address, tokenId);
+            expect(beneficiary).to.equal(users.beneficiary.address);
+          });
+
+          it("should initialise holder correctly on minting token receive", async () => {
+            await titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+            const holder = await titleEscrowContract.holder();
+
+            expect(holder).to.equal(users.holder.address);
+          });
+
+          it("should emit TokenReceived event with correct values", async () => {
+            const tx = await titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+
+            expect(tx)
+              .to.emit(titleEscrowContract, "TokenReceived")
+              .withArgs(users.beneficiary.address, users.holder.address, true, fakeRegistry.address, tokenId);
+          });
+
+          describe("When minting token receive is sent without data", () => {
+            it("should revert: Empty data", async () => {
+              const tx = titleEscrowContract
+                .connect(fakeRegistry.wallet)
+                .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
+
+              await expect(tx).to.be.revertedWith("TE: Empty data");
+            });
+
+            it("should revert: Missing data", async () => {
+              const tx = titleEscrowContract
+                .connect(fakeRegistry.wallet)
+                .onERC721Received(fakeAddress, fakeAddress, tokenId, "");
+
+              await expect(tx).to.be.reverted;
+            });
+
+            it("should revert: Invalid data", async () => {
+              const tx = titleEscrowContract
+                .connect(fakeRegistry.wallet)
+                .onERC721Received(fakeAddress, fakeAddress, tokenId, "0xabcd");
+
+              await expect(tx).to.be.reverted;
+            });
+          });
+        });
+
+        describe("After Minting Token Receive", () => {
+          it("should return successfully without data after minting token receive", async () => {
+            await titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+            const tx = titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
+
+            await expect(tx).to.not.be.reverted;
+          });
+
+          it("should emit TokenReceived event with correct values", async () => {
+            await titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+            const tx = await titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
+
+            expect(tx)
+              .to.emit(titleEscrowContract, "TokenReceived")
+              .withArgs(users.beneficiary.address, users.holder.address, false, fakeRegistry.address, tokenId);
+          });
+        });
+
+        describe("Beneficiary and Holder Transfer Events", () => {
+          it("should emit BeneficiaryTransfer event", async () => {
+            const tx = await titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+
+            expect(tx)
+              .to.emit(titleEscrowContract, "BeneficiaryTransfer")
+              .withArgs(defaultAddress.Zero, users.beneficiary.address, fakeRegistry.address, tokenId);
+          });
+
+          it("should emit HolderTransfer event", async () => {
+            const tx = await titleEscrowContract
+              .connect(fakeRegistry.wallet)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+
+            expect(tx)
+              .to.emit(titleEscrowContract, "HolderTransfer")
+              .withArgs(defaultAddress.Zero, users.holder.address, fakeRegistry.address, tokenId);
+          });
+        });
       });
     });
 
@@ -186,12 +286,7 @@ describe("Title Escrow", async () => {
       it("should return true after being initialised", async () => {
         const fakeRegistry = (await smock.fake("TradeTrustERC721")) as FakeContract<TradeTrustERC721>;
         fakeRegistry.ownerOf.returns(titleEscrowContract.address);
-        await titleEscrowContract.initialize(
-          fakeRegistry.address,
-          users.beneficiary.address,
-          users.holder.address,
-          tokenId
-        );
+        await titleEscrowContract.initialize(fakeRegistry.address, tokenId);
 
         const res = await titleEscrowContract.active();
 
@@ -211,12 +306,7 @@ describe("Title Escrow", async () => {
           ).deploy()) as unknown as MockContract<TitleEscrow>;
           await mockTitleEscrowContract.setVariable("_initialized", false);
 
-          await mockTitleEscrowContract.initialize(
-            fakeRegistry.address,
-            users.beneficiary.address,
-            users.beneficiary.address,
-            tokenId
-          );
+          await mockTitleEscrowContract.initialize(fakeRegistry.address, tokenId);
 
           await mockTitleEscrowContract.setVariable("active", false);
           fakeRegistry.ownerOf.returns(mockTitleEscrowContract.address);

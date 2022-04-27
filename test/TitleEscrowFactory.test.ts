@@ -16,10 +16,6 @@ describe("TitleEscrowFactory", async () => {
 
   let titleEscrowFactory: TitleEscrowFactory;
 
-  const createEventAbi = [
-    "event TitleEscrowCreated (address indexed titleEscrow, address indexed tokenRegistry, uint256 indexed tokenId, address beneficiary, address holder)",
-  ];
-
   beforeEach(async () => {
     users = await getTestUsers();
 
@@ -66,7 +62,7 @@ describe("TitleEscrowFactory", async () => {
       const punk = users.others[faker.datatype.number(users.others.length - 1)];
       const badAddress = faker.finance.ethereumAddress();
 
-      const tx = titleEscrowContract.connect(punk).initialize(badAddress, badAddress, badAddress, "123");
+      const tx = titleEscrowContract.connect(punk).initialize(badAddress, "123");
 
       await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
     });
@@ -89,11 +85,12 @@ describe("TitleEscrowFactory", async () => {
     beforeEach(async () => {
       tokenId = faker.datatype.hexaDecimal(64);
       fakeRegistrySigner = users.others[faker.datatype.number(users.others.length - 1)];
-      titleEscrowFactoryCreateTx = await titleEscrowFactory
-        .connect(fakeRegistrySigner)
-        .create(users.beneficiary.address, users.holder.address, tokenId);
+      titleEscrowFactoryCreateTx = await titleEscrowFactory.connect(fakeRegistrySigner).create(tokenId);
 
-      const event = await getEventFromTransaction(titleEscrowFactoryCreateTx, createEventAbi, "TitleEscrowCreated");
+      const eventAbi = titleEscrowFactory.interface
+        .getEvent("TitleEscrowCreated")
+        .format(ethers.utils.FormatTypes.full);
+      const event = await getEventFromTransaction(titleEscrowFactoryCreateTx, [eventAbi], "TitleEscrowCreated");
       titleEscrowContract = (await ethers.getContractFactory("TitleEscrow")).attach(
         event.titleEscrow as string
       ) as TitleEscrow;
@@ -105,28 +102,10 @@ describe("TitleEscrowFactory", async () => {
       expect(registryAddress).to.equal(fakeRegistrySigner.address);
     });
 
-    it("should create with the correct beneficiary", async () => {
-      const beneficiary = await titleEscrowContract.beneficiary();
-
-      expect(beneficiary).to.equal(users.beneficiary.address);
-    });
-
-    it("should create with the correct holder ", async () => {
-      const holder = await titleEscrowContract.holder();
-
-      expect(holder).to.equal(users.holder.address);
-    });
-
     it("should emit TitleEscrowCreated event", async () => {
       expect(titleEscrowFactoryCreateTx)
         .to.emit(titleEscrowFactory, "TitleEscrowCreated")
-        .withArgs(
-          titleEscrowContract.address,
-          fakeRegistrySigner.address,
-          tokenId,
-          users.beneficiary.address,
-          users.holder.address
-        );
+        .withArgs(titleEscrowContract.address, fakeRegistrySigner.address, tokenId);
     });
   });
 

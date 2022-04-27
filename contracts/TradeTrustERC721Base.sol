@@ -102,8 +102,8 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     address holder,
     uint256 tokenId
   ) internal virtual returns (address) {
-    address newTitleEscrow = titleEscrowFactory().create(beneficiary, holder, tokenId);
-    _safeMint(newTitleEscrow, tokenId);
+    address newTitleEscrow = titleEscrowFactory().create(tokenId);
+    _safeMint(newTitleEscrow, tokenId, abi.encode(beneficiary, holder));
 
     return newTitleEscrow;
   }
