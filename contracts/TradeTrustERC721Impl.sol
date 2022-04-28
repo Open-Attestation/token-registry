@@ -10,10 +10,8 @@ contract TradeTrustERC721Impl is TradeTrustERC721Base {
   constructor() initializer {}
 
   function initialize(bytes memory params) external initializer {
-    (string memory name, string memory symbol, address titleEscrowFactory_, address admin) = abi.decode(
-      params,
-      (string, string, address, address)
-    );
+    (bytes memory _params, address titleEscrowFactory_) = abi.decode(params, (bytes, address));
+    (string memory name, string memory symbol, address admin) = abi.decode(_params, (string, string, address));
     _genesis = block.number;
     _titleEscrowFactory = titleEscrowFactory_;
     __TradeTrustERC721Base_init(name, symbol, admin);

@@ -12,6 +12,29 @@ import { getTestUsers, TestUsers } from "./helpers";
 
 const { loadFixture } = waffle;
 
+const encodeInitParamsWithFactory = ({
+  name,
+  symbol,
+  deployer,
+  titleEscrowFactory,
+}: {
+  name: string;
+  symbol: string;
+  deployer: string;
+  titleEscrowFactory: string;
+}) =>
+  ethers.utils.defaultAbiCoder.encode(
+    ["bytes", "address"],
+    [
+      encodeInitParams({
+        name,
+        symbol,
+        deployer,
+      }),
+      titleEscrowFactory,
+    ]
+  );
+
 describe("TradeTrustERC721Impl", async () => {
   let users: TestUsers;
   let implContract: TradeTrustERC721Impl;
@@ -47,11 +70,11 @@ describe("TradeTrustERC721Impl", async () => {
     let initParams: string;
 
     beforeEach(async () => {
-      initParams = encodeInitParams({
+      initParams = encodeInitParamsWithFactory({
         name: registryName,
         symbol: registrySymbol,
-        titleEscrowFactory: fakeTitleEscrowFactory,
         deployer: users.carrier.address,
+        titleEscrowFactory: fakeTitleEscrowFactory,
       });
 
       initTx = await registryImplContract.connect(initialiserSigner).initialize(initParams);
@@ -84,11 +107,11 @@ describe("TradeTrustERC721Impl", async () => {
 
   describe("Initialisation", () => {
     it("should revert if deployer is zero address", async () => {
-      const initParams = encodeInitParams({
+      const initParams = encodeInitParamsWithFactory({
         name: registryName,
         symbol: registrySymbol,
-        titleEscrowFactory: fakeTitleEscrowFactory,
         deployer: defaultAddress.Zero,
+        titleEscrowFactory: fakeTitleEscrowFactory,
       });
 
       const tx = registryImplContract.connect(initialiserSigner).initialize(initParams);
@@ -102,11 +125,11 @@ describe("TradeTrustERC721Impl", async () => {
 
       beforeEach(async () => {
         registryAdmin = users.beneficiary;
-        initParams = encodeInitParams({
+        initParams = encodeInitParamsWithFactory({
           name: registryName,
           symbol: registrySymbol,
-          titleEscrowFactory: fakeTitleEscrowFactory,
           deployer: registryAdmin.address,
+          titleEscrowFactory: fakeTitleEscrowFactory,
         });
 
         await registryImplContract.connect(initialiserSigner).initialize(initParams);
