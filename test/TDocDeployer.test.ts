@@ -128,6 +128,14 @@ describe("TDocDeployer", async () => {
 
         await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
       });
+
+      it("should not allow removing an invalid implementation", async () => {
+        const fakeImplContract = faker.finance.ethereumAddress();
+
+        const tx = deployerContractAsOwner.removeImplementation(fakeImplContract);
+
+        await expect(tx).to.be.revertedWith("TDocDeployer: Invalid implementation");
+      });
     });
   });
 

@@ -44,6 +44,7 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable {
   }
 
   function removeImplementation(address implementation) external onlyOwner {
+    require(implementations[implementation] != address(0), "TDocDeployer: Invalid implementation");
     delete implementations[implementation];
   }
 }
