@@ -1,8 +1,8 @@
 // noinspection ExceptionCaughtLocallyJS
 
 import { task } from "hardhat/config";
-import { TDocDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
-import { DeploymentEvent } from "@tradetrust/contracts/TDocDeployer";
+import { ImplDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
+import { DeploymentEvent } from "@tradetrust/contracts/ImplDeployer";
 import { verifyContract, wait, deployContract, isSupportedTitleEscrowFactory } from "./helpers";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
 import { constants } from "../src";
@@ -51,15 +51,16 @@ task(TASK_DEPLOY_TOKEN)
         if (!deployerContractAddress || !implAddress) {
           throw new Error(`Network ${network.name} currently is not supported. Use --standalone instead.`);
         }
-        const deployerContract = (await ethers.getContractFactory("TDocDeployer")).attach(
+        const deployerContract = (await ethers.getContractFactory("ImplDeployer")).attach(
           deployerContractAddress
-        ) as TDocDeployer;
+        ) as ImplDeployer;
         const initParam = encodeInitParams({
           name,
           symbol,
+          titleEscrowFactory: factoryAddress,
           deployer: deployerAddress,
         });
-        const tx = await deployerContract.deploy(implAddress, initParam, factoryAddress);
+        const tx = await deployerContract.deploy(implAddress, initParam);
         console.log(`[Transaction] Pending ${tx.hash}`);
         const receipt = await tx.wait();
         registryAddress = getEventFromReceipt<DeploymentEvent>(
