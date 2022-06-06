@@ -55,21 +55,30 @@ This package exposes the [Typechain (Ethers)](https://github.com/dethcrypto/Type
 
 ### TradeTrustERC721
 
-#### Deploy new token registry
-
-```ts
-import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
-
-const factory = new TradeTrustERC721__factory(signer);
-const tokenRegistry = await factory.deploy("The Great Shipping Co.", "GSC");
-```
-
 #### Connect to existing token registry
 
 ```ts
 import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
 
-const connectedRegistry = TradeTrustERC721__factory.connect(existingERC721Address, signer);
+const connectedRegistry = TradeTrustERC721__factory.connect(tokenRegistryAddress, signer);
+```
+
+#### Issuing a Document
+
+```ts
+await connectedRegistry.mint(beneficiaryAddress, holderAddress, tokenId);
+```
+
+#### Restoring a Document
+
+```ts
+await connectedRegistry.restore(tokenId);
+```
+
+#### Accept/Burn a Document
+
+```ts
+await connectedRegistry.burn(tokenId);
 ```
 
 #### List of available functions
@@ -80,34 +89,36 @@ The contract supports [all ERC721 methods](http://erc721.org/)
 
 The TradeTrustErc721 Token Registry will clone a new TitleEscrow internally when minting or restoring titles.
 
-#### Minting Title Escrow
-
-```ts
-import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
-
-const connectedRegistry = TradeTrustERC721__factory.connect(existingERC721Address, signer);
-const tx = await connectedRegistry.mintTitle(beneficiaryAddress, holderAddress, tokenId);
-```
-
-#### Restoring Title Escrow
-
-```ts
-import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
-
-const connectedRegistry = TradeTrustERC721__factory.connect(existingERC721Address, signer);
-const tx = await connectedRegistry.restoreTitle(beneficiaryAddress, holderAddress, existingTokenId);
-```
-
 #### Connect to Title Escrow
 
 ```ts
 import { TitleEscrow__factory } from "@govtechsg/token-registry/contracts";
 
-const connectedEscrow = TitleEscrow__factory.connect(existingTitleEscrowAddress, signer1);
+const connectedEscrow = TitleEscrow__factory.connect(existingTitleEscrowAddress, signer);
 ```
 
-For list of available functions on TitleEscrow simply check the type definitions as they are automatically generated
-using typechain.
+#### Transfer of Beneficiary/Holder
+
+Transferring of beneficiary and holder within the Title Escrow relies on the following methods:
+
+```solidity
+function transferBeneficiary(address beneficiaryNominee) external;
+function transferHolder(address newHolder) external;
+function transferOwners(address beneficiaryNominee, address newHolder) external;
+function nominate(address beneficiaryNominee) external;
+```
+The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder. 
+To transfer both beneficiary and holder in a single transaction, use `transferOwners`. Transfer of beneficiary will require a nomination done through the `nominate` method.
+
+#### Surrendering/Burning a Document
+Use the `surrender` method in the Title Escrow.
+```solidity
+function surrender() external;
+```
+Example:
+```ts
+await connectedEscrow.surrender();
+```
 
 ### Provider & Signer
 
