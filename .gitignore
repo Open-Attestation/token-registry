@@ -8,3 +8,9 @@ yarn-error.log
 /dist
 /build
 /types
+/cache
+/artifacts
+/contracts/artifacts
+/contracts/.deps
+/coverage
+coverage.json
