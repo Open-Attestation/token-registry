@@ -1,7 +1,7 @@
 import { providers } from "ethers";
 import { TitleEscrowFactory, TradeTrustErc721Factory, TitleEscrowCreatorFactory } from "./index";
-import { TradeTrustERC721 } from "../types/TradeTrustERC721";
-import { TitleEscrowCreator } from "../types/TitleEscrowCreator";
+import { TradeTrustERC721 } from "./contracts";
+import { TitleEscrowCreator } from "./contracts";
 
 const provider = new providers.JsonRpcProvider();
 const signer1 = provider.getSigner(0);
