@@ -46,7 +46,7 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     _;
   }
 
-  function initialize(address _registry, uint256 _tokenId) public initializer {
+  function initialize(address _registry, uint256 _tokenId) public virtual initializer {
     registry = _registry;
     tokenId = _tokenId;
     active = true;
@@ -61,7 +61,7 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     address, /* from */
     uint256 _tokenId,
     bytes calldata data
-  ) external override whenNotPaused whenActive returns (bytes4) {
+  ) external virtual override whenNotPaused whenActive returns (bytes4) {
     require(tokenId == _tokenId, "TE: Invalid token");
     require(msg.sender == address(registry), "TE: Wrong registry");
     bool isMinting = false;
@@ -105,7 +105,6 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     require(beneficiary == holder || (beneficiaryNominee == _beneficiaryNominee), "TE: Recipient is non-nominee");
 
     _setBeneficiary(_beneficiaryNominee);
-    beneficiaryNominee = address(0);
   }
 
   function transferHolder(address newHolder)
@@ -139,7 +138,6 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     require(!_isHoldingToken(), "TE: Not surrendered");
     require(msg.sender == registry, "TE: Invalid registry");
 
-    _setBeneficiaryNominee(address(0));
     _setBeneficiary(address(0));
     _setHolder(address(0));
     active = false;
@@ -155,17 +153,18 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     return ITradeTrustERC721(registry).ownerOf(tokenId) == address(this);
   }
 
-  function _setBeneficiaryNominee(address newBeneficiaryNominee) internal {
+  function _setBeneficiaryNominee(address newBeneficiaryNominee) internal virtual {
     emit Nomination(beneficiaryNominee, newBeneficiaryNominee, registry, tokenId);
     beneficiaryNominee = newBeneficiaryNominee;
   }
 
-  function _setBeneficiary(address newBeneficiary) internal {
+  function _setBeneficiary(address newBeneficiary) internal virtual {
     emit BeneficiaryTransfer(beneficiary, newBeneficiary, registry, tokenId);
+    _setBeneficiaryNominee(address(0));
     beneficiary = newBeneficiary;
   }
 
-  function _setHolder(address newHolder) internal {
+  function _setHolder(address newHolder) internal virtual {
     emit HolderTransfer(holder, newHolder, registry, tokenId);
     holder = newHolder;
   }
