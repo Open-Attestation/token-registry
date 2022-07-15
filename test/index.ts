@@ -4,7 +4,7 @@ import chaiAsPromised from "chai-as-promised";
 import { solidity } from "ethereum-waffle";
 import { smock } from "@defi-wonderland/smock";
 
-export const { expect } = chai
+export const { expect, assert } = chai
   .use(chaiAsPromised) //
   .use(solidity)
   .use(smock.matchers);
