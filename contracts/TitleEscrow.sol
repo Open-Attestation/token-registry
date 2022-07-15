@@ -47,6 +47,10 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
   }
 
   function initialize(address _registry, uint256 _tokenId) public virtual initializer {
+    __TitleEscrow_init(_registry, _tokenId);
+  }
+
+  function __TitleEscrow_init(address _registry, uint256 _tokenId) internal virtual onlyInitializing {
     registry = _registry;
     tokenId = _tokenId;
     active = true;
