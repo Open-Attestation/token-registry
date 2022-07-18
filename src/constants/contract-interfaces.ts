@@ -21,6 +21,10 @@ export const contractInterfaces = {
     "surrender()",
     "shred()",
   ],
+  TitleEscrowSignable: [
+    "transferBeneficiaryWithSig((address,address,address,address,uint256,uint256,uint256),(bytes32,bytes32,uint8))",
+    "cancelBeneficiaryTransfer((address,address,address,address,uint256,uint256,uint256))",
+  ],
   TitleEscrowFactory: ["create(address,address,uint256)", "getAddress(address,uint256)"],
   AccessControl: [
     "hasRole(bytes32,address)",

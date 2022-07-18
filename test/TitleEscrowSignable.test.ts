@@ -8,6 +8,7 @@ import { FakeContract, smock } from "@defi-wonderland/smock";
 import { expect, assert } from ".";
 import { getTestUsers, TestUsers } from "./helpers";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
+import { contractInterfaceId } from "../src/constants";
 
 const { loadFixture } = waffle;
 
@@ -74,6 +75,22 @@ describe("TitleEscrowSignable", async () => {
       const res = await titleEscrowContract.BENEFICIARY_TRANSFER_TYPEHASH();
 
       expect(res).to.equal(typeHash);
+    });
+
+    it("should support TitleEscrowSignable interface", async () => {
+      const interfaceId = contractInterfaceId.TitleEscrowSignable;
+
+      const res = await titleEscrowContract.supportsInterface(interfaceId);
+
+      expect(res).to.be.true;
+    });
+
+    it("should support TitleEscrow interface", async () => {
+      const interfaceId = contractInterfaceId.TitleEscrow;
+
+      const res = await titleEscrowContract.supportsInterface(interfaceId);
+
+      expect(res).to.be.true;
     });
   });
 

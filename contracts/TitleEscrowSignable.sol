@@ -3,28 +3,17 @@ pragma solidity ^0.8.0;
 
 import "./TitleEscrow.sol";
 import "./utils/SigHelper.sol";
+import { BeneficiaryTransferEndorsement } from "./lib/TitleEscrowStructs.sol";
+import "./interfaces/ITitleEscrowSignable.sol";
 
-contract TitleEscrowSignable is SigHelper, TitleEscrow {
+/// @notice This Title Escrow allows the holder to perform an off-chain endorsement of beneficiary transfers
+/// @custom:experimental Note that this is currently an experimental feature. See readme for usage details.
+contract TitleEscrowSignable is SigHelper, TitleEscrow, ITitleEscrowSignable {
   string public constant name = "TradeTrust Title Escrow";
 
   // BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)
   bytes32 public constant BENEFICIARY_TRANSFER_TYPEHASH =
     0xdc8ea80c045a9b675c73cb328c225cc3f099d01bd9b7820947ac10cba8661cf1;
-
-  struct BeneficiaryTransferEndorsement {
-    // Transfer proposer
-    address beneficiary;
-    // Endorser
-    address holder;
-    // Endorsed nominee
-    address nominee;
-    address registry;
-    uint256 tokenId;
-    uint256 deadline;
-    uint256 nonce;
-  }
-
-  event CancelBeneficiaryTransferEndorsement(bytes32 indexed hash, address indexed endorser, uint256 indexed tokenId);
 
   function initialize(address _registry, uint256 _tokenId) public virtual override initializer {
     __TitleEscrowSignable_init(_registry, _tokenId);
@@ -33,6 +22,10 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow {
   function __TitleEscrowSignable_init(address _registry, uint256 _tokenId) internal virtual onlyInitializing {
     super.__TitleEscrow_init(_registry, _tokenId);
     __SigHelper_init(name, "1");
+  }
+
+  function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    return super.supportsInterface(interfaceId) || interfaceId == type(ITitleEscrowSignable).interfaceId;
   }
 
   function transferBeneficiaryWithSig(BeneficiaryTransferEndorsement memory endorsement, Sig memory sig)
