@@ -20,6 +20,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 - [Usage](#usage)
   - [TradeTrustERC721](#tradetrusterc721)
   - [Title Escrow](#title-escrow)
+  - [Title Escrow Signable (Experimental)](#title-escrow-signable-experimental)
   - [Provider & Signer](#provider--signer)
   - [Roles and Access](#roles-and-access)
 - [Deployment](#deployment)
@@ -121,6 +122,35 @@ Example:
 ```ts
 await connectedEscrow.surrender();
 ```
+
+### Title Escrow Signable (Experimental)
+This is similar to the [Title Escrow](#title-escrow) with the additional support for off-chain nomination and endorsement of beneficiary nominees. The on-chain nominee will take precedence. 
+The current beneficiary will initiate the transfer transaction with the endorsement.
+
+This feature could help to save on gas fees for cases where there are frequent nominations and endorsements between the owners.
+
+Currently, this is not the default Title Escrow. To use this version of the Title Escrow, you will need to make some changes to the `TitleEscrowFactory.sol` file before deployment by following these steps:
+
+```solidity
+// Step 1. Import the TitleEscrowSignable contract
+import "./TitleEscrowSignable.sol";
+
+contract TitleEscrowFactory is ITitleEscrowFactory {
+  // ...
+
+  constructor() {
+    // Step 2. Look for this line in the constructor
+    implementation = address(new TitleEscrow());
+    // Step 3. Replace the line in Step #2 with the following line:
+    implementation = address(new TitleEscrowSignable());
+  }
+
+  // ...
+}
+
+```
+
+Note that this is currently an experimental feature. Implementers will need to setup a "book-keeping" backend for the signed data.
 
 ### Provider & Signer
 
