@@ -88,8 +88,9 @@ Although the registry contract is based on the [ERC721](http://erc721.org/) stan
 See [issue #108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
 ### Title Escrow
+
 The Title Escrow contract is used to manage and represent the ownership of a token between a beneficiary and holder.
-During minting, the Token Registry will create and assign a Title Escrow as the owner of that token. 
+During minting, the Token Registry will create and assign a Title Escrow as the owner of that token.
 The actual owners will use the Title Escrow contract to perform their ownership operations.
 
 #### Connect to Title Escrow
@@ -106,25 +107,36 @@ Transferring of beneficiary and holder within the Title Escrow relies on the fol
 
 ```solidity
 function transferBeneficiary(address beneficiaryNominee) external;
+
 function transferHolder(address newHolder) external;
+
 function transferOwners(address beneficiaryNominee, address newHolder) external;
+
 function nominate(address beneficiaryNominee) external;
+
 ```
-The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder. 
+
+The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder.
 To transfer both beneficiary and holder in a single transaction, use `transferOwners`. Transfer of beneficiary will require a nomination done through the `nominate` method.
 
 #### Surrendering/Burning a Document
+
 Use the `surrender` method in the Title Escrow.
+
 ```solidity
 function surrender() external;
+
 ```
+
 Example:
+
 ```ts
 await connectedEscrow.surrender();
 ```
 
 ### Title Escrow Signable (Experimental)
-This is similar to the [Title Escrow](#title-escrow) with the additional support for off-chain nomination and endorsement of beneficiary nominees. The on-chain nominee will take precedence. 
+
+This is similar to the [Title Escrow](#title-escrow) with the additional support for off-chain nomination and endorsement of beneficiary nominees. The on-chain nominee will take precedence.
 The current beneficiary will initiate the transfer transaction with the endorsement.
 
 This feature could help to save on gas fees for cases where there are frequent nominations and endorsements between the owners.
