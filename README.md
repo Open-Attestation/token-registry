@@ -81,9 +81,10 @@ await connectedRegistry.restore(tokenId);
 await connectedRegistry.burn(tokenId);
 ```
 
-#### List of available functions
+#### ERC721 NFT Standard
 
-The contract supports [all ERC721 methods](http://erc721.org/)
+Although the registry contract is based on the [ERC721](http://erc721.org/) standards, token transfer is currently restricted to the tokens' Title Escrow contracts only.
+See [issue #108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
 ### TitleEscrow
 
