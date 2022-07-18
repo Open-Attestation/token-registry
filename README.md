@@ -19,7 +19,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 - [Installation](#installation)
 - [Usage](#usage)
   - [TradeTrustERC721](#tradetrusterc721)
-  - [Title Escrow](#titleescrow)
+  - [Title Escrow](#title-escrow)
   - [Provider & Signer](#provider--signer)
   - [Roles and Access](#roles-and-access)
 - [Deployment](#deployment)
@@ -86,9 +86,10 @@ await connectedRegistry.burn(tokenId);
 Although the registry contract is based on the [ERC721](http://erc721.org/) standards, token transfer is currently restricted to the tokens' Title Escrow contracts only.
 See [issue #108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
-### TitleEscrow
-
-The TradeTrustErc721 Token Registry will clone a new TitleEscrow internally when minting or restoring titles.
+### Title Escrow
+The Title Escrow contract is used to manage and represent the ownership of a token between a beneficiary and holder.
+During minting, the Token Registry will create and assign a Title Escrow as the owner of that token. 
+The actual owners will use the Title Escrow contract to perform their ownership operations.
 
 #### Connect to Title Escrow
 
