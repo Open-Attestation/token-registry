@@ -20,3 +20,7 @@ export const getTitleEscrowFactoryFromToken = async (
 export const toAccessControlRevertMessage = (account: string, role: string): string => {
   return `AccessControl: account ${account.toLowerCase()} is missing role ${role}`;
 };
+
+export const createDeployFixtureRunner = async <T extends any[number][]>(...fixtures: T) => {
+  return Promise.all(fixtures);
+};

@@ -1,4 +1,5 @@
-import { ethers, waffle } from "hardhat";
+import { ethers } from "hardhat";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TradeTrustERC721 } from "@tradetrust/contracts";
 import faker from "faker";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -6,26 +7,42 @@ import { Signer } from "ethers";
 import { FakeContract, MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture, deployTitleEscrowFixture } from "./fixtures";
-import { getTitleEscrowContract, impersonateAccount, getTestUsers, TestUsers } from "./helpers";
+import {
+  getTitleEscrowContract,
+  impersonateAccount,
+  getTestUsers,
+  TestUsers,
+  createDeployFixtureRunner,
+} from "./helpers";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
-
-const { loadFixture } = waffle;
 
 describe("Title Escrow", async () => {
   let users: TestUsers;
 
   let tokenId: string;
 
-  beforeEach(async () => {
+  // eslint-disable-next-line no-undef
+  before(async () => {
     users = await getTestUsers();
+  });
+
+  beforeEach(async () => {
     tokenId = faker.datatype.hexaDecimal(64);
   });
 
   describe("ERC165 Support", () => {
+    let deployTitleEscrowFixtureRunner: () => Promise<[TitleEscrow]>;
+
+    // eslint-disable-next-line no-undef
+    before(async () => {
+      deployTitleEscrowFixtureRunner = async () =>
+        createDeployFixtureRunner(deployTitleEscrowFixture({ deployer: users.carrier }));
+    });
+
     it("should support ITitleEscrow interface", async () => {
       const interfaceId = contractInterfaceId.TitleEscrow;
-      const titleEscrowContract = await loadFixture(deployTitleEscrowFixture({ deployer: users.carrier }));
+      const [titleEscrowContract] = await loadFixture(deployTitleEscrowFixtureRunner);
 
       const res = await titleEscrowContract.supportsInterface(interfaceId);
 
@@ -37,19 +54,35 @@ describe("Title Escrow", async () => {
     let deployer: SignerWithAddress;
     let implContract: TitleEscrow;
     let titleEscrowContract: TitleEscrow;
+    let registryContract: TradeTrustERC721;
+
+    let deployFixturesRunner: () => Promise<[TradeTrustERC721, TitleEscrow, TitleEscrow]>;
+
+    // eslint-disable-next-line no-undef
+    before(async () => {
+      deployer = users.others[users.others.length - 1];
+
+      deployFixturesRunner = async () => {
+        const registryContractFixture = await deployTokenFixture<TradeTrustERC721>({
+          tokenContractName: "TradeTrustERC721",
+          tokenName: "The Great Shipping Company",
+          tokenInitials: "GSC",
+          deployer: users.carrier,
+        });
+        const implContractFixture = await deployTitleEscrowFixture({ deployer });
+        const titleEscrowContractFixture = await deployImplProxy<TitleEscrow>({
+          implementation: implContractFixture,
+          deployer: users.carrier,
+        });
+
+        return [registryContractFixture, implContractFixture, titleEscrowContractFixture];
+      };
+    });
 
     beforeEach(async () => {
-      users = await getTestUsers();
-
-      deployer = users.others[users.others.length - 1];
-      implContract = await loadFixture(deployTitleEscrowFixture({ deployer }));
-      titleEscrowContract = await loadFixture(
-        deployImplProxy<TitleEscrow>({
-          implementation: implContract,
-          deployer: users.carrier,
-        })
-      );
       tokenId = faker.datatype.hexaDecimal(64);
+
+      [registryContract, implContract, titleEscrowContract] = await loadFixture(deployFixturesRunner);
     });
 
     it("should initialise implementation", async () => {
@@ -177,7 +210,7 @@ describe("Title Escrow", async () => {
             it("should revert: Missing data", async () => {
               const tx = titleEscrowContract
                 .connect(fakeRegistry.wallet)
-                .onERC721Received(fakeAddress, fakeAddress, tokenId, "");
+                .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
 
               await expect(tx).to.be.reverted;
             });
@@ -243,18 +276,9 @@ describe("Title Escrow", async () => {
     });
 
     describe("Is Holding Token Status", () => {
-      let registryContract: TradeTrustERC721;
       let titleEscrowOwnerContract: TitleEscrow;
 
       beforeEach(async () => {
-        registryContract = await loadFixture(
-          deployTokenFixture<TradeTrustERC721>({
-            tokenContractName: "TradeTrustERC721",
-            tokenName: "The Great Shipping Company",
-            tokenInitials: "GSC",
-            deployer: users.carrier,
-          })
-        );
         await registryContract
           .connect(users.carrier)
           .mint(users.beneficiary.address, users.beneficiary.address, tokenId);
@@ -361,15 +385,23 @@ describe("Title Escrow", async () => {
     let registryContract: TradeTrustERC721;
     let titleEscrowOwnerContract: TitleEscrow;
 
+    let deployTokenFixtureRunner: () => Promise<[TradeTrustERC721]>;
+
+    // eslint-disable-next-line no-undef
+    before(async () => {
+      deployTokenFixtureRunner = async () =>
+        createDeployFixtureRunner(
+          deployTokenFixture<TradeTrustERC721>({
+            tokenContractName: "TradeTrustERC721",
+            tokenName: "The Great Shipping Company",
+            tokenInitials: "GSC",
+            deployer: users.carrier,
+          })
+        );
+    });
+
     beforeEach(async () => {
-      registryContract = await loadFixture(
-        deployTokenFixture<TradeTrustERC721>({
-          tokenContractName: "TradeTrustERC721",
-          tokenName: "The Great Shipping Company",
-          tokenInitials: "GSC",
-          deployer: users.carrier,
-        })
-      );
+      [registryContract] = await loadFixture(deployTokenFixtureRunner);
     });
 
     describe("Nomination", () => {
@@ -755,10 +787,8 @@ describe("Title Escrow", async () => {
         const holdingStatus = await titleEscrowOwnerContract.isHoldingToken();
 
         await titleEscrowOwnerContract.connect(registrySigner).shred();
-        const tx = ethers.provider.getCode(titleEscrowOwnerContract.address);
 
         expect(holdingStatus).to.equal(false);
-        await expect(tx).to.not.be.reverted;
       });
 
       it("should not allow to shred when title escrow is holding token", async () => {

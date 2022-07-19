@@ -4,8 +4,9 @@ import faker from "faker";
 import { SigHelperMock } from "@tradetrust/contracts";
 import { Signature } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect, assert } from ".";
-import { getTestUsers, TestUsers } from "./helpers";
+import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 
 describe("SigHelper", async () => {
   let users: TestUsers;
@@ -17,14 +18,26 @@ describe("SigHelper", async () => {
   const domainName = "Test Name";
   let domain: Record<string, any>;
 
-  beforeEach(async () => {
+  let deployFixturesRunner: () => Promise<[SigHelperMock]>;
+
+  // eslint-disable-next-line no-undef
+  before(async () => {
     users = await getTestUsers();
     sender = users.carrier;
     [deployer] = users.others;
 
-    sigHelperMock = (await (await ethers.getContractFactory("SigHelperMock"))
-      .connect(deployer)
-      .deploy(domainName)) as SigHelperMock;
+    deployFixturesRunner = async () =>
+      createDeployFixtureRunner(
+        (async () => {
+          return (await (await ethers.getContractFactory("SigHelperMock"))
+            .connect(deployer)
+            .deploy(domainName)) as SigHelperMock;
+        })()
+      );
+  });
+
+  beforeEach(async () => {
+    [sigHelperMock] = await loadFixture(deployFixturesRunner);
     sigHelperMock = sigHelperMock.connect(sender);
 
     const chainId = await sender.getChainId();

@@ -1,14 +1,18 @@
-import { waffle } from "hardhat";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TitleEscrowFactory, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture } from "./fixtures";
-import { getTitleEscrowContract, impersonateAccount, getTestUsers, TestUsers } from "./helpers";
+import {
+  getTitleEscrowContract,
+  impersonateAccount,
+  getTestUsers,
+  TestUsers,
+  createDeployFixtureRunner,
+} from "./helpers";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
-
-const { loadFixture } = waffle;
 
 describe("TradeTrustERC721", async () => {
   let users: TestUsers;
@@ -24,26 +28,36 @@ describe("TradeTrustERC721", async () => {
   let tokenId: string;
   let titleEscrowImplAddr: string;
 
-  beforeEach(async () => {
+  let deployTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustERC721]>;
+
+  // eslint-disable-next-line no-undef
+  before(async () => {
     users = await getTestUsers();
 
     registryName = "The Great Shipping Company";
     registrySymbol = "GSC";
-    tokenId = faker.datatype.hexaDecimal(64);
 
-    mockTitleEscrowFactoryContract = (await (
-      await smock.mock("TitleEscrowFactory", users.carrier)
-    ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
+    deployTokenFixtureRunner = async () => {
+      const mockTitleEscrowFactoryContractFixture = (await (
+        await smock.mock("TitleEscrowFactory", users.carrier)
+      ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
 
-    registryContract = await loadFixture(
-      deployTokenFixture<TradeTrustERC721>({
+      const registryContractFixture = await deployTokenFixture<TradeTrustERC721>({
         tokenContractName: "TradeTrustERC721",
         tokenName: registryName,
         tokenInitials: registrySymbol,
-        escrowFactoryAddress: mockTitleEscrowFactoryContract.address,
+        escrowFactoryAddress: mockTitleEscrowFactoryContractFixture.address,
         deployer: users.carrier,
-      })
-    );
+      });
+
+      return [mockTitleEscrowFactoryContractFixture, registryContractFixture];
+    };
+  });
+
+  beforeEach(async () => {
+    tokenId = faker.datatype.hexaDecimal(64);
+
+    [mockTitleEscrowFactoryContract, registryContract] = await loadFixture(deployTokenFixtureRunner);
 
     registryContractAsAdmin = registryContract.connect(users.carrier);
     titleEscrowImplAddr = await mockTitleEscrowFactoryContract.implementation();
@@ -100,7 +114,7 @@ describe("TradeTrustERC721", async () => {
 
       const tx = registryContract.onERC721Received(fakeAddress, fakeAddress, "123", "0x00");
 
-      await expect(tx).to.not.be.reverted;
+      await expect(tx).to.not.be.rejected;
     });
   });
 
@@ -173,14 +187,17 @@ describe("TradeTrustERC721", async () => {
 
         it("should revert before transfer when forcefully sent to burn address", async () => {
           // Note: This is only an additional defence and is not a normal flow.
-          const registryContractMock = await loadFixture(
-            deployTokenFixture<TradeTrustERC721Mock>({
-              tokenContractName: "TradeTrustERC721Mock",
-              tokenName: "The Great Shipping Company",
-              tokenInitials: "GSC",
-              deployer: users.carrier,
-            })
-          );
+          const deployMockTokenFixturesRunner = async () =>
+            createDeployFixtureRunner(
+              deployTokenFixture<TradeTrustERC721Mock>({
+                tokenContractName: "TradeTrustERC721Mock",
+                tokenName: "The Great Shipping Company",
+                tokenInitials: "GSC",
+                deployer: users.carrier,
+              })
+            );
+
+          const [registryContractMock] = await loadFixture(deployMockTokenFixturesRunner);
           await registryContractMock.mintInternal(users.carrier.address, tokenId);
 
           const tx = registryContractMock
@@ -193,6 +210,18 @@ describe("TradeTrustERC721", async () => {
     });
 
     describe("Mint Token", () => {
+      beforeEach(async () => {
+        // Fixtures need to be redeployed here without loadFixture because snapshot does not reset call counts in mocks
+        // Only this section has tests that test for call counts
+        [mockTitleEscrowFactoryContract, registryContract] = await deployTokenFixtureRunner();
+
+        registryContractAsAdmin = registryContract.connect(users.carrier);
+        titleEscrowImplAddr = await mockTitleEscrowFactoryContract.implementation();
+
+        await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+        titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
+      });
+
       it("should mint token to a title escrow", async () => {
         const interfaceId = contractInterfaceId.TitleEscrow;
 

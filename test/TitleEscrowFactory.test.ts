@@ -1,4 +1,5 @@
-import { waffle, ethers } from "hardhat";
+import { ethers } from "hardhat";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
@@ -8,19 +9,25 @@ import { expect } from ".";
 import { deployEscrowFactoryFixture } from "./fixtures";
 import { computeTitleEscrowAddress, getEventFromReceipt } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
-import { getTestUsers, TestUsers } from "./helpers";
-
-const { loadFixture } = waffle;
+import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 
 describe("TitleEscrowFactory", async () => {
   let users: TestUsers;
 
   let titleEscrowFactory: TitleEscrowFactory;
 
-  beforeEach(async () => {
+  let deployFixturesRunner: () => Promise<[TitleEscrowFactory]>;
+
+  // eslint-disable-next-line no-undef
+  before(async () => {
     users = await getTestUsers();
 
-    titleEscrowFactory = await loadFixture(deployEscrowFactoryFixture({ deployer: users.carrier }));
+    deployFixturesRunner = async () =>
+      createDeployFixtureRunner(deployEscrowFactoryFixture({ deployer: users.carrier }));
+  });
+
+  beforeEach(async () => {
+    [titleEscrowFactory] = await loadFixture(deployFixturesRunner);
   });
 
   describe("Implementation", () => {

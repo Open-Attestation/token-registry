@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-import { ethers, waffle } from "hardhat";
+import { ethers } from "hardhat";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import faker from "faker";
 import { TitleEscrowSignable, TradeTrustERC721 } from "@tradetrust/contracts";
 import { Signature } from "ethers";
@@ -9,8 +10,6 @@ import { expect, assert } from ".";
 import { getTestUsers, TestUsers } from "./helpers";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 import { contractInterfaceId } from "../src/constants";
-
-const { loadFixture } = waffle;
 
 type BeneficiaryTransferData = {
   beneficiary: string;
@@ -26,30 +25,33 @@ describe("TitleEscrowSignable", async () => {
   let users: TestUsers;
   let deployer: SignerWithAddress;
 
-  let implContract: TitleEscrowSignable;
   let titleEscrowContract: TitleEscrowSignable;
 
   const domainName = "TradeTrust Title Escrow";
   let domain: Record<string, any>;
 
+  let deployFixturesRunner: () => Promise<[TitleEscrowSignable]>;
+
   // eslint-disable-next-line no-undef
   before(async () => {
     users = await getTestUsers();
     deployer = users.carrier;
+
+    deployFixturesRunner = async () => {
+      const titleEscrowSignableFixture = (await (await ethers.getContractFactory("TitleEscrowSignable"))
+        .connect(deployer)
+        .deploy()) as TitleEscrowSignable;
+      const titleEscrowWithProxy = await deployImplProxy<TitleEscrowSignable>({
+        implementation: titleEscrowSignableFixture,
+        deployer,
+      });
+
+      return [titleEscrowWithProxy];
+    };
   });
 
   beforeEach(async () => {
-    implContract = await loadFixture(async () => {
-      return (await (await ethers.getContractFactory("TitleEscrowSignable"))
-        .connect(deployer)
-        .deploy()) as TitleEscrowSignable;
-    });
-    titleEscrowContract = await loadFixture(
-      deployImplProxy<TitleEscrowSignable>({
-        implementation: implContract,
-        deployer,
-      })
-    );
+    [titleEscrowContract] = await loadFixture(deployFixturesRunner);
 
     const chainId = await deployer.getChainId();
     domain = {
