@@ -19,7 +19,8 @@ code for token registry (in `/contracts`) as well as the node package for using 
 - [Installation](#installation)
 - [Usage](#usage)
   - [TradeTrustERC721](#tradetrusterc721)
-  - [Title Escrow](#titleescrow)
+  - [Title Escrow](#title-escrow)
+  - [Title Escrow Signable (Experimental)](#title-escrow-signable-experimental)
   - [Provider & Signer](#provider--signer)
   - [Roles and Access](#roles-and-access)
 - [Deployment](#deployment)
@@ -41,7 +42,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 ## Installation
 
 ```sh
-npm install --save @govtechsg/token-registry
+npm install --save @govtechsg/token-registry@beta
 ```
 
 ---
@@ -81,13 +82,16 @@ await connectedRegistry.restore(tokenId);
 await connectedRegistry.burn(tokenId);
 ```
 
-#### List of available functions
+#### ERC721 NFT Standard
 
-The contract supports [all ERC721 methods](http://erc721.org/)
+Although the registry contract is based on the [ERC721](http://erc721.org/) standards, token transfer is currently restricted to the tokens' Title Escrow contracts only.
+See [issue #108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
-### TitleEscrow
+### Title Escrow
 
-The TradeTrustErc721 Token Registry will clone a new TitleEscrow internally when minting or restoring titles.
+The Title Escrow contract is used to manage and represent the ownership of a token between a beneficiary and holder.
+During minting, the Token Registry will create and assign a Title Escrow as the owner of that token.
+The actual owners will use the Title Escrow contract to perform their ownership operations.
 
 #### Connect to Title Escrow
 
@@ -103,22 +107,62 @@ Transferring of beneficiary and holder within the Title Escrow relies on the fol
 
 ```solidity
 function transferBeneficiary(address beneficiaryNominee) external;
+
 function transferHolder(address newHolder) external;
+
 function transferOwners(address beneficiaryNominee, address newHolder) external;
+
 function nominate(address beneficiaryNominee) external;
+
 ```
-The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder. 
+
+The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder.
 To transfer both beneficiary and holder in a single transaction, use `transferOwners`. Transfer of beneficiary will require a nomination done through the `nominate` method.
 
 #### Surrendering/Burning a Document
+
 Use the `surrender` method in the Title Escrow.
+
 ```solidity
 function surrender() external;
+
 ```
+
 Example:
+
 ```ts
 await connectedEscrow.surrender();
 ```
+
+### Title Escrow Signable (Experimental)
+
+This is similar to the [Title Escrow](#title-escrow) with the additional support for off-chain nomination and endorsement of beneficiary nominees. The on-chain nominee will take precedence.
+The current beneficiary will initiate the transfer transaction with the endorsement.
+
+This feature could help to save on gas fees for cases where there are frequent nominations and endorsements between the owners.
+
+Currently, this is not the default Title Escrow. To use this version of the Title Escrow, you will need to make some changes to the `TitleEscrowFactory.sol` file before deployment by following these steps:
+
+```solidity
+// Step 1. Import the TitleEscrowSignable contract
+import "./TitleEscrowSignable.sol";
+
+contract TitleEscrowFactory is ITitleEscrowFactory {
+  // ...
+
+  constructor() {
+    // Step 2. Look for this line in the constructor
+    implementation = address(new TitleEscrow());
+    // Step 3. Replace the line in Step #2 with the following line:
+    implementation = address(new TitleEscrowSignable());
+  }
+
+  // ...
+}
+
+```
+
+Note that this is currently an experimental feature. Implementers will need to setup a "book-keeping" backend for the signed data.
 
 ### Provider & Signer
 
