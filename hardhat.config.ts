@@ -1,6 +1,6 @@
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-waffle";
+import "@nomicfoundation/hardhat-chai-matchers";
 import "hardhat-watcher";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
