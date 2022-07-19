@@ -1,6 +1,6 @@
 module.exports = {
   skipFiles: [
-    'lib',
+    'lib/external',
     'mocks'
   ],
   istanbulReporter: ['lcov', 'text', 'text-summary', 'html']
