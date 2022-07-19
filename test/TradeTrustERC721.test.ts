@@ -204,7 +204,7 @@ describe("TradeTrustERC721", async () => {
             .connect(users.carrier)
             .transferFrom(users.carrier.address, defaultAddress.Burn, tokenId);
 
-          await expect(tx).to.be.revertedWith("Registry: Token unsurrendered");
+          await expect(tx).to.be.revertedWithCustomError(registryContractMock, "TokenNotSurrendered");
         });
       });
     });
@@ -249,13 +249,13 @@ describe("TradeTrustERC721", async () => {
 
         const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-        await expect(tx).to.be.revertedWith("Registry: Token exists");
+        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenExists");
       });
 
       it("should not allow minting an existing token", async () => {
         const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
-        await expect(tx).to.be.revertedWith("Registry: Token exists");
+        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenExists");
       });
 
       it("should create title escrow from factory", async () => {
@@ -302,13 +302,13 @@ describe("TradeTrustERC721", async () => {
         const invalidTokenId = faker.datatype.hexaDecimal(64);
         const tx = registryContractAsAdmin.restore(invalidTokenId);
 
-        await expect(tx).to.be.revertedWith("Registry: Invalid token");
+        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "InvalidTokenId");
       });
 
       it("should revert if token is not surrendered", async () => {
         const tx = registryContractAsAdmin.restore(tokenId);
 
-        await expect(tx).to.be.revertedWith("Registry: Not surrendered");
+        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
       });
 
       it("should not allow to restore burnt token", async () => {
@@ -317,7 +317,7 @@ describe("TradeTrustERC721", async () => {
 
         const tx = registryContractAsAdmin.restore(tokenId);
 
-        await expect(tx).to.be.revertedWith("Registry: Token burnt");
+        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
       });
 
       it("should allow to restore after token is surrendered", async () => {
