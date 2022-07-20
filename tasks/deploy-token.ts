@@ -2,7 +2,7 @@
 
 import { task } from "hardhat/config";
 import { TDocDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
-import { DeploymentEvent } from "@tradetrust/contracts/TDocDeployer";
+import { DeploymentEvent } from "@tradetrust/contracts/contracts/utils/TDocDeployer";
 import { verifyContract, wait, deployContract, isSupportedTitleEscrowFactory } from "./helpers";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
 import { constants } from "../src";

@@ -1,10 +1,10 @@
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TDocDeployer, TradeTrustERC721Impl } from "@tradetrust/contracts";
+import { DeploymentEvent } from "@tradetrust/contracts/contracts/utils/TDocDeployer";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { DeploymentEvent } from "@tradetrust/contracts/TDocDeployer";
 import { expect } from ".";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 import { defaultAddress, contractInterfaceId } from "../src/constants";
