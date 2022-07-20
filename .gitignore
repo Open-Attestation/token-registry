@@ -11,6 +11,7 @@ yarn-error.log
 /cache
 /artifacts
 /contracts/artifacts
+/contracts/*/artifacts
 /contracts/.deps
 /coverage
 coverage.json
