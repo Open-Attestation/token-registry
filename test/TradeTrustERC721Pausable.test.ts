@@ -1,12 +1,10 @@
-import { waffle } from "hardhat";
 import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
 import faker from "faker";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
-import { getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
+import { createDeployFixtureRunner, getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
 import { roleHash } from "../src/constants";
-
-const { loadFixture } = waffle;
 
 describe("TradeTrustERC721 Pausable Behaviour", async () => {
   let users: TestUsers;
@@ -15,23 +13,31 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
   let registryContractAsAdmin: TradeTrustERC721;
   let registryContractAsNonAdmin: TradeTrustERC721;
 
-  beforeEach(async () => {
+  let deployTokenFixturesRunner: () => Promise<[TradeTrustERC721]>;
+
+  // eslint-disable-next-line no-undef
+  before(async () => {
     users = await getTestUsers();
 
-    registryContract = await loadFixture(
-      deployTokenFixture<TradeTrustERC721>({
-        tokenContractName: "TradeTrustERC721",
-        tokenName: "The Great Shipping Company",
-        tokenInitials: "GSC",
-        deployer: users.carrier,
-      })
-    );
-
-    registryContractAsAdmin = registryContract.connect(users.carrier);
-    registryContractAsNonAdmin = registryContract.connect(users.beneficiary);
+    deployTokenFixturesRunner = async () =>
+      createDeployFixtureRunner(
+        deployTokenFixture<TradeTrustERC721>({
+          tokenContractName: "TradeTrustERC721",
+          tokenName: "The Great Shipping Company",
+          tokenInitials: "GSC",
+          deployer: users.carrier,
+        })
+      );
   });
 
   describe("Rights to pause and unpause registry", () => {
+    beforeEach(async () => {
+      [registryContract] = await loadFixture(deployTokenFixturesRunner);
+
+      registryContractAsAdmin = registryContract.connect(users.carrier);
+      registryContractAsNonAdmin = registryContract.connect(users.beneficiary);
+    });
+
     describe("When registry is paused", () => {
       beforeEach(async () => {
         await registryContractAsAdmin.pause();
@@ -100,14 +106,12 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       });
 
       it("should not allow transfers token", async () => {
-        const registryContractMock = await loadFixture(
-          deployTokenFixture<TradeTrustERC721Mock>({
-            tokenContractName: "TradeTrustERC721Mock",
-            tokenName: "The Great Shipping Company",
-            tokenInitials: "GSC",
-            deployer: users.carrier,
-          })
-        );
+        const registryContractMock = await deployTokenFixture<TradeTrustERC721Mock>({
+          tokenContractName: "TradeTrustERC721Mock",
+          tokenName: "The Great Shipping Company",
+          tokenInitials: "GSC",
+          deployer: users.carrier,
+        });
         await registryContractMock.mintInternal(users.beneficiary.address, tokenId);
         await registryContractMock.pause();
 
@@ -122,17 +126,36 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
     describe("Token Registry and Title Escrow Behaviours", () => {
       let titleEscrowContract: TitleEscrow;
 
+      // eslint-disable-next-line no-undef
+      let deployFixturesRunner: () => Promise<[TradeTrustERC721, TitleEscrow]>;
+
+      // eslint-disable-next-line no-undef
+      before(async () => {
+        deployFixturesRunner = async () => {
+          const registryContractFixture = await deployTokenFixture<TradeTrustERC721>({
+            tokenContractName: "TradeTrustERC721",
+            tokenName: "The Great Shipping Company",
+            tokenInitials: "GSC",
+            deployer: users.carrier,
+          });
+          const registryContractFixtureAsAdmin = registryContractFixture.connect(users.carrier);
+
+          const { titleEscrow: titleEscrowFixture } = await mintTokenFixture({
+            token: registryContractFixtureAsAdmin,
+            beneficiary: users.beneficiary,
+            holder: users.beneficiary,
+            tokenId,
+          });
+
+          return [registryContractFixture, titleEscrowFixture];
+        };
+      });
+
       beforeEach(async () => {
-        titleEscrowContract = (
-          await loadFixture(
-            mintTokenFixture({
-              token: registryContractAsAdmin,
-              beneficiary: users.beneficiary,
-              holder: users.beneficiary,
-              tokenId,
-            })
-          )
-        ).titleEscrow;
+        [registryContract, titleEscrowContract] = await loadFixture(deployFixturesRunner);
+
+        registryContractAsAdmin = registryContract.connect(users.carrier);
+        registryContractAsNonAdmin = registryContract.connect(users.beneficiary);
       });
 
       describe("Token Registry Behaviour", () => {

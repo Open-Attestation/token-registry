@@ -1,17 +1,17 @@
-import { waffle, ethers } from "hardhat";
+import { ethers } from "hardhat";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import faker from "faker";
-import { TradeTrustERC721 } from "@tradetrust/contracts";
+import { TitleEscrow, TradeTrustERC721 } from "@tradetrust/contracts";
 import { roleHash } from "../src/constants";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
 import { getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
 
-const { loadFixture } = waffle;
-
 describe("TradeTrustERC721 Access Control Behaviour", async () => {
   let users: TestUsers;
   let registryContract: TradeTrustERC721;
+  let titleEscrowContract: TitleEscrow;
 
   let userAdmin: SignerWithAddress;
   let userMinter: SignerWithAddress;
@@ -26,37 +26,55 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
 
   let tokenId: string;
 
-  beforeEach(async () => {
-    users = await getTestUsers();
+  let deployFixturesRunner: () => Promise<[TradeTrustERC721, TitleEscrow]>;
 
-    registryContract = await loadFixture(
-      deployTokenFixture<TradeTrustERC721>({
-        tokenContractName: "TradeTrustERC721",
-        tokenName: "The Great Shipping Company",
-        tokenInitials: "GSC",
-        deployer: users.carrier,
-      })
-    );
+  // eslint-disable-next-line no-undef
+  before(async () => {
+    users = await getTestUsers();
 
     userAdmin = users.carrier;
     userMinter = users.others[users.others.length - 1];
     userRestorer = users.others[users.others.length - 2];
     userAccepter = users.others[users.others.length - 3];
 
+    tokenId = faker.datatype.hexaDecimal(64);
+
+    deployFixturesRunner = async () => {
+      const registryContractFixture = await deployTokenFixture<TradeTrustERC721>({
+        tokenContractName: "TradeTrustERC721",
+        tokenName: "The Great Shipping Company",
+        tokenInitials: "GSC",
+        deployer: userAdmin,
+      });
+
+      const registryContractFixtureAsAdmin = registryContractFixture.connect(userAdmin);
+      const registryContractFixtureAsMinter = registryContractFixture.connect(userMinter);
+
+      await Promise.all([
+        registryContractFixtureAsAdmin.grantRole(roleHash.MinterRole, userMinter.address),
+        registryContractFixtureAsAdmin.grantRole(roleHash.RestorerRole, userRestorer.address),
+        registryContractFixtureAsAdmin.grantRole(roleHash.AccepterRole, userAccepter.address),
+      ]);
+
+      const { titleEscrow: titleEscrowContractFixture } = await mintTokenFixture({
+        token: registryContractFixtureAsMinter,
+        beneficiary: users.beneficiary,
+        holder: users.beneficiary,
+        tokenId,
+      });
+
+      return [registryContractFixture, titleEscrowContractFixture];
+    };
+  });
+
+  beforeEach(async () => {
+    [registryContract, titleEscrowContract] = await loadFixture(deployFixturesRunner);
+
     registryContractAsAdmin = registryContract.connect(userAdmin);
-
-    await Promise.all([
-      registryContractAsAdmin.grantRole(roleHash.MinterRole, userMinter.address),
-      registryContractAsAdmin.grantRole(roleHash.RestorerRole, userRestorer.address),
-      registryContractAsAdmin.grantRole(roleHash.AccepterRole, userAccepter.address),
-    ]);
-
     registryContractAsMinter = registryContract.connect(userMinter);
     registryContractAsRestorer = registryContract.connect(userRestorer);
     registryContractAsAccepter = registryContract.connect(userAccepter);
     registryContractAsNoRole = registryContract.connect(users.beneficiary);
-
-    tokenId = faker.datatype.hexaDecimal(64);
   });
 
   it("should support access control interfaces", async () => {
@@ -115,7 +133,9 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
 
   describe("Minter Role", () => {
     it("should allow a minter to mint new tokens", async () => {
-      const tx = registryContractAsMinter.mint(users.beneficiary.address, users.holder.address, tokenId);
+      const newTokenId = faker.datatype.hexaDecimal(64);
+
+      const tx = registryContractAsMinter.mint(users.beneficiary.address, users.holder.address, newTokenId);
 
       await expect(tx).to.not.be.reverted;
     });
@@ -129,16 +149,6 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
 
   describe("Restorer Role", () => {
     beforeEach(async () => {
-      const titleEscrowContract = (
-        await loadFixture(
-          mintTokenFixture({
-            token: registryContractAsMinter,
-            beneficiary: users.beneficiary,
-            holder: users.beneficiary,
-            tokenId,
-          })
-        )
-      ).titleEscrow;
       await titleEscrowContract.connect(users.beneficiary).surrender();
     });
 
@@ -159,16 +169,6 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
 
   describe("Accepter Role", () => {
     beforeEach(async () => {
-      const titleEscrowContract = (
-        await loadFixture(
-          mintTokenFixture({
-            token: registryContractAsMinter,
-            beneficiary: users.beneficiary,
-            holder: users.beneficiary,
-            tokenId,
-          })
-        )
-      ).titleEscrow;
       await titleEscrowContract.connect(users.beneficiary).surrender();
     });
 

@@ -1,4 +1,5 @@
-import { ethers, waffle } from "hardhat";
+import { ethers } from "hardhat";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TDocDeployer, TradeTrustERC721Impl } from "@tradetrust/contracts";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
@@ -8,9 +9,7 @@ import { expect } from ".";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 import { defaultAddress, contractInterfaceId } from "../src/constants";
 import { deployTDocDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
-import { getTestUsers, TestUsers } from "./helpers";
-
-const { loadFixture } = waffle;
+import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 
 describe("TDocDeployer", async () => {
   let users: TestUsers;
@@ -23,16 +22,24 @@ describe("TDocDeployer", async () => {
   let deployerContractAsOwner: TDocDeployer;
   let deployerContractAsNonOwner: TDocDeployer;
 
-  beforeEach(async () => {
+  let deployFixturesRunner: () => Promise<[TradeTrustERC721Impl, TDocDeployer]>;
+
+  // eslint-disable-next-line no-undef
+  before(async () => {
     users = await getTestUsers();
     deployer = users.carrier;
 
+    deployFixturesRunner = async () =>
+      createDeployFixtureRunner(
+        deployTradeTrustERC721ImplFixture({ deployer }),
+        deployTDocDeployerFixture({ deployer })
+      );
+  });
+
+  beforeEach(async () => {
     fakeTitleEscrowFactory = ethers.utils.getAddress(faker.finance.ethereumAddress());
 
-    [implContract, deployerContract] = await Promise.all([
-      loadFixture(deployTradeTrustERC721ImplFixture({ deployer })),
-      loadFixture(deployTDocDeployerFixture({ deployer })),
-    ]);
+    [implContract, deployerContract] = await loadFixture(deployFixturesRunner);
 
     deployerContractAsOwner = deployerContract.connect(deployer);
     deployerContractAsNonOwner = deployerContract.connect(users.beneficiary);
