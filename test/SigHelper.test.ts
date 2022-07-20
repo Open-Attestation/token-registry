@@ -152,7 +152,7 @@ describe("SigHelper", async () => {
 
       const tx = sigHelperMock.validateSigInternal(hashStruct, sender.address, sig);
 
-      await expect(tx).to.be.rejectedWith("Cancelled");
+      await expect(tx).to.be.revertedWithCustomError(sigHelperMock, "SignatureAlreadyCancelled");
     });
   });
 });

@@ -420,7 +420,10 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("Cancelled");
+            await expect(tx).to.be.revertedWithCustomError(
+              titleEscrowContractAsBeneficiary,
+              "SignatureAlreadyCancelled"
+            );
           });
         });
 

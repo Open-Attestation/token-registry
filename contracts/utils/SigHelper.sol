@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "../interfaces/SigHelperErrors.sol";
 
-abstract contract SigHelper {
+abstract contract SigHelper is SigHelperErrors {
   using ECDSAUpgradeable for bytes32;
 
   bytes32 public DOMAIN_SEPARATOR;
@@ -33,14 +34,18 @@ abstract contract SigHelper {
     address signer,
     Sig memory sig
   ) internal view virtual returns (bool) {
-    require(!cancelled[hash], "Cancelled");
+    if (cancelled[hash]) {
+      revert SignatureAlreadyCancelled();
+    }
     bytes32 digest = DOMAIN_SEPARATOR.toTypedDataHash(hash);
     address rSigner = digest.recover(abi.encodePacked(sig.r, sig.s, sig.v));
     return rSigner != address(0) && rSigner == signer;
   }
 
   function _cancelHash(bytes32 hash) internal virtual {
-    require(!cancelled[hash], "Cancelled");
+    if (cancelled[hash]) {
+      revert SignatureAlreadyCancelled();
+    }
     cancelled[hash] = true;
   }
 }
