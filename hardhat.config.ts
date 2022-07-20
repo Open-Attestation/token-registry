@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
@@ -25,7 +26,7 @@ if (!IS_CI_ENV && !DEPLOYER_PK && !MNEMONIC) {
 
 const networkConfig: HttpNetworkUserConfig = {};
 if (IS_CI_ENV) {
-  networkConfig.accounts = ["0xbabe"];
+  networkConfig.accounts = [`0x${randomBytes(32).toString("hex")}`];
 } else if (DEPLOYER_PK) {
   networkConfig.accounts = [DEPLOYER_PK];
 } else {
