@@ -31,6 +31,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, ITitleEscrowSignable {
   function transferBeneficiaryWithSig(BeneficiaryTransferEndorsement memory endorsement, Sig memory sig)
     public
     virtual
+    override
     whenNotPaused
     whenActive
     onlyBeneficiary
@@ -60,6 +61,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, ITitleEscrowSignable {
   function cancelBeneficiaryTransfer(BeneficiaryTransferEndorsement memory endorsement)
     public
     virtual
+    override
     whenNotPaused
     whenActive
   {
