@@ -14,7 +14,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: 'circleci/node:14'
+      - image: cimg/node:14.19.3
     environment:
       ENV_NAME: ci
     steps:
@@ -39,7 +39,7 @@ jobs:
           command: NODE_ENV=$ENV_NAME npm run semantic-release
   coverage:
     docker:
-      - image: 'circleci/node:14'
+      - image: cimg/node:14.19.3
     environment:
       ENV_NAME: ci
     steps:
