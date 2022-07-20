@@ -6,8 +6,9 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
+import "./interfaces/TitleEscrowErrors.sol";
 
-contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
+contract TitleEscrow is IERC165, TitleEscrowErrors, ITitleEscrow, Initializable {
   address public override registry;
   uint256 public override tokenId;
 
@@ -21,28 +22,38 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
   constructor() initializer {}
 
   modifier onlyBeneficiary() {
-    require(msg.sender == beneficiary, "TE: Not beneficiary");
+    if (msg.sender != beneficiary) {
+      revert CallerNotBeneficiary();
+    }
     _;
   }
 
   modifier onlyHolder() {
-    require(msg.sender == holder, "TE: Not holder");
+    if (msg.sender != holder) {
+      revert CallerNotHolder();
+    }
     _;
   }
 
   modifier whenHoldingToken() {
-    require(_isHoldingToken(), "TE: Not holding token");
+    if (!_isHoldingToken()) {
+      revert TitleEscrowNotHoldingToken();
+    }
     _;
   }
 
   modifier whenNotPaused() {
     bool paused = Pausable(registry).paused();
-    require(!paused, "TE: Registry paused");
+    if (paused) {
+      revert RegistryContractPaused();
+    }
     _;
   }
 
   modifier whenActive() {
-    require(active, "TE: Inactive");
+    if (!active) {
+      revert InactiveTitleEscrow();
+    }
     _;
   }
 
@@ -66,12 +77,21 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     uint256 _tokenId,
     bytes calldata data
   ) external virtual override whenNotPaused whenActive returns (bytes4) {
-    require(tokenId == _tokenId, "TE: Invalid token");
-    require(msg.sender == address(registry), "TE: Wrong registry");
+    if (_tokenId != tokenId) {
+      revert UnknownReceivingTokenId(_tokenId);
+    }
+    if (msg.sender != address(registry)) {
+      revert UnknownRegistry(msg.sender);
+    }
     bool isMinting = false;
     if (beneficiary == address(0) || holder == address(0)) {
-      require(data.length > 0, "TE: Empty data");
+      if (data.length == 0) {
+        revert EmptyReceivingData();
+      }
       (address _beneficiary, address _holder) = abi.decode(data, (address, address));
+      if (_beneficiary == address(0) || _holder == address(0)) {
+        revert InvalidTokenTransferToZeroAddressOwners(_beneficiary, _holder);
+      }
       _setBeneficiary(_beneficiary);
       _setHolder(_holder);
       isMinting = true;
@@ -90,8 +110,12 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     onlyBeneficiary
     whenHoldingToken
   {
-    require(beneficiary != _beneficiaryNominee, "TE: Nominee is beneficiary");
-    require(beneficiaryNominee != _beneficiaryNominee, "TE: Already beneficiary nominee");
+    if (beneficiary == _beneficiaryNominee) {
+      revert TargetNomineeAlreadyBeneficiary();
+    }
+    if (beneficiaryNominee == _beneficiaryNominee) {
+      revert NomineeAlreadyNominated();
+    }
 
     _setBeneficiaryNominee(_beneficiaryNominee);
   }
@@ -105,8 +129,12 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     onlyHolder
     whenHoldingToken
   {
-    require(_beneficiaryNominee != address(0), "TE: Endorsing zero");
-    require(beneficiary == holder || (beneficiaryNominee == _beneficiaryNominee), "TE: Recipient is non-nominee");
+    if (_beneficiaryNominee == address(0)) {
+      revert InvalidTransferToZeroAddress();
+    }
+    if (!(beneficiary == holder || beneficiaryNominee == _beneficiaryNominee)) {
+      revert TargetBeneficiaryNomineeNotNominated();
+    }
 
     _setBeneficiary(_beneficiaryNominee);
   }
@@ -120,8 +148,12 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
     onlyHolder
     whenHoldingToken
   {
-    require(newHolder != address(0), "TE: Transfer to zero");
-    require(holder != newHolder, "TE: Already holder");
+    if (newHolder == address(0)) {
+      revert InvalidTransferToZeroAddress();
+    }
+    if (holder == newHolder) {
+      revert RecipientAlreadyHolder();
+    }
 
     _setHolder(newHolder);
   }
@@ -139,8 +171,12 @@ contract TitleEscrow is IERC165, ITitleEscrow, Initializable {
   }
 
   function shred() external virtual override whenNotPaused whenActive {
-    require(!_isHoldingToken(), "TE: Not surrendered");
-    require(msg.sender == registry, "TE: Invalid registry");
+    if (_isHoldingToken()) {
+      revert TokenNotSurrendered();
+    }
+    if (msg.sender != registry) {
+      revert UnknownRegistry(msg.sender);
+    }
 
     _setBeneficiary(address(0));
     _setHolder(address(0));
