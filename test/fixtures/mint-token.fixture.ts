@@ -1,7 +1,7 @@
 import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
+import { TitleEscrowCreatedEvent } from "@tradetrust/contracts/contracts/TitleEscrowFactory";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import { TitleEscrowCreatedEvent } from "@tradetrust/contracts/ITitleEscrowFactory";
 import { getEventFromReceipt } from "../../src/utils";
 
 export const mintTokenFixture = async ({

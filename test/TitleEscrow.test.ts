@@ -172,7 +172,7 @@ describe("Title Escrow", async () => {
         describe("Minting Token Receive", () => {
           it("should initialise beneficiary correctly on minting token receive", async () => {
             await titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
             const beneficiary = await titleEscrowContract.beneficiary();
 
@@ -181,7 +181,7 @@ describe("Title Escrow", async () => {
 
           it("should initialise holder correctly on minting token receive", async () => {
             await titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
             const holder = await titleEscrowContract.holder();
 
@@ -190,7 +190,7 @@ describe("Title Escrow", async () => {
 
           it("should emit TokenReceived event with correct values", async () => {
             const tx = await titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
 
             expect(tx)
@@ -201,7 +201,7 @@ describe("Title Escrow", async () => {
           describe("When minting token receive is sent without data", () => {
             it("should revert: Empty data", async () => {
               const tx = titleEscrowContract
-                .connect(fakeRegistry.wallet)
+                .connect(fakeRegistry.wallet as Signer)
                 .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
 
               await expect(tx).to.be.revertedWith("TE: Empty data");
@@ -209,7 +209,7 @@ describe("Title Escrow", async () => {
 
             it("should revert: Missing data", async () => {
               const tx = titleEscrowContract
-                .connect(fakeRegistry.wallet)
+                .connect(fakeRegistry.wallet as Signer)
                 .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
 
               await expect(tx).to.be.reverted;
@@ -217,7 +217,7 @@ describe("Title Escrow", async () => {
 
             it("should revert: Invalid data", async () => {
               const tx = titleEscrowContract
-                .connect(fakeRegistry.wallet)
+                .connect(fakeRegistry.wallet as Signer)
                 .onERC721Received(fakeAddress, fakeAddress, tokenId, "0xabcd");
 
               await expect(tx).to.be.reverted;
@@ -228,10 +228,10 @@ describe("Title Escrow", async () => {
         describe("After Minting Token Receive", () => {
           it("should return successfully without data after minting token receive", async () => {
             await titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
             const tx = titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
 
             await expect(tx).to.not.be.reverted;
@@ -239,10 +239,10 @@ describe("Title Escrow", async () => {
 
           it("should emit TokenReceived event with correct values", async () => {
             await titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
             const tx = await titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
 
             expect(tx)
@@ -254,7 +254,7 @@ describe("Title Escrow", async () => {
         describe("Beneficiary and Holder Transfer Events", () => {
           it("should emit BeneficiaryTransfer event", async () => {
             const tx = await titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
 
             expect(tx)
@@ -264,7 +264,7 @@ describe("Title Escrow", async () => {
 
           it("should emit HolderTransfer event", async () => {
             const tx = await titleEscrowContract
-              .connect(fakeRegistry.wallet)
+              .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
 
             expect(tx)

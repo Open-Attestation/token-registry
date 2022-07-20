@@ -49,7 +49,7 @@
   "devDependencies": {
     "@babel/cli": "^7.13.16",
     "@babel/core": "^7.14.6",
-    "@babel/eslint-parser": "^7.14.7",
+    "@babel/eslint-parser": "^7.18.9",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.13.8",
     "@babel/plugin-proposal-optional-chaining": "^7.13.12",
@@ -68,8 +68,7 @@
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@openzeppelin/contracts": "^4.5.0",
     "@openzeppelin/contracts-upgradeable": "^4.5.2",
-    "@typechain/ethers-v5": "^7.1.2",
-    "@typechain/hardhat": "^2.3.0",
+    "@typechain/hardhat": "^6.1.2",
     "@types/chai": "^4.2.22",
     "@types/chai-as-promised": "^7.1.4",
     "@types/faker": "^5.5.8",
@@ -77,8 +76,8 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "^15.14.9",
     "@types/uuid": "^8.3.3",
-    "@typescript-eslint/eslint-plugin": "^4.33.0",
-    "@typescript-eslint/parser": "^4.33.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.7",
+    "@typescript-eslint/parser": "^5.30.7",
     "babel-jest": "^26.6.3",
     "babel-plugin-module-resolver": "^4.1.0",
     "chai": "^4.3.4",
@@ -92,11 +91,11 @@
     "eslint-plugin-chai-friendly": "^0.6.0",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-prettier": "^3.1.2",
-    "ethers": "^5.4.7",
+    "ethers": "^5.6.9",
     "faker": "^5.5.3",
     "git-cz": "^4.7.6",
     "hardhat": "^2.10.1",
-    "hardhat-gas-reporter": "^1.0.4",
+    "hardhat-gas-reporter": "^1.0.8",
     "hardhat-watcher": "^2.1.1",
     "jest": "^27.2.4",
     "prettier": "^2.4.1",
@@ -107,7 +106,7 @@
     "solidity-coverage": "^0.7.21",
     "solium": "^1.2.5",
     "ts-node": "^10.9.1",
-    "typechain": "^5.1.2",
+    "typechain": "^8.1.0",
     "typescript": "^4.7.4",
     "uuid": "^8.3.2"
   },
@@ -119,5 +118,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@typechain/ethers-v5": "~10.0.0"
+  }
 }

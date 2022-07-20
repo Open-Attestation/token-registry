@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import faker from "faker";
 import { TitleEscrowSignable, TradeTrustERC721 } from "@tradetrust/contracts";
-import { Signature } from "ethers";
+import { Signature, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { FakeContract, smock } from "@defi-wonderland/smock";
 import { expect, assert } from ".";
@@ -154,7 +154,7 @@ describe("TitleEscrowSignable", async () => {
         [users.beneficiary.address, users.holder.address]
       );
       await titleEscrowContract
-        .connect(fakeRegistryContract.wallet)
+        .connect(fakeRegistryContract.wallet as Signer)
         .onERC721Received(ethers.constants.AddressZero, ethers.constants.AddressZero, fakeTokenId, data);
 
       fakeRegistryContract.ownerOf.returns(titleEscrowContract.address);
@@ -197,7 +197,7 @@ describe("TitleEscrowSignable", async () => {
       describe("When title escrow is inactive", () => {
         beforeEach(async () => {
           fakeRegistryContract.ownerOf.returns(faker.finance.ethereumAddress());
-          await titleEscrowContract.connect(fakeRegistryContract.wallet).shred();
+          await titleEscrowContract.connect(fakeRegistryContract.wallet as Signer).shred();
         });
 
         it("should revert when calling: transferBeneficiaryWithSig", async () => {
