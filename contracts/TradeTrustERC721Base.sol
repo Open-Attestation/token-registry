@@ -84,12 +84,6 @@ abstract contract TradeTrustERC721Base is
     return titleEscrow;
   }
 
-  function isSurrendered(uint256 tokenId) public view returns (bool) {
-    require(_exists(tokenId), "Registry: Invalid token");
-    address owner = ownerOf(tokenId);
-    return owner == address(this) || owner == BURN_ADDRESS;
-  }
-
   function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
     _pause();
   }

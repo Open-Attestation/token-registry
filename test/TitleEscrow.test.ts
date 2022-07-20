@@ -694,9 +694,10 @@ describe("Title Escrow", async () => {
 
       it("should allow a beneficiary who is also a holder to surrender", async () => {
         await titleEscrowOwnerContract.connect(beneficiary).surrender();
-        const res = await registryContract.isSurrendered(tokenId);
 
-        expect(res).to.be.true;
+        const res = await registryContract.ownerOf(tokenId);
+
+        expect(res).to.equal(registryContract.address);
       });
 
       it("should not allow surrendering when title escrow is not holding token", async () => {

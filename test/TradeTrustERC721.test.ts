@@ -361,44 +361,39 @@ describe("TradeTrustERC721", async () => {
     });
 
     describe("Surrender Status", () => {
-      it("should return false for an unsurrendered token", async () => {
-        const res = await registryContract.isSurrendered(tokenId);
+      // These are just extra cases to test how the surrender status will be checked in an app
+      it("should not have registry and burn address as owner for an unsurrendered token", async () => {
+        const owner = await registryContract.ownerOf(tokenId);
 
-        expect(res).to.be.false;
+        expect(owner).to.not.equal(registryContract.address);
+        expect(owner).to.not.equal(defaultAddress.Burn);
       });
 
-      it("should return true for a surrendered token", async () => {
+      it("should have registry as owner for a surrendered token", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender();
 
-        const res = await registryContract.isSurrendered(tokenId);
+        const owner = await registryContract.ownerOf(tokenId);
 
-        expect(res).to.be.true;
+        expect(owner).to.equal(registryContract.address);
       });
 
-      it("should return true for an accepted token", async () => {
+      it("should have burn address as owner for an accepted token", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender();
         await registryContract.burn(tokenId);
 
-        const res = await registryContract.isSurrendered(tokenId);
+        const owner = await registryContract.ownerOf(tokenId);
 
-        expect(res).to.be.true;
+        expect(owner).to.equal(defaultAddress.Burn);
       });
 
-      it("should return false for a restored token", async () => {
+      it("should not have registry and burn address as owner for a restored token", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender();
         await registryContract.restore(tokenId);
 
-        const res = await registryContract.isSurrendered(tokenId);
+        const owner = await registryContract.ownerOf(tokenId);
 
-        expect(res).to.be.false;
-      });
-
-      it("should revert if a Invalid token", async () => {
-        const invalidTokenId = faker.datatype.hexaDecimal(64);
-
-        const tx = registryContract.isSurrendered(invalidTokenId);
-
-        await expect(tx).to.be.revertedWith("Registry: Invalid token");
+        expect(owner).to.not.equal(registryContract.address);
+        expect(owner).to.not.equal(defaultAddress.Burn);
       });
     });
   });
