@@ -108,7 +108,7 @@ describe("TDocDeployer", async () => {
       it("should not allow adding an already added implementation", async () => {
         const tx = deployerContractAsOwner.addImplementation(implContract.address, fakeTitleEscrowFactory);
 
-        await expect(tx).to.be.revertedWith("TDocDeployer: Already added");
+        await expect(tx).to.be.revertedWithCustomError(deployerContractAsNonOwner, "ImplementationAlreadyAdded");
       });
 
       it("should not allow non-owner to add implementation", async () => {
@@ -141,7 +141,7 @@ describe("TDocDeployer", async () => {
 
         const tx = deployerContractAsOwner.removeImplementation(fakeImplContract);
 
-        await expect(tx).to.be.revertedWith("TDocDeployer: Invalid implementation");
+        await expect(tx).to.be.revertedWithCustomError(deployerContractAsNonOwner, "InvalidImplementation");
       });
     });
   });
@@ -168,7 +168,10 @@ describe("TDocDeployer", async () => {
       });
       const tx = deployerContractAsNonOwner.deploy(fakeAddress, initParams);
 
-      await expect(tx).to.be.revertedWith("TDocDeployer: Not whitelisted");
+      await expect(tx).to.be.revertedWithCustomError(
+        deployerContractAsNonOwner,
+        "UnsupportedImplementationContractAddress"
+      );
     });
 
     it("should revert when registry admin is zero address", async () => {
@@ -179,7 +182,7 @@ describe("TDocDeployer", async () => {
       });
       const tx = deployerContractAsNonOwner.deploy(implContract.address, initParams);
 
-      await expect(tx).to.be.revertedWith("TDocDeployer: Init fail");
+      await expect(tx).to.be.revertedWithCustomError(deployerContractAsNonOwner, "ImplementationInitializationFailure");
     });
 
     describe("Deploy", () => {
