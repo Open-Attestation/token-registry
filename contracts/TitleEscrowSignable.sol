@@ -5,10 +5,11 @@ import "./TitleEscrow.sol";
 import "./utils/SigHelper.sol";
 import { BeneficiaryTransferEndorsement } from "./lib/TitleEscrowStructs.sol";
 import "./interfaces/ITitleEscrowSignable.sol";
+import "./interfaces/TitleEscrowSignableErrors.sol";
 
 /// @notice This Title Escrow allows the holder to perform an off-chain endorsement of beneficiary transfers
 /// @custom:experimental Note that this is currently an experimental feature. See readme for usage details.
-contract TitleEscrowSignable is SigHelper, TitleEscrow, ITitleEscrowSignable {
+contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableErrors, ITitleEscrowSignable {
   string public constant name = "TradeTrust Title Escrow";
 
   // BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)
@@ -37,22 +38,31 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, ITitleEscrowSignable {
     onlyBeneficiary
     whenHoldingToken
   {
-    require(endorsement.deadline >= block.timestamp, "TE: Expired");
-    require(
-      endorsement.nominee != address(0) &&
-        endorsement.nominee != beneficiary &&
-        endorsement.holder == holder &&
-        endorsement.tokenId == tokenId &&
-        endorsement.registry == registry,
-      "TE: Invalid endorsement"
-    );
-
-    if (beneficiaryNominee != address(0)) {
-      require(endorsement.nominee == beneficiaryNominee, "TE: Nominee mismatch");
+    if (endorsement.deadline < block.timestamp) {
+      revert SignatureExpired(block.timestamp);
+    }
+    if (
+      endorsement.nominee == address(0) ||
+      endorsement.nominee == beneficiary ||
+      endorsement.holder != holder ||
+      endorsement.tokenId != tokenId ||
+      endorsement.registry != registry
+    ) {
+      revert InvalidEndorsement();
     }
 
-    require(endorsement.beneficiary == beneficiary, "TE: Beneficiary mismatch");
-    require(_validateSig(_hash(endorsement), holder, sig), "TE: Invalid signature");
+    if (beneficiaryNominee != address(0)) {
+      if (endorsement.nominee != beneficiaryNominee) {
+        revert MismatchedEndorsedNomineeAndOnChainNominee(endorsement.nominee, beneficiaryNominee);
+      }
+    }
+
+    if (endorsement.beneficiary != beneficiary) {
+      revert MismatchedEndorsedBeneficiaryAndCurrentBeneficiary(endorsement.beneficiary, beneficiary);
+    }
+    if (!_validateSig(_hash(endorsement), holder, sig)) {
+      revert InvalidSignature();
+    }
 
     ++nonces[holder];
     _setBeneficiary(endorsement.nominee);
@@ -65,7 +75,9 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, ITitleEscrowSignable {
     whenNotPaused
     whenActive
   {
-    require(msg.sender == endorsement.holder, "TE: Caller not endorser");
+    if (msg.sender != endorsement.holder) {
+      revert CallerNotEndorser();
+    }
 
     bytes32 hash = _hash(endorsement);
     _cancelHash(hash);
