@@ -8,7 +8,7 @@ import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustERC721.sol";
 import "./interfaces/TitleEscrowErrors.sol";
 
-contract TitleEscrow is IERC165, TitleEscrowErrors, ITitleEscrow, Initializable {
+contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow {
   address public override registry;
   uint256 public override tokenId;
 

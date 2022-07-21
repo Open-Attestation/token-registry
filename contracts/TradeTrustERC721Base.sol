@@ -10,11 +10,11 @@ import "./interfaces/ITitleEscrowFactory.sol";
 import "./interfaces/TradeTrustTokenErrors.sol";
 
 abstract contract TradeTrustERC721Base is
-  TradeTrustTokenErrors,
-  ITradeTrustERC721,
   RegistryAccess,
   PausableUpgradeable,
-  ERC721Upgradeable
+  ERC721Upgradeable,
+  TradeTrustTokenErrors,
+  ITradeTrustERC721
 {
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
