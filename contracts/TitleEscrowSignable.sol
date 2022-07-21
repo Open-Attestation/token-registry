@@ -51,9 +51,9 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
       revert InvalidEndorsement();
     }
 
-    if (beneficiaryNominee != address(0)) {
-      if (endorsement.nominee != beneficiaryNominee) {
-        revert MismatchedEndorsedNomineeAndOnChainNominee(endorsement.nominee, beneficiaryNominee);
+    if (nominee != address(0)) {
+      if (endorsement.nominee != nominee) {
+        revert MismatchedEndorsedNomineeAndOnChainNominee(endorsement.nominee, nominee);
       }
     }
 

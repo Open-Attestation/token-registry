@@ -23,13 +23,13 @@ interface ITitleEscrow is IERC721Receiver {
   event Surrender(address indexed surrenderer, address registry, uint256 tokenId);
   event Shred(address registry, uint256 tokenId);
 
-  function nominate(address beneficiaryNominee) external;
+  function nominate(address nominee) external;
 
-  function transferBeneficiary(address beneficiaryNominee) external;
+  function transferBeneficiary(address nominee) external;
 
   function transferHolder(address newHolder) external;
 
-  function transferOwners(address beneficiaryNominee, address newHolder) external;
+  function transferOwners(address nominee, address newHolder) external;
 
   function beneficiary() external view returns (address);
 
@@ -37,7 +37,7 @@ interface ITitleEscrow is IERC721Receiver {
 
   function active() external view returns (bool);
 
-  function beneficiaryNominee() external view returns (address);
+  function nominee() external view returns (address);
 
   function registry() external view returns (address);
 

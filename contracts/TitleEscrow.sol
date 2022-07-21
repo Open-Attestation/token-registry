@@ -15,7 +15,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   address public override beneficiary;
   address public override holder;
 
-  address public override beneficiaryNominee;
+  address public override nominee;
 
   bool public override active;
 
@@ -101,7 +101,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
   }
 
-  function nominate(address _beneficiaryNominee)
+  function nominate(address _nominee)
     public
     virtual
     override
@@ -110,17 +110,17 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     onlyBeneficiary
     whenHoldingToken
   {
-    if (beneficiary == _beneficiaryNominee) {
+    if (beneficiary == _nominee) {
       revert TargetNomineeAlreadyBeneficiary();
     }
-    if (beneficiaryNominee == _beneficiaryNominee) {
+    if (nominee == _nominee) {
       revert NomineeAlreadyNominated();
     }
 
-    _setBeneficiaryNominee(_beneficiaryNominee);
+    _setNominee(_nominee);
   }
 
-  function transferBeneficiary(address _beneficiaryNominee)
+  function transferBeneficiary(address _nominee)
     public
     virtual
     override
@@ -129,14 +129,14 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     onlyHolder
     whenHoldingToken
   {
-    if (_beneficiaryNominee == address(0)) {
+    if (_nominee == address(0)) {
       revert InvalidTransferToZeroAddress();
     }
-    if (!(beneficiary == holder || beneficiaryNominee == _beneficiaryNominee)) {
+    if (!(beneficiary == holder || nominee == _nominee)) {
       revert InvalidNominee();
     }
 
-    _setBeneficiary(_beneficiaryNominee);
+    _setBeneficiary(_nominee);
   }
 
   function transferHolder(address newHolder)
@@ -158,13 +158,13 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _setHolder(newHolder);
   }
 
-  function transferOwners(address _beneficiaryNominee, address newHolder) external virtual override {
-    transferBeneficiary(_beneficiaryNominee);
+  function transferOwners(address _nominee, address newHolder) external virtual override {
+    transferBeneficiary(_nominee);
     transferHolder(newHolder);
   }
 
   function surrender() external virtual override whenNotPaused whenActive onlyBeneficiary onlyHolder whenHoldingToken {
-    _setBeneficiaryNominee(address(0));
+    _setNominee(address(0));
     ITradeTrustERC721(registry).safeTransferFrom(address(this), registry, tokenId);
 
     emit Surrender(msg.sender, registry, tokenId);
@@ -193,14 +193,14 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     return ITradeTrustERC721(registry).ownerOf(tokenId) == address(this);
   }
 
-  function _setBeneficiaryNominee(address newBeneficiaryNominee) internal virtual {
-    emit Nomination(beneficiaryNominee, newBeneficiaryNominee, registry, tokenId);
-    beneficiaryNominee = newBeneficiaryNominee;
+  function _setNominee(address newNominee) internal virtual {
+    emit Nomination(nominee, newNominee, registry, tokenId);
+    nominee = newNominee;
   }
 
   function _setBeneficiary(address newBeneficiary) internal virtual {
     emit BeneficiaryTransfer(beneficiary, newBeneficiary, registry, tokenId);
-    _setBeneficiaryNominee(address(0));
+    _setNominee(address(0));
     beneficiary = newBeneficiary;
   }
 
