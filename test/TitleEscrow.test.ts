@@ -141,9 +141,7 @@ describe("Title Escrow", async () => {
 
         const tx = titleEscrowContract.onERC721Received(fakeAddress, fakeAddress, wrongTokenId, "0x00");
 
-        await expect(tx)
-          .to.be.revertedWithCustomError(titleEscrowContract, "UnknownReceivingTokenId")
-          .withArgs(wrongTokenId);
+        await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "InvalidTokenId").withArgs(wrongTokenId);
       });
 
       it("should only be able to receive from designated registry", async () => {
@@ -154,7 +152,7 @@ describe("Title Escrow", async () => {
           .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x00");
 
         await expect(tx)
-          .to.be.revertedWithCustomError(titleEscrowContract, "UnknownRegistry")
+          .to.be.revertedWithCustomError(titleEscrowContract, "InvalidRegistry")
           .withArgs(fakeWrongRegistry.address);
       });
 
@@ -587,10 +585,7 @@ describe("Title Escrow", async () => {
 
           const tx = titleEscrowOwnerContract.connect(users.holder).transferBeneficiary(fakeNonNominee);
 
-          await expect(tx).to.be.revertedWithCustomError(
-            titleEscrowOwnerContract,
-            "TargetBeneficiaryNomineeNotNominated"
-          );
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "InvalidNominee");
         });
 
         it("should reset nominated beneficiary", async () => {
@@ -843,7 +838,7 @@ describe("Title Escrow", async () => {
 
         const tx = titleEscrowOwnerContract.connect(users.beneficiary).shred();
 
-        await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "UnknownRegistry");
+        await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "InvalidRegistry");
       });
 
       it("should reset nominated beneficiary", async () => {

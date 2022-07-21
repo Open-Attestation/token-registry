@@ -78,10 +78,10 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     bytes calldata data
   ) external virtual override whenNotPaused whenActive returns (bytes4) {
     if (_tokenId != tokenId) {
-      revert UnknownReceivingTokenId(_tokenId);
+      revert InvalidTokenId(_tokenId);
     }
     if (msg.sender != address(registry)) {
-      revert UnknownRegistry(msg.sender);
+      revert InvalidRegistry(msg.sender);
     }
     bool isMinting = false;
     if (beneficiary == address(0) || holder == address(0)) {
@@ -133,7 +133,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
       revert InvalidTransferToZeroAddress();
     }
     if (!(beneficiary == holder || beneficiaryNominee == _beneficiaryNominee)) {
-      revert TargetBeneficiaryNomineeNotNominated();
+      revert InvalidNominee();
     }
 
     _setBeneficiary(_beneficiaryNominee);
@@ -175,7 +175,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
       revert TokenNotSurrendered();
     }
     if (msg.sender != registry) {
-      revert UnknownRegistry(msg.sender);
+      revert InvalidRegistry(msg.sender);
     }
 
     _setBeneficiary(address(0));

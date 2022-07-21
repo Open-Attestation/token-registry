@@ -12,9 +12,9 @@ interface TitleEscrowErrors {
 
   error InactiveTitleEscrow();
 
-  error UnknownReceivingTokenId(uint256 tokenId);
+  error InvalidTokenId(uint256 tokenId);
 
-  error UnknownRegistry(address registry);
+  error InvalidRegistry(address registry);
 
   error EmptyReceivingData();
 
@@ -26,7 +26,7 @@ interface TitleEscrowErrors {
 
   error InvalidTransferToZeroAddress();
 
-  error TargetBeneficiaryNomineeNotNominated();
+  error InvalidNominee();
 
   error RecipientAlreadyHolder();
 
