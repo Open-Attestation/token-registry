@@ -194,43 +194,43 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
           const fakeAddress = faker.finance.ethereumAddress();
           const tx = titleEscrowContract.onERC721Received(fakeAddress, fakeAddress, tokenId, "0x00");
 
-          expect(tx).to.be.revertedWith("TE: Registry paused");
+          expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow surrendering", async () => {
           const tx = titleEscrowContract.connect(users.beneficiary).surrender();
 
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow shredding", async () => {
           const tx = titleEscrowContract.shred();
 
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow nomination of beneficiary", async () => {
           const tx = titleEscrowContract.nominate(users.beneficiary.address);
 
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow transfer of beneficiary", async () => {
           const tx = titleEscrowContract.transferBeneficiary(users.beneficiary.address);
 
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow transfer holder", async () => {
           const tx = titleEscrowContract.transferHolder(users.holder.address);
 
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow endorse beneficiary and transfer holder", async () => {
           const tx = titleEscrowContract.transferOwners(users.beneficiary.address, users.holder.address);
 
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
       });
     });

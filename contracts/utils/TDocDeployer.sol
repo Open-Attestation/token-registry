@@ -4,8 +4,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "../interfaces/TDocDeployerErrors.sol";
 
-contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable {
+contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors {
   event Deployment(
     address indexed deployed,
     address indexed implementation,
@@ -27,24 +28,32 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable {
 
   function deploy(address implementation, bytes memory params) external returns (address) {
     address titleEscrowFactory = implementations[implementation];
-    require(titleEscrowFactory != address(0), "TDocDeployer: Not whitelisted");
+    if (titleEscrowFactory == address(0)) {
+      revert UnsupportedImplementationContractAddress();
+    }
 
     address deployed = ClonesUpgradeable.clone(implementation);
     bytes memory payload = abi.encodeWithSignature("initialize(bytes)", abi.encode(params, titleEscrowFactory));
     (bool success, ) = address(deployed).call(payload);
-    require(success, "TDocDeployer: Init fail");
+    if (!success) {
+      revert ImplementationInitializationFailure(payload);
+    }
 
     emit Deployment(deployed, implementation, msg.sender, titleEscrowFactory, params);
     return deployed;
   }
 
   function addImplementation(address implementation, address titleEscrowFactory) external onlyOwner {
-    require(implementations[implementation] == address(0), "TDocDeployer: Already added");
+    if (implementations[implementation] != address(0)) {
+      revert ImplementationAlreadyAdded();
+    }
     implementations[implementation] = titleEscrowFactory;
   }
 
   function removeImplementation(address implementation) external onlyOwner {
-    require(implementations[implementation] != address(0), "TDocDeployer: Invalid implementation");
+    if (implementations[implementation] == address(0)) {
+      revert InvalidImplementation();
+    }
     delete implementations[implementation];
   }
 }

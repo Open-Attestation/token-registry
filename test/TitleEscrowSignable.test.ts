@@ -184,13 +184,13 @@ describe("TitleEscrowSignable", async () => {
         it("should revert when calling: transferBeneficiaryWithSig", async () => {
           const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(fakeEndorsement, fakeSig);
 
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "RegistryContractPaused");
         });
 
         it("should revert when calling: cancelBeneficiaryTransfer", async () => {
           const tx = titleEscrowContractAsBeneficiary.cancelBeneficiaryTransfer(fakeEndorsement);
 
-          await expect(tx).to.be.revertedWith("TE: Registry paused");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "RegistryContractPaused");
         });
       });
 
@@ -203,13 +203,13 @@ describe("TitleEscrowSignable", async () => {
         it("should revert when calling: transferBeneficiaryWithSig", async () => {
           const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(fakeEndorsement, fakeSig);
 
-          await expect(tx).to.be.revertedWith("TE: Inactive");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InactiveTitleEscrow");
         });
 
         it("should revert when calling: cancelBeneficiaryTransfer", async () => {
           const tx = titleEscrowContractAsBeneficiary.cancelBeneficiaryTransfer(fakeEndorsement);
 
-          await expect(tx).to.be.revertedWith("TE: Inactive");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InactiveTitleEscrow");
         });
       });
 
@@ -221,7 +221,10 @@ describe("TitleEscrowSignable", async () => {
         it("should revert when calling: transferBeneficiaryWithSig", async () => {
           const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(fakeEndorsement, fakeSig);
 
-          await expect(tx).to.be.revertedWith("TE: Not holding token");
+          await expect(tx).to.be.revertedWithCustomError(
+            titleEscrowContractAsBeneficiary,
+            "TitleEscrowNotHoldingToken"
+          );
         });
 
         it("should call cancelBeneficiaryTransfer successfully", async () => {
@@ -285,7 +288,7 @@ describe("TitleEscrowSignable", async () => {
           it("should revert when caller is not a beneficiary", async () => {
             const tx = titleEscrowContract.connect(users.holder).transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Not beneficiary");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "CallerNotBeneficiary");
           });
 
           it("should revert if endorsed nominee is zero address", async () => {
@@ -293,7 +296,7 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Invalid endorsement");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidEndorsement");
           });
 
           it("should revert if endorsed nominee is same as beneficiary address", async () => {
@@ -301,7 +304,7 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Invalid endorsement");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidEndorsement");
           });
 
           it("should revert if signer is not holder", async () => {
@@ -309,7 +312,7 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Invalid endorsement");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidEndorsement");
           });
 
           it("should revert if endorsed token ID is in correct", async () => {
@@ -319,7 +322,7 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Invalid endorsement");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidEndorsement");
           });
 
           it("should revert if endorsed registry is in correct", async () => {
@@ -329,7 +332,7 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Invalid endorsement");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidEndorsement");
           });
 
           it("should revert when on-chain nominee is different from endorsed nominee", async () => {
@@ -340,7 +343,12 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Nominee mismatch");
+            await expect(tx)
+              .to.be.revertedWithCustomError(
+                titleEscrowContractAsBeneficiary,
+                "MismatchedEndorsedNomineeAndOnChainNominee"
+              )
+              .withArgs(endorsement.nominee, onChainNominee);
           });
 
           it("should revert if beneficiary in endorsement is different from current beneficiary", async () => {
@@ -348,7 +356,12 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Beneficiary mismatch");
+            await expect(tx)
+              .to.be.revertedWithCustomError(
+                titleEscrowContractAsBeneficiary,
+                "MismatchedEndorsedBeneficiaryAndCurrentBeneficiary"
+              )
+              .withArgs(endorsement.beneficiary, users.beneficiary.address);
           });
 
           it("should revert if signature is expired", async () => {
@@ -358,7 +371,7 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Expired");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "SignatureExpired");
           });
 
           it("should revert if nonce is incorrect", async () => {
@@ -368,7 +381,7 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("TE: Invalid signature");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidSignature");
           });
         });
 
@@ -407,7 +420,10 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWith("Cancelled");
+            await expect(tx).to.be.revertedWithCustomError(
+              titleEscrowContractAsBeneficiary,
+              "SignatureAlreadyCancelled"
+            );
           });
         });
 
@@ -423,7 +439,7 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContract.connect(invalidHolder).cancelBeneficiaryTransfer(endorsement);
 
-            await expect(tx).to.be.revertedWith("TE: Caller not endorser");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "CallerNotEndorser");
           });
 
           it("should add correct hash to cancel", async () => {
@@ -480,7 +496,7 @@ describe("TitleEscrowSignable", async () => {
 
           const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-          await expect(tx).to.be.revertedWith("TE: Invalid signature");
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidSignature");
         });
       });
     });

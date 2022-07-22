@@ -7,8 +7,15 @@ import "./access/RegistryAccess.sol";
 import "./interfaces/ITradeTrustERC721.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITitleEscrowFactory.sol";
+import "./interfaces/TradeTrustTokenErrors.sol";
 
-abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, PausableUpgradeable, ERC721Upgradeable {
+abstract contract TradeTrustERC721Base is
+  RegistryAccess,
+  PausableUpgradeable,
+  ERC721Upgradeable,
+  TradeTrustTokenErrors,
+  ITradeTrustERC721
+{
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
   function __TradeTrustERC721Base_init(
@@ -56,26 +63,25 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     address holder,
     uint256 tokenId
   ) public virtual override whenNotPaused onlyRole(MINTER_ROLE) returns (address) {
-    require(!_exists(tokenId), "Registry: Token exists");
+    if (_exists(tokenId)) {
+      revert TokenExists();
+    }
 
     return _mintTitle(beneficiary, holder, tokenId);
   }
 
   function restore(uint256 tokenId) external override whenNotPaused onlyRole(RESTORER_ROLE) returns (address) {
-    require(_exists(tokenId), "Registry: Invalid token");
-    require(isSurrendered(tokenId), "Registry: Not surrendered");
-    require(ownerOf(tokenId) != BURN_ADDRESS, "Registry: Token burnt");
+    if (!_exists(tokenId)) {
+      revert InvalidTokenId();
+    }
+    if (ownerOf(tokenId) != address(this)) {
+      revert TokenNotSurrendered();
+    }
 
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
     _registryTransferTo(titleEscrow, tokenId);
 
     return titleEscrow;
-  }
-
-  function isSurrendered(uint256 tokenId) public view returns (bool) {
-    require(_exists(tokenId), "Registry: Invalid token");
-    address owner = ownerOf(tokenId);
-    return owner == address(this) || owner == BURN_ADDRESS;
   }
 
   function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -91,8 +97,8 @@ abstract contract TradeTrustERC721Base is ITradeTrustERC721, RegistryAccess, Pau
     address to,
     uint256 tokenId
   ) internal virtual override whenNotPaused {
-    if (to == BURN_ADDRESS) {
-      require(isSurrendered(tokenId), "Registry: Token unsurrendered");
+    if (to == BURN_ADDRESS && ownerOf(tokenId) != address(this)) {
+      revert TokenNotSurrendered();
     }
     super._beforeTokenTransfer(from, to, tokenId);
   }
