@@ -134,6 +134,20 @@ Example:
 await connectedEscrow.surrender();
 ```
 
+#### Accessing the Current Owners
+
+The addresses of the current owners can be retrieved from the `beneficiary`, `holder` and `nominee` methods.
+
+Example:
+
+```ts
+const currentBeneficiary = await connectedEscrow.beneficiary();
+
+const currentHolder = await connectedEscrow.holder();
+
+const nominatedBeneficiary = await connectedEscrow.nominee();
+```
+
 ### Title Escrow Signable (Experimental)
 
 This is similar to the [Title Escrow](#title-escrow) with the additional support for off-chain nomination and endorsement of beneficiary nominees. The on-chain nominee will take precedence.
