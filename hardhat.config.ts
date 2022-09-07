@@ -105,6 +105,10 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: `https://kovan.infura.io/v3/${INFURA_APP_ID}`,
     },
+    sepolia: {
+      ...networkConfig,
+      url: "https://rpc.sepolia.org",
+    },
     /**
      * Polygon
      */
