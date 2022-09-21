@@ -12,13 +12,13 @@ const ChainId = {
 export const contractAddress = {
   TitleEscrowFactory: {
     [ChainId.Ethereum]: undefined,
-    [ChainId.Rinkeby]: "0x878A327daA390Bc602Ae259D3A374610356b6485",
-    [ChainId.Ropsten]: "0x878A327daA390Bc602Ae259D3A374610356b6485",
+    [ChainId.Rinkeby]: "0x626E5A7043270C99C37795C1D0F85F28b3220b1C",
+    [ChainId.Ropsten]: "0x021C1e895e39D53Cf87722211FF0a824d9D73c60",
     [ChainId.Goerli]: "0x878A327daA390Bc602Ae259D3A374610356b6485",
     [ChainId.Sepolia]: "0x878A327daA390Bc602Ae259D3A374610356b6485",
     [ChainId.Kovan]: undefined,
     [ChainId.Polygon]: undefined,
-    [ChainId.PolygonMumbai]: "0x878A327daA390Bc602Ae259D3A374610356b6485",
+    [ChainId.PolygonMumbai]: "0xBf6aF71F523aD7A0531536eB33972E6fCA5aaA53",
   },
   Deployer: {
     [ChainId.Ethereum]: undefined,
