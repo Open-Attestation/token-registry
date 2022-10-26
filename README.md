@@ -6,8 +6,8 @@
 The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
 
 > 🧪 **Join the Beta!**
-> 
->If you are interested in using and helping us at testing the new features of transferable records, please consider trying out our [beta](https://github.com/Open-Attestation/token-registry/tree/beta) branch. We'd love to hear your feedback!😊
+>
+> If you are interested in using and helping us at testing the new features of transferable records, please consider trying out our [beta](https://github.com/Open-Attestation/token-registry/tree/beta) branch. We'd love to hear your feedback!😊
 
 ## Installation
 
@@ -85,7 +85,7 @@ import { Wallet, providers, getDefaultProvider } from "ethers";
 
 // Providers
 const mainnetProvider = getDefaultProvider();
-const ropstenProvider = getDefaultProvider("ropsten");
+const goerliProvider = getDefaultProvider("goerli");
 const metamaskProvider = new providers.Web3Provider(web3.currentProvider); // Will change network automatically
 
 // Signer
@@ -112,4 +112,5 @@ This repository's development framework uses [HardHat](https://hardhat.org/getti
 Tests are run using `npm run test`, more development tasks can be found in the package.json scripts.
 
 ## Notes
-* The contracts have not gone through formal audits yet. Please use them at your own discretion. 
+
+- The contracts have not gone through formal audits yet. Please use them at your own discretion.
