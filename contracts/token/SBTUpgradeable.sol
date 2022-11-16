@@ -17,7 +17,13 @@ import "./extensions/IERC721MetadataUpgradeable.sol";
  * @dev Implementation of Soulbound Token based on the https://eips.ethereum.org/EIPS/eip-721[ERC721]
  * Non-Fungible Token in OpenZeppelin.
  */
-contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable, ISBTUpgradeable, IERC721MetadataUpgradeable {
+contract SBTUpgradeable is
+  Initializable,
+  ContextUpgradeable,
+  ERC165Upgradeable,
+  ISBTUpgradeable,
+  IERC721MetadataUpgradeable
+{
   using AddressUpgradeable for address;
   using StringsUpgradeable for uint256;
 
@@ -35,7 +41,7 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
-     */
+   */
   function __SBT_init(string memory name_, string memory symbol_) internal onlyInitializing {
     __SBT_init_unchained(name_, symbol_);
   }
@@ -47,17 +53,23 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev See {IERC165-supportsInterface}.
-     */
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165Upgradeable, IERC165Upgradeable) returns (bool) {
+   */
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(ERC165Upgradeable, IERC165Upgradeable)
+    returns (bool)
+  {
     return
-    interfaceId == type(ISBTUpgradeable).interfaceId ||
-    interfaceId == type(IERC721MetadataUpgradeable).interfaceId ||
-    super.supportsInterface(interfaceId);
+      interfaceId == type(ISBTUpgradeable).interfaceId ||
+      interfaceId == type(IERC721MetadataUpgradeable).interfaceId ||
+      super.supportsInterface(interfaceId);
   }
 
   /**
    * @dev See {IERC721-balanceOf}.
-     */
+   */
   function balanceOf(address owner) public view virtual override returns (uint256) {
     require(owner != address(0), "ERC721: balance query for the zero address");
     return _balances[owner];
@@ -65,7 +77,7 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev See {IERC721-ownerOf}.
-     */
+   */
   function ownerOf(uint256 tokenId) public view virtual override returns (address) {
     address owner = _owners[tokenId];
     require(owner != address(0), "ERC721: owner query for nonexistent token");
@@ -74,21 +86,21 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev See {IERC721Metadata-name}.
-     */
+   */
   function name() public view virtual override returns (string memory) {
     return _name;
   }
 
   /**
    * @dev See {IERC721Metadata-symbol}.
-     */
+   */
   function symbol() public view virtual override returns (string memory) {
     return _symbol;
   }
 
   /**
    * @dev See {IERC721Metadata-tokenURI}.
-     */
+   */
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
@@ -98,16 +110,16 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
-     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
-     * by default, can be overriden in child contracts.
-     */
+   * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+   * by default, can be overriden in child contracts.
+   */
   function _baseURI() internal view virtual returns (string memory) {
     return "";
   }
 
   /**
    * @dev See {IERC721-safeTransferFrom}.
-     */
+   */
   function transferFrom(
     address from,
     address to,
@@ -119,22 +131,22 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
-     * are aware of the ERC721 protocol to prevent tokens from being forever locked.
-     *
-     * `_data` is additional data, it has no specified format and it is sent in call to `to`.
-     *
-     * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.
-     * implement alternative mechanisms to perform token transfer, such as signature-based.
-     *
-     * Requirements:
-     *
-     * - `from` cannot be the zero address.
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must exist and be owned by `from`.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
+   * are aware of the ERC721 protocol to prevent tokens from being forever locked.
+   *
+   * `_data` is additional data, it has no specified format and it is sent in call to `to`.
+   *
+   * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.
+   * implement alternative mechanisms to perform token transfer, such as signature-based.
+   *
+   * Requirements:
+   *
+   * - `from` cannot be the zero address.
+   * - `to` cannot be the zero address.
+   * - `tokenId` token must exist and be owned by `from`.
+   * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
+   *
+   * Emits a {Transfer} event.
+   */
   function _safeTransfer(
     address from,
     address to,
@@ -147,23 +159,23 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Returns whether `tokenId` exists.
-     *
-     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
-     *
-     * Tokens start existing when they are minted (`_mint`),
-     * and stop existing when they are burned (`_burn`).
-     */
+   *
+   * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
+   *
+   * Tokens start existing when they are minted (`_mint`),
+   * and stop existing when they are burned (`_burn`).
+   */
   function _exists(uint256 tokenId) internal view virtual returns (bool) {
     return _owners[tokenId] != address(0);
   }
 
   /**
    * @dev Returns whether `spender` is allowed to manage `tokenId`.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     */
+   *
+   * Requirements:
+   *
+   * - `tokenId` must exist.
+   */
   function _isOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
     require(_exists(tokenId), "ERC721: operator query for nonexistent token");
     address owner = SBTUpgradeable.ownerOf(tokenId);
@@ -172,22 +184,22 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Safely mints `tokenId` and transfers it to `to`.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must not exist.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
+   *
+   * Requirements:
+   *
+   * - `tokenId` must not exist.
+   * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
+   *
+   * Emits a {Transfer} event.
+   */
   function _safeMint(address to, uint256 tokenId) internal virtual {
     _safeMint(to, tokenId, "");
   }
 
   /**
    * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
-     * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
-     */
+   * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
+   */
   function _safeMint(
     address to,
     uint256 tokenId,
@@ -202,16 +214,16 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Mints `tokenId` and transfers it to `to`.
-     *
-     * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
-     *
-     * Requirements:
-     *
-     * - `tokenId` must not exist.
-     * - `to` cannot be the zero address.
-     *
-     * Emits a {Transfer} event.
-     */
+   *
+   * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
+   *
+   * Requirements:
+   *
+   * - `tokenId` must not exist.
+   * - `to` cannot be the zero address.
+   *
+   * Emits a {Transfer} event.
+   */
   function _mint(address to, uint256 tokenId) internal virtual {
     require(to != address(0), "ERC721: mint to the zero address");
     require(!_exists(tokenId), "ERC721: token already minted");
@@ -228,14 +240,14 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Destroys `tokenId`.
-     * The approval is cleared when the token is burned.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     *
-     * Emits a {Transfer} event.
-     */
+   * The approval is cleared when the token is burned.
+   *
+   * Requirements:
+   *
+   * - `tokenId` must exist.
+   *
+   * Emits a {Transfer} event.
+   */
   function _burn(uint256 tokenId) internal virtual {
     address owner = SBTUpgradeable.ownerOf(tokenId);
 
@@ -251,15 +263,15 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Transfers `tokenId` from `from` to `to`.
-     *  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must be owned by `from`.
-     *
-     * Emits a {Transfer} event.
-     */
+   *  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.
+   *
+   * Requirements:
+   *
+   * - `to` cannot be the zero address.
+   * - `tokenId` token must be owned by `from`.
+   *
+   * Emits a {Transfer} event.
+   */
   function _transfer(
     address from,
     address to,
@@ -281,14 +293,14 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
-     * The call is not executed if the target address is not a contract.
-     *
-     * @param from address representing the previous owner of the given token ID
-     * @param to target address that will receive the tokens
-     * @param tokenId uint256 ID of the token to be transferred
-     * @param _data bytes optional data to send along with the call
-     * @return bool whether the call correctly returned the expected magic value
-     */
+   * The call is not executed if the target address is not a contract.
+   *
+   * @param from address representing the previous owner of the given token ID
+   * @param to target address that will receive the tokens
+   * @param tokenId uint256 ID of the token to be transferred
+   * @param _data bytes optional data to send along with the call
+   * @return bool whether the call correctly returned the expected magic value
+   */
   function _checkOnERC721Received(
     address from,
     address to,
@@ -314,18 +326,18 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Hook that is called before any token transfer. This includes minting
-     * and burning.
-     *
-     * Calling conditions:
-     *
-     * - When `from` and `to` are both non-zero, ``from``'s `tokenId` will be
-     * transferred to `to`.
-     * - When `from` is zero, `tokenId` will be minted for `to`.
-     * - When `to` is zero, ``from``'s `tokenId` will be burned.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
+   * and burning.
+   *
+   * Calling conditions:
+   *
+   * - When `from` and `to` are both non-zero, ``from``'s `tokenId` will be
+   * transferred to `to`.
+   * - When `from` is zero, `tokenId` will be minted for `to`.
+   * - When `to` is zero, ``from``'s `tokenId` will be burned.
+   * - `from` and `to` are never both zero.
+   *
+   * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+   */
   function _beforeTokenTransfer(
     address from,
     address to,
@@ -334,15 +346,15 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev Hook that is called after any transfer of tokens. This includes
-     * minting and burning.
-     *
-     * Calling conditions:
-     *
-     * - when `from` and `to` are both non-zero.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
+   * minting and burning.
+   *
+   * Calling conditions:
+   *
+   * - when `from` and `to` are both non-zero.
+   * - `from` and `to` are never both zero.
+   *
+   * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+   */
   function _afterTokenTransfer(
     address from,
     address to,
@@ -351,8 +363,8 @@ contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable,
 
   /**
    * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
+   * variables without shifting down storage in the inheritance chain.
+   * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+   */
   uint256[44] private __gap;
 }

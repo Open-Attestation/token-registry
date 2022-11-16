@@ -12,7 +12,7 @@ import "./interfaces/TradeTrustTokenErrors.sol";
 abstract contract TradeTrustERC721Base is
   RegistryAccess,
   PausableUpgradeable,
-SBTUpgradeable,
+  SBTUpgradeable,
   TradeTrustTokenErrors,
   ITradeTrustERC721
 {
