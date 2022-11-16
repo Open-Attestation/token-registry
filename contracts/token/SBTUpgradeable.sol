@@ -14,9 +14,8 @@ import "./ISBTUpgradeable.sol";
 import "./extensions/IERC721MetadataUpgradeable.sol";
 
 /**
- * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
- * the Metadata extension, but not including the Enumerable extension, which is available separately as
- * {ERC721Enumerable}.
+ * @dev Implementation of Soulbound Token based on the https://eips.ethereum.org/EIPS/eip-721[ERC721]
+ * Non-Fungible Token in OpenZeppelin.
  */
 contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable, ISBTUpgradeable, IERC721MetadataUpgradeable {
   using AddressUpgradeable for address;
