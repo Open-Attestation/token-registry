@@ -7,5 +7,5 @@ export const contractInterfaceId = {
   TitleEscrowSignable: computeInterfaceId(contractInterfaces.TitleEscrowSignable),
   TitleEscrowFactory: computeInterfaceId(contractInterfaces.TitleEscrowFactory),
   AccessControl: computeInterfaceId(contractInterfaces.AccessControl),
-  ERC721: computeInterfaceId(contractInterfaces.ERC721),
+  ERC721: computeInterfaceId(contractInterfaces.SBT),
 };

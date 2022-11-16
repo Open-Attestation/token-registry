@@ -34,12 +34,6 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
   // Mapping owner address to token count
   mapping(address => uint256) private _balances;
 
-  // Mapping from token ID to approved address
-  mapping(uint256 => address) private _tokenApprovals;
-
-  // Mapping from owner to operator approvals
-  mapping(address => mapping(address => bool)) private _operatorApprovals;
-
   /**
    * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
@@ -113,44 +107,6 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
   }
 
   /**
-   * @dev See {IERC721-approve}.
-     */
-  function approve(address to, uint256 tokenId) public virtual override {
-    address owner = ERC721Upgradeable.ownerOf(tokenId);
-    require(to != owner, "ERC721: approval to current owner");
-
-    require(
-      _msgSender() == owner || isApprovedForAll(owner, _msgSender()),
-      "ERC721: approve caller is not owner nor approved for all"
-    );
-
-    _approve(to, tokenId);
-  }
-
-  /**
-   * @dev See {IERC721-getApproved}.
-     */
-  function getApproved(uint256 tokenId) public view virtual override returns (address) {
-    require(_exists(tokenId), "ERC721: approved query for nonexistent token");
-
-    return _tokenApprovals[tokenId];
-  }
-
-  /**
-   * @dev See {IERC721-setApprovalForAll}.
-     */
-  function setApprovalForAll(address operator, bool approved) public virtual override {
-    _setApprovalForAll(_msgSender(), operator, approved);
-  }
-
-  /**
-   * @dev See {IERC721-isApprovedForAll}.
-     */
-  function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-    return _operatorApprovals[owner][operator];
-  }
-
-  /**
    * @dev See {IERC721-transferFrom}.
      */
   function transferFrom(
@@ -159,7 +115,7 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
     uint256 tokenId
   ) public virtual override {
     //solhint-disable-next-line max-line-length
-    require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
+    require(_isOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
 
     _transfer(from, to, tokenId);
   }
@@ -184,7 +140,7 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
     uint256 tokenId,
     bytes memory _data
   ) public virtual override {
-    require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
+    require(_isOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
     _safeTransfer(from, to, tokenId, _data);
   }
 
@@ -235,10 +191,10 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
      *
      * - `tokenId` must exist.
      */
-  function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
+  function _isOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
     require(_exists(tokenId), "ERC721: operator query for nonexistent token");
     address owner = ERC721Upgradeable.ownerOf(tokenId);
-    return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
+    return spender == owner;
   }
 
   /**
@@ -312,9 +268,6 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
 
     _beforeTokenTransfer(owner, address(0), tokenId);
 
-    // Clear approvals
-    _approve(address(0), tokenId);
-
     _balances[owner] -= 1;
     delete _owners[tokenId];
 
@@ -344,9 +297,6 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
 
     _beforeTokenTransfer(from, to, tokenId);
 
-    // Clear approvals from the previous owner
-    _approve(address(0), tokenId);
-
     _balances[from] -= 1;
     _balances[to] += 1;
     _owners[tokenId] = to;
@@ -354,31 +304,6 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
     emit Transfer(from, to, tokenId);
 
     _afterTokenTransfer(from, to, tokenId);
-  }
-
-  /**
-   * @dev Approve `to` to operate on `tokenId`
-     *
-     * Emits a {Approval} event.
-     */
-  function _approve(address to, uint256 tokenId) internal virtual {
-    _tokenApprovals[tokenId] = to;
-    emit Approval(ERC721Upgradeable.ownerOf(tokenId), to, tokenId);
-  }
-
-  /**
-   * @dev Approve `operator` to operate on all of `owner` tokens
-     *
-     * Emits a {ApprovalForAll} event.
-     */
-  function _setApprovalForAll(
-    address owner,
-    address operator,
-    bool approved
-  ) internal virtual {
-    require(owner != operator, "ERC721: approve to caller");
-    _operatorApprovals[owner][operator] = approved;
-    emit ApprovalForAll(owner, operator, approved);
   }
 
   /**

@@ -6,7 +6,6 @@ import { expect } from ".";
 import { deployTokenFixture } from "./fixtures";
 import {
   getTitleEscrowContract,
-  impersonateAccount,
   getTestUsers,
   TestUsers,
   createDeployFixtureRunner,
@@ -168,17 +167,6 @@ describe("TradeTrustERC721", async () => {
       });
 
       describe("When token has not been surrendered", () => {
-        it("should not allow to burn the token even if registry is approved", async () => {
-          // Note: This is an edge case and not a normal flow.
-          const operator = users.carrier;
-          const titleEscrowSigner = await impersonateAccount({ address: titleEscrowContract.address });
-          await registryContract.connect(titleEscrowSigner).approve(operator.address, tokenId);
-
-          const tx = registryContract.connect(operator).burn(tokenId);
-
-          await expect(tx).to.be.reverted;
-        });
-
         it("should revert when burn token", async () => {
           const tx = registryContractAsAdmin.burn(tokenId);
 
