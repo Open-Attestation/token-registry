@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./lib/token/ERC721Upgradeable.sol";
+import "./token/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./access/RegistryAccess.sol";
 import "./interfaces/ITradeTrustERC721.sol";
