@@ -165,7 +165,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   function surrender() external virtual override whenNotPaused whenActive onlyBeneficiary onlyHolder whenHoldingToken {
     _setNominee(address(0));
-    ITradeTrustERC721(registry).safeTransferFrom(address(this), registry, tokenId);
+    ITradeTrustERC721(registry).transferFrom(address(this), registry, tokenId);
 
     emit Surrender(msg.sender, registry, tokenId);
   }

@@ -107,41 +107,15 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
   }
 
   /**
-   * @dev See {IERC721-transferFrom}.
+   * @dev See {IERC721-safeTransferFrom}.
      */
   function transferFrom(
     address from,
     address to,
     uint256 tokenId
   ) public virtual override {
-    //solhint-disable-next-line max-line-length
     require(_isOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
-
-    _transfer(from, to, tokenId);
-  }
-
-  /**
-   * @dev See {IERC721-safeTransferFrom}.
-     */
-  function safeTransferFrom(
-    address from,
-    address to,
-    uint256 tokenId
-  ) public virtual override {
-    safeTransferFrom(from, to, tokenId, "");
-  }
-
-  /**
-   * @dev See {IERC721-safeTransferFrom}.
-     */
-  function safeTransferFrom(
-    address from,
-    address to,
-    uint256 tokenId,
-    bytes memory _data
-  ) public virtual override {
-    require(_isOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
-    _safeTransfer(from, to, tokenId, _data);
+    _safeTransfer(from, to, tokenId, "");
   }
 
   /**

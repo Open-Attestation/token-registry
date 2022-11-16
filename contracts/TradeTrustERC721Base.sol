@@ -115,7 +115,7 @@ abstract contract TradeTrustERC721Base is
   }
 
   function _registryTransferTo(address to, uint256 tokenId) internal {
-    this.safeTransferFrom(address(this), to, tokenId, "");
+    this.transferFrom(address(this), to, tokenId);
   }
 
   function genesis() public view virtual override returns (uint256);

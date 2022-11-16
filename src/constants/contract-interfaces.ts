@@ -33,11 +33,5 @@ export const contractInterfaces = {
     "revokeRole(bytes32,address)",
     "renounceRole(bytes32,address)",
   ],
-  SBT: [
-    "balanceOf(address)",
-    "ownerOf(uint256)",
-    "transferFrom(address,address,uint256)",
-    "safeTransferFrom(address,address,uint256)",
-    "safeTransferFrom(address,address,uint256,bytes)",
-  ],
+  SBT: ["balanceOf(address)", "ownerOf(uint256)", "transferFrom(address,address,uint256)"],
 };
