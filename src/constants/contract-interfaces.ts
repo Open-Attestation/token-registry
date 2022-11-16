@@ -1,5 +1,5 @@
 export const contractInterfaces = {
-  TradeTrustERC721: [
+  TradeTrustToken: [
     "genesis()",
     "titleEscrowFactory()",
     "burn(uint256)",

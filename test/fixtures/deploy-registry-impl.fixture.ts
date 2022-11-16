@@ -1,9 +1,9 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import { TradeTrustERC721Impl } from "@tradetrust/contracts";
+import { TradeTrustTokenImpl } from "@tradetrust/contracts";
 
-export const deployTradeTrustERC721ImplFixture = async ({ deployer }: { deployer: SignerWithAddress }) => {
-  return (await (await ethers.getContractFactory("TradeTrustERC721Impl"))
+export const deployTradeTrustTokenImplFixture = async ({ deployer }: { deployer: SignerWithAddress }) => {
+  return (await (await ethers.getContractFactory("TradeTrustTokenImpl"))
     .connect(deployer)
-    .deploy()) as TradeTrustERC721Impl;
+    .deploy()) as TradeTrustTokenImpl;
 };

@@ -1,20 +1,20 @@
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import faker from "faker";
-import { TradeTrustERC721Impl } from "@tradetrust/contracts";
+import { TradeTrustTokenImpl } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ContractTransaction } from "ethers";
 import { expect } from ".";
-import { deployTradeTrustERC721ImplFixture } from "./fixtures";
+import { deployTradeTrustTokenImplFixture } from "./fixtures";
 import { encodeInitParams } from "../src/utils";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 import { defaultAddress, roleHash } from "../src/constants";
 import { getTestUsers, TestUsers } from "./helpers";
 
-describe("TradeTrustERC721Impl", async () => {
+describe("TradeTrustTokenImpl", async () => {
   let users: TestUsers;
-  let implContract: TradeTrustERC721Impl;
-  let registryImplContract: TradeTrustERC721Impl;
+  let implContract: TradeTrustTokenImpl;
+  let registryImplContract: TradeTrustTokenImpl;
 
   let registryName: string;
   let registrySymbol: string;
@@ -23,7 +23,7 @@ describe("TradeTrustERC721Impl", async () => {
   let deployer: SignerWithAddress;
   let initialiserSigner: SignerWithAddress;
 
-  let deployFixturesRunner: () => Promise<[TradeTrustERC721Impl, TradeTrustERC721Impl]>;
+  let deployFixturesRunner: () => Promise<[TradeTrustTokenImpl, TradeTrustTokenImpl]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -35,9 +35,9 @@ describe("TradeTrustERC721Impl", async () => {
     registrySymbol = "GSC";
 
     deployFixturesRunner = async () => {
-      const implContractFixture = await deployTradeTrustERC721ImplFixture({ deployer });
+      const implContractFixture = await deployTradeTrustTokenImplFixture({ deployer });
 
-      const registryWithProxyContractFixture = await deployImplProxy<TradeTrustERC721Impl>({
+      const registryWithProxyContractFixture = await deployImplProxy<TradeTrustTokenImpl>({
         implementation: implContractFixture,
         deployer: users.carrier,
       });

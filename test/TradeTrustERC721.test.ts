@@ -1,5 +1,5 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { TitleEscrow, TitleEscrowFactory, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
+import { TitleEscrow, TitleEscrowFactory, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
 import faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
@@ -13,21 +13,21 @@ import {
 import { computeTitleEscrowAddress } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 
-describe("TradeTrustERC721", async () => {
+describe("TradeTrustToken", async () => {
   let users: TestUsers;
-  let registryContract: TradeTrustERC721;
+  let registryContract: TradeTrustToken;
 
   let registryName: string;
   let registrySymbol: string;
 
-  let registryContractAsAdmin: TradeTrustERC721;
+  let registryContractAsAdmin: TradeTrustToken;
 
   let mockTitleEscrowFactoryContract: MockContract<TitleEscrowFactory>;
 
   let tokenId: string;
   let titleEscrowImplAddr: string;
 
-  let deployTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustERC721]>;
+  let deployTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustToken]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -41,8 +41,8 @@ describe("TradeTrustERC721", async () => {
         await smock.mock("TitleEscrowFactory", users.carrier)
       ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
 
-      const registryContractFixture = await deployTokenFixture<TradeTrustERC721>({
-        tokenContractName: "TradeTrustERC721",
+      const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
+        tokenContractName: "TradeTrustToken",
         tokenName: registryName,
         tokenInitials: registrySymbol,
         escrowFactoryAddress: mockTitleEscrowFactoryContractFixture.address,
@@ -63,8 +63,8 @@ describe("TradeTrustERC721", async () => {
   });
 
   describe("ERC165 Support", () => {
-    it("should support ITradeTrustERC721 interface", async () => {
-      const interfaceId = contractInterfaceId.TradeTrustERC721;
+    it("should support ITradeTrustToken interface", async () => {
+      const interfaceId = contractInterfaceId.TradeTrustToken;
 
       const res = await registryContract.supportsInterface(interfaceId);
 
@@ -177,8 +177,8 @@ describe("TradeTrustERC721", async () => {
           // Note: This is only an additional defence and is not a normal flow.
           const deployMockTokenFixturesRunner = async () =>
             createDeployFixtureRunner(
-              deployTokenFixture<TradeTrustERC721Mock>({
-                tokenContractName: "TradeTrustERC721Mock",
+              deployTokenFixture<TradeTrustTokenMock>({
+                tokenContractName: "TradeTrustTokenMock",
                 tokenName: "The Great Shipping Company",
                 tokenInitials: "GSC",
                 deployer: users.carrier,

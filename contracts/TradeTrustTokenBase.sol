@@ -4,17 +4,17 @@ pragma solidity ^0.8.0;
 import "./token/SBTUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./access/RegistryAccess.sol";
-import "./interfaces/ITradeTrustERC721.sol";
+import "./interfaces/ITradeTrustToken.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITitleEscrowFactory.sol";
 import "./interfaces/TradeTrustTokenErrors.sol";
 
-abstract contract TradeTrustERC721Base is
+abstract contract TradeTrustTokenBase is
   RegistryAccess,
   PausableUpgradeable,
   SBTUpgradeable,
   TradeTrustTokenErrors,
-  ITradeTrustERC721
+ITradeTrustToken
 {
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
@@ -36,7 +36,7 @@ abstract contract TradeTrustERC721Base is
     returns (bool)
   {
     return
-      interfaceId == type(ITradeTrustERC721).interfaceId ||
+      interfaceId == type(ITradeTrustToken).interfaceId ||
       SBTUpgradeable.supportsInterface(interfaceId) ||
       RegistryAccess.supportsInterface(interfaceId);
   }

@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { TitleEscrow, TradeTrustERC721 } from "@tradetrust/contracts";
+import { TitleEscrow, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Signer } from "ethers";
@@ -54,17 +54,17 @@ describe("Title Escrow", async () => {
     let deployer: SignerWithAddress;
     let implContract: TitleEscrow;
     let titleEscrowContract: TitleEscrow;
-    let registryContract: TradeTrustERC721;
+    let registryContract: TradeTrustToken;
 
-    let deployFixturesRunner: () => Promise<[TradeTrustERC721, TitleEscrow, TitleEscrow]>;
+    let deployFixturesRunner: () => Promise<[TradeTrustToken, TitleEscrow, TitleEscrow]>;
 
     // eslint-disable-next-line no-undef
     before(async () => {
       deployer = users.others[users.others.length - 1];
 
       deployFixturesRunner = async () => {
-        const registryContractFixture = await deployTokenFixture<TradeTrustERC721>({
-          tokenContractName: "TradeTrustERC721",
+        const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
+          tokenContractName: "TradeTrustToken",
           tokenName: "The Great Shipping Company",
           tokenInitials: "GSC",
           deployer: users.carrier,
@@ -127,10 +127,10 @@ describe("Title Escrow", async () => {
 
     describe("IERC721Receiver Behaviour", () => {
       let fakeAddress: string;
-      let fakeRegistry: FakeContract<TradeTrustERC721>;
+      let fakeRegistry: FakeContract<TradeTrustToken>;
 
       beforeEach(async () => {
-        fakeRegistry = (await smock.fake("TradeTrustERC721")) as FakeContract<TradeTrustERC721>;
+        fakeRegistry = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
         fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
 
         await titleEscrowContract.initialize(fakeRegistry.address, tokenId);
@@ -340,7 +340,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should return true after being initialised", async () => {
-        const fakeRegistry = (await smock.fake("TradeTrustERC721")) as FakeContract<TradeTrustERC721>;
+        const fakeRegistry = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
         fakeRegistry.ownerOf.returns(titleEscrowContract.address);
         await titleEscrowContract.initialize(fakeRegistry.address, tokenId);
 
@@ -351,12 +351,12 @@ describe("Title Escrow", async () => {
 
       describe("When title escrow is not active", () => {
         let fakeAddress: string;
-        let fakeRegistry: FakeContract<TradeTrustERC721>;
+        let fakeRegistry: FakeContract<TradeTrustToken>;
         let mockTitleEscrowContract: MockContract<TitleEscrow>;
 
         beforeEach(async () => {
           fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
-          fakeRegistry = (await smock.fake("TradeTrustERC721")) as FakeContract<TradeTrustERC721>;
+          fakeRegistry = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
           mockTitleEscrowContract = (await (
             await smock.mock("TitleEscrow")
           ).deploy()) as unknown as MockContract<TitleEscrow>;
@@ -414,17 +414,17 @@ describe("Title Escrow", async () => {
   });
 
   describe("Operational Behaviours", () => {
-    let registryContract: TradeTrustERC721;
+    let registryContract: TradeTrustToken;
     let titleEscrowOwnerContract: TitleEscrow;
 
-    let deployTokenFixtureRunner: () => Promise<[TradeTrustERC721]>;
+    let deployTokenFixtureRunner: () => Promise<[TradeTrustToken]>;
 
     // eslint-disable-next-line no-undef
     before(async () => {
       deployTokenFixtureRunner = async () =>
         createDeployFixtureRunner(
-          deployTokenFixture<TradeTrustERC721>({
-            tokenContractName: "TradeTrustERC721",
+          deployTokenFixture<TradeTrustToken>({
+            tokenContractName: "TradeTrustToken",
             tokenName: "The Great Shipping Company",
             tokenInitials: "GSC",
             deployer: users.carrier,

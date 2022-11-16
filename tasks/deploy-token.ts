@@ -86,7 +86,7 @@ task(TASK_DEPLOY_TOKEN)
           await verifyContract({
             address: registryAddress,
             constructorArgsParams: [name, symbol, factoryAddress],
-            contract: "contracts/TradeTrustERC721.sol:TradeTrustERC721",
+            contract: "contracts/TradeTrustToken.sol:TradeTrustERC721",
             hre,
           });
         } else {

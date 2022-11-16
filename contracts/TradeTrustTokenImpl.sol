@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./TradeTrustERC721Base.sol";
+import "./TradeTrustTokenBase.sol";
 
-contract TradeTrustERC721Impl is TradeTrustERC721Base {
+contract TradeTrustTokenImpl is TradeTrustTokenBase {
   address internal _titleEscrowFactory;
   uint256 internal _genesis;
 

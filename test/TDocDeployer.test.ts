@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { TDocDeployer, TradeTrustERC721Impl } from "@tradetrust/contracts";
+import { TDocDeployer, TradeTrustTokenImpl } from "@tradetrust/contracts";
 import { DeploymentEvent } from "@tradetrust/contracts/contracts/utils/TDocDeployer";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
@@ -8,7 +8,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 import { defaultAddress, contractInterfaceId } from "../src/constants";
-import { deployTDocDeployerFixture, deployTradeTrustERC721ImplFixture } from "./fixtures";
+import { deployTDocDeployerFixture, deployTradeTrustTokenImplFixture } from "./fixtures";
 import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 
 describe("TDocDeployer", async () => {
@@ -16,13 +16,13 @@ describe("TDocDeployer", async () => {
   let deployer: SignerWithAddress;
 
   let deployerContract: TDocDeployer;
-  let implContract: TradeTrustERC721Impl;
+  let implContract: TradeTrustTokenImpl;
   let fakeTitleEscrowFactory: string;
 
   let deployerContractAsOwner: TDocDeployer;
   let deployerContractAsNonOwner: TDocDeployer;
 
-  let deployFixturesRunner: () => Promise<[TradeTrustERC721Impl, TDocDeployer]>;
+  let deployFixturesRunner: () => Promise<[TradeTrustTokenImpl, TDocDeployer]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -31,7 +31,7 @@ describe("TDocDeployer", async () => {
 
     deployFixturesRunner = async () =>
       createDeployFixtureRunner(
-        deployTradeTrustERC721ImplFixture({ deployer }),
+        deployTradeTrustTokenImplFixture({ deployer }),
         deployTDocDeployerFixture({ deployer })
       );
   });
@@ -187,7 +187,7 @@ describe("TDocDeployer", async () => {
 
     describe("Deploy", () => {
       let createTx: ContractTransaction;
-      let clonedRegistryContract: TradeTrustERC721Impl;
+      let clonedRegistryContract: TradeTrustTokenImpl;
       let initParams: string;
 
       beforeEach(async () => {
@@ -202,9 +202,9 @@ describe("TDocDeployer", async () => {
           createReceipt,
           deployerContract.interface.getEventTopic("Deployment")
         );
-        clonedRegistryContract = (await ethers.getContractFactory("TradeTrustERC721Impl")).attach(
+        clonedRegistryContract = (await ethers.getContractFactory("TradeTrustTokenImpl")).attach(
           event.args.deployed
-        ) as TradeTrustERC721Impl;
+        ) as TradeTrustTokenImpl;
       });
 
       describe("Initialisation by deployer", () => {
@@ -241,8 +241,8 @@ describe("TDocDeployer", async () => {
         });
       });
 
-      it("should clone TradeTrustERC721Impl", async () => {
-        const interfaceId = contractInterfaceId.TradeTrustERC721;
+      it("should clone TradeTrustTokenImpl", async () => {
+        const interfaceId = contractInterfaceId.TradeTrustToken;
 
         const res = await clonedRegistryContract.supportsInterface(interfaceId);
 

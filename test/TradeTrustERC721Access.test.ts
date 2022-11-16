@@ -2,15 +2,15 @@ import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import faker from "faker";
-import { TitleEscrow, TradeTrustERC721 } from "@tradetrust/contracts";
+import { TitleEscrow, TradeTrustToken } from "@tradetrust/contracts";
 import { roleHash } from "../src/constants";
 import { expect } from ".";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
 import { getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
 
-describe("TradeTrustERC721 Access Control Behaviour", async () => {
+describe("TradeTrustToken Access Control Behaviour", async () => {
   let users: TestUsers;
-  let registryContract: TradeTrustERC721;
+  let registryContract: TradeTrustToken;
   let titleEscrowContract: TitleEscrow;
 
   let userAdmin: SignerWithAddress;
@@ -18,15 +18,15 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
   let userRestorer: SignerWithAddress;
   let userAccepter: SignerWithAddress;
 
-  let registryContractAsAdmin: TradeTrustERC721;
-  let registryContractAsMinter: TradeTrustERC721;
-  let registryContractAsRestorer: TradeTrustERC721;
-  let registryContractAsAccepter: TradeTrustERC721;
-  let registryContractAsNoRole: TradeTrustERC721;
+  let registryContractAsAdmin: TradeTrustToken;
+  let registryContractAsMinter: TradeTrustToken;
+  let registryContractAsRestorer: TradeTrustToken;
+  let registryContractAsAccepter: TradeTrustToken;
+  let registryContractAsNoRole: TradeTrustToken;
 
   let tokenId: string;
 
-  let deployFixturesRunner: () => Promise<[TradeTrustERC721, TitleEscrow]>;
+  let deployFixturesRunner: () => Promise<[TradeTrustToken, TitleEscrow]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -40,8 +40,8 @@ describe("TradeTrustERC721 Access Control Behaviour", async () => {
     tokenId = faker.datatype.hexaDecimal(64);
 
     deployFixturesRunner = async () => {
-      const registryContractFixture = await deployTokenFixture<TradeTrustERC721>({
-        tokenContractName: "TradeTrustERC721",
+      const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
+        tokenContractName: "TradeTrustToken",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
         deployer: userAdmin,
