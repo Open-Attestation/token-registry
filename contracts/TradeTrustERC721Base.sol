@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./token/ERC721Upgradeable.sol";
+import "./token/SBTUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./access/RegistryAccess.sol";
 import "./interfaces/ITradeTrustERC721.sol";
@@ -12,7 +12,7 @@ import "./interfaces/TradeTrustTokenErrors.sol";
 abstract contract TradeTrustERC721Base is
   RegistryAccess,
   PausableUpgradeable,
-  ERC721Upgradeable,
+SBTUpgradeable,
   TradeTrustTokenErrors,
   ITradeTrustERC721
 {
@@ -23,7 +23,7 @@ abstract contract TradeTrustERC721Base is
     string memory symbol,
     address admin
   ) internal onlyInitializing {
-    __ERC721_init(name, symbol);
+    __SBT_init(name, symbol);
     __Pausable_init();
     __RegistryAccess_init(admin);
   }
@@ -32,12 +32,12 @@ abstract contract TradeTrustERC721Base is
     public
     view
     virtual
-    override(ERC721Upgradeable, IERC165Upgradeable, RegistryAccess)
+    override(SBTUpgradeable, IERC165Upgradeable, RegistryAccess)
     returns (bool)
   {
     return
       interfaceId == type(ITradeTrustERC721).interfaceId ||
-      ERC721Upgradeable.supportsInterface(interfaceId) ||
+      SBTUpgradeable.supportsInterface(interfaceId) ||
       RegistryAccess.supportsInterface(interfaceId);
   }
 

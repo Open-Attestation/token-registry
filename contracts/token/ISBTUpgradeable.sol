@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeab
 /**
  * @dev Required interface of an ERC721 compliant contract.
  */
-interface IERC721Upgradeable is IERC165Upgradeable {
+interface ISBTUpgradeable is IERC165Upgradeable {
   /**
    * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
      */

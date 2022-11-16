@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "./IERC721Upgradeable.sol";
+import "./ISBTUpgradeable.sol";
 import "./extensions/IERC721MetadataUpgradeable.sol";
 
 /**
@@ -18,7 +18,7 @@ import "./extensions/IERC721MetadataUpgradeable.sol";
  * the Metadata extension, but not including the Enumerable extension, which is available separately as
  * {ERC721Enumerable}.
  */
-contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable, IERC721Upgradeable, IERC721MetadataUpgradeable {
+contract SBTUpgradeable is Initializable, ContextUpgradeable, ERC165Upgradeable, ISBTUpgradeable, IERC721MetadataUpgradeable {
   using AddressUpgradeable for address;
   using StringsUpgradeable for uint256;
 
@@ -37,11 +37,11 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
   /**
    * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-  function __ERC721_init(string memory name_, string memory symbol_) internal onlyInitializing {
-    __ERC721_init_unchained(name_, symbol_);
+  function __SBT_init(string memory name_, string memory symbol_) internal onlyInitializing {
+    __SBT_init_unchained(name_, symbol_);
   }
 
-  function __ERC721_init_unchained(string memory name_, string memory symbol_) internal onlyInitializing {
+  function __SBT_init_unchained(string memory name_, string memory symbol_) internal onlyInitializing {
     _name = name_;
     _symbol = symbol_;
   }
@@ -51,7 +51,7 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
      */
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165Upgradeable, IERC165Upgradeable) returns (bool) {
     return
-    interfaceId == type(IERC721Upgradeable).interfaceId ||
+    interfaceId == type(ISBTUpgradeable).interfaceId ||
     interfaceId == type(IERC721MetadataUpgradeable).interfaceId ||
     super.supportsInterface(interfaceId);
   }
@@ -167,7 +167,7 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
      */
   function _isOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
     require(_exists(tokenId), "ERC721: operator query for nonexistent token");
-    address owner = ERC721Upgradeable.ownerOf(tokenId);
+    address owner = SBTUpgradeable.ownerOf(tokenId);
     return spender == owner;
   }
 
@@ -238,7 +238,7 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
      * Emits a {Transfer} event.
      */
   function _burn(uint256 tokenId) internal virtual {
-    address owner = ERC721Upgradeable.ownerOf(tokenId);
+    address owner = SBTUpgradeable.ownerOf(tokenId);
 
     _beforeTokenTransfer(owner, address(0), tokenId);
 
@@ -266,7 +266,7 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
     address to,
     uint256 tokenId
   ) internal virtual {
-    require(ERC721Upgradeable.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
+    require(SBTUpgradeable.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
     require(to != address(0), "ERC721: transfer to the zero address");
 
     _beforeTokenTransfer(from, to, tokenId);
