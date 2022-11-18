@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./token/SBTUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "./access/RegistryAccess.sol";
-import "./interfaces/ITradeTrustToken.sol";
-import "./interfaces/ITitleEscrow.sol";
-import "./interfaces/ITitleEscrowFactory.sol";
-import "./interfaces/TradeTrustTokenErrors.sol";
+import "../token/SBTUpgradeable.sol";
+import "../access/RegistryAccess.sol";
+import "../interfaces/ITradeTrustToken.sol";
+import "../interfaces/ITitleEscrow.sol";
+import "../interfaces/ITitleEscrowFactory.sol";
+import "../interfaces/TradeTrustTokenErrors.sol";
 
 abstract contract TradeTrustTokenBase is
   RegistryAccess,
   PausableUpgradeable,
   SBTUpgradeable,
   TradeTrustTokenErrors,
-ITradeTrustToken
+  ITradeTrustToken
 {
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
