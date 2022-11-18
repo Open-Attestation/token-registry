@@ -1,8 +1,8 @@
-import { TitleEscrow, TitleEscrowFactory, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
+import { TitleEscrow, TitleEscrowFactory, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
 import { ethers } from "hardhat";
 
 export const getTitleEscrowContract = async (
-  tokenContract: TradeTrustERC721 | TradeTrustERC721Mock,
+  tokenContract: TradeTrustToken | TradeTrustTokenMock,
   tokenId: string | number
 ): Promise<TitleEscrow> => {
   const titleEscrowAddr = await tokenContract.ownerOf(tokenId);
@@ -11,7 +11,7 @@ export const getTitleEscrowContract = async (
 };
 
 export const getTitleEscrowFactoryFromToken = async (
-  tokenContract: TradeTrustERC721 | TradeTrustERC721Mock
+  tokenContract: TradeTrustToken | TradeTrustTokenMock
 ): Promise<TitleEscrowFactory> => {
   const escrowFactoryAddr = await tokenContract.titleEscrowFactory();
   return (await ethers.getContractFactory("TitleEscrowFactory")).attach(escrowFactoryAddr) as TitleEscrowFactory;

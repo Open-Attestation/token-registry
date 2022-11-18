@@ -1,4 +1,4 @@
-import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
+import { TitleEscrow, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
 import { TitleEscrowCreatedEvent } from "@tradetrust/contracts/contracts/TitleEscrowFactory";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
@@ -10,7 +10,7 @@ export const mintTokenFixture = async ({
   holder,
   tokenId,
 }: {
-  token: TradeTrustERC721 | TradeTrustERC721Mock;
+  token: TradeTrustToken | TradeTrustTokenMock;
   beneficiary: SignerWithAddress;
   holder: SignerWithAddress;
   tokenId: string;

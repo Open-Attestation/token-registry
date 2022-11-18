@@ -1,7 +1,7 @@
 // noinspection ExceptionCaughtLocallyJS
 
 import { task } from "hardhat/config";
-import { TDocDeployer, TradeTrustERC721 } from "@tradetrust/contracts";
+import { TDocDeployer, TradeTrustToken } from "@tradetrust/contracts";
 import { DeploymentEvent } from "@tradetrust/contracts/contracts/utils/TDocDeployer";
 import { verifyContract, wait, deployContract, isSupportedTitleEscrowFactory } from "./helpers";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
@@ -9,7 +9,7 @@ import { constants } from "../src";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 
 task(TASK_DEPLOY_TOKEN)
-  .setDescription("Deploys the TradeTrustERC721 token")
+  .setDescription("Deploys the TradeTrust token")
   .addParam("name", "Name of the token")
   .addParam("symbol", "Symbol of token")
   .addFlag("verify", "Verify on Etherscan")
@@ -68,8 +68,8 @@ task(TASK_DEPLOY_TOKEN)
         ).args.deployed;
       } else {
         // Standalone deployment
-        const contractName = "TradeTrustERC721";
-        const token = await deployContract<TradeTrustERC721>({
+        const contractName = "TradeTrustToken";
+        const token = await deployContract<TradeTrustToken>({
           params: [name, symbol, factoryAddress],
           contractName,
           hre,
@@ -86,7 +86,7 @@ task(TASK_DEPLOY_TOKEN)
           await verifyContract({
             address: registryAddress,
             constructorArgsParams: [name, symbol, factoryAddress],
-            contract: "contracts/TradeTrustToken.sol:TradeTrustERC721",
+            contract: "contracts/TradeTrustToken.sol:TradeTrustToken",
             hre,
           });
         } else {
