@@ -22,7 +22,7 @@ contract TradeTrustToken is TradeTrustTokenBase {
     string memory symbol,
     address admin
   ) internal initializer {
-    __TradeTrustERC721Base_init(name, symbol, admin);
+    __TradeTrustTokenBase_init(name, symbol, admin);
   }
 
   function titleEscrowFactory() public view override returns (ITitleEscrowFactory) {

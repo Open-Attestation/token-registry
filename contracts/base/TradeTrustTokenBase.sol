@@ -18,7 +18,7 @@ abstract contract TradeTrustTokenBase is
 {
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
-  function __TradeTrustERC721Base_init(
+  function __TradeTrustTokenBase_init(
     string memory name,
     string memory symbol,
     address admin

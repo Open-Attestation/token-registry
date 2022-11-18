@@ -14,7 +14,7 @@ contract TradeTrustTokenStandard is TradeTrustTokenBase {
     (string memory name, string memory symbol, address admin) = abi.decode(_params, (string, string, address));
     _genesis = block.number;
     _titleEscrowFactory = titleEscrowFactory_;
-    __TradeTrustERC721Base_init(name, symbol, admin);
+    __TradeTrustTokenBase_init(name, symbol, admin);
   }
 
   function titleEscrowFactory() public view override returns (ITitleEscrowFactory) {
