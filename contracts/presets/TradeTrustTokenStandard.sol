@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../base/TradeTrustTokenBase.sol";
 
-contract TradeTrustTokenImpl is TradeTrustTokenBase {
+contract TradeTrustTokenStandard is TradeTrustTokenBase {
   address internal _titleEscrowFactory;
   uint256 internal _genesis;
 
