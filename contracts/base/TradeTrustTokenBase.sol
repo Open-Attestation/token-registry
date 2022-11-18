@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "../token/SBTUpgradeable.sol";
+import "./SBTUpgradeable.sol";
 import "../access/RegistryAccess.sol";
 import "../interfaces/ITradeTrustToken.sol";
 import "../interfaces/ITitleEscrow.sol";

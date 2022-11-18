@@ -10,12 +10,12 @@ import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "./ISBTUpgradeable.sol";
-import "./extensions/IERC721MetadataUpgradeable.sol";
+import "../interfaces/ISBTUpgradeable.sol";
+import "../interfaces/IERC721MetadataUpgradeable.sol";
 
 /**
- * @dev Implementation of Soulbound Token based on the https://eips.ethereum.org/EIPS/eip-721[ERC721]
- * Non-Fungible Token in OpenZeppelin.
+ * @dev A trimmed version of the https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token
+ * in OpenZeppelin for use as Soulbound Token.
  */
 contract SBTUpgradeable is
   Initializable,

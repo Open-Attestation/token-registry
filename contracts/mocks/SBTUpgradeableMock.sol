@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "../token/SBTUpgradeable.sol";
+import "../base/SBTUpgradeable.sol";
 
 contract SBTUpgradeableMock is SBTUpgradeable {
   constructor(string memory name, string memory symbol) initializer {

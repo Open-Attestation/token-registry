@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "../token/ISBTUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "./ISBTUpgradeable.sol";
 import "./ITitleEscrowFactory.sol";
 
 interface ITradeTrustToken is IERC721ReceiverUpgradeable, ISBTUpgradeable {
