@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "../TradeTrustToken.sol";
+import "../presets/TradeTrustToken.sol";
 
 contract TradeTrustTokenMock is TradeTrustToken {
   constructor(
