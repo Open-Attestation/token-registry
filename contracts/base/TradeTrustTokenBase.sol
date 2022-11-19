@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./SBTUpgradeable.sol";
-import "../access/RegistryAccess.sol";
+import "../base/RegistryAccess.sol";
+import "../base/Pausable.sol";
 import "../interfaces/ITradeTrustToken.sol";
 import "../interfaces/ITitleEscrow.sol";
 import "../interfaces/ITitleEscrowFactory.sol";
@@ -11,7 +11,7 @@ import "../interfaces/TradeTrustTokenErrors.sol";
 
 abstract contract TradeTrustTokenBase is
   RegistryAccess,
-  PausableUpgradeable,
+  Pausable,
   SBTUpgradeable,
   TradeTrustTokenErrors,
   ITradeTrustToken
@@ -32,7 +32,7 @@ abstract contract TradeTrustTokenBase is
     public
     view
     virtual
-    override(SBTUpgradeable, IERC165Upgradeable, RegistryAccess)
+    override(SBTUpgradeable, IERC165Upgradeable, AccessControlUpgradeable, RegistryAccess)
     returns (bool)
   {
     return
@@ -82,14 +82,6 @@ abstract contract TradeTrustTokenBase is
     _registryTransferTo(titleEscrow, tokenId);
 
     return titleEscrow;
-  }
-
-  function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
-    _pause();
-  }
-
-  function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
-    _unpause();
   }
 
   function _beforeTokenTransfer(
