@@ -22,7 +22,7 @@ describe("TradeTrustTokenMintable", async () => {
   let titleEscrowImplAddr: string;
   let titleEscrowContract: TitleEscrow;
 
-  let deployTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustToken]>;
+  let deployMockTitleEscrowAndTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustToken]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -31,7 +31,7 @@ describe("TradeTrustTokenMintable", async () => {
     registryName = "The Great Shipping Company";
     registrySymbol = "GSC";
 
-    deployTokenFixtureRunner = async () => {
+    deployMockTitleEscrowAndTokenFixtureRunner = async () => {
       const mockTitleEscrowFactoryContractFixture = (await (
         await smock.mock("TitleEscrowFactory", users.carrier)
       ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
@@ -53,7 +53,7 @@ describe("TradeTrustTokenMintable", async () => {
 
     // Fixtures need to be redeployed here without loadFixture because snapshot does not reset call counts in mocks
     // Only this section has tests that test for call counts
-    [mockTitleEscrowFactoryContract, registryContract] = await deployTokenFixtureRunner();
+    [mockTitleEscrowFactoryContract, registryContract] = await deployMockTitleEscrowAndTokenFixtureRunner();
 
     registryContractAsAdmin = registryContract.connect(users.carrier);
     titleEscrowImplAddr = await mockTitleEscrowFactoryContract.implementation();

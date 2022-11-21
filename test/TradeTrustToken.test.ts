@@ -1,11 +1,10 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
-import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
-import { deployTokenFixture } from "./fixtures";
 import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
+import { DeployTokenFixtureRunner, deployTokenFixtureRunnerCreator } from "./fixtures";
 
 describe("TradeTrustToken", async () => {
   let users: TestUsers;
@@ -16,11 +15,11 @@ describe("TradeTrustToken", async () => {
 
   let registryContractAsAdmin: TradeTrustToken;
 
-  let mockTitleEscrowFactoryContract: MockContract<TitleEscrowFactory>;
+  let mockTitleEscrowFactoryContract: TitleEscrowFactory;
 
   let tokenId: string;
 
-  let deployTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustToken]>;
+  let deployTokenFixtureRunner: DeployTokenFixtureRunner;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -29,21 +28,8 @@ describe("TradeTrustToken", async () => {
     registryName = "The Great Shipping Company";
     registrySymbol = "GSC";
 
-    deployTokenFixtureRunner = async () => {
-      const mockTitleEscrowFactoryContractFixture = (await (
-        await smock.mock("TitleEscrowFactory", users.carrier)
-      ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
-
-      const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
-        tokenContractName: "TradeTrustToken",
-        tokenName: registryName,
-        tokenInitials: registrySymbol,
-        escrowFactoryAddress: mockTitleEscrowFactoryContractFixture.address,
-        deployer: users.carrier,
-      });
-
-      return [mockTitleEscrowFactoryContractFixture, registryContractFixture];
-    };
+    deployTokenFixtureRunner = async () =>
+      deployTokenFixtureRunnerCreator(registryName, registrySymbol, users.carrier, "TradeTrustToken");
   });
 
   beforeEach(async () => {

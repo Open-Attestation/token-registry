@@ -1,9 +1,8 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { TitleEscrow, TitleEscrowFactory, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
+import { TitleEscrow, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
 import faker from "faker";
-import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
-import { deployTokenFixture } from "./fixtures";
+import { deployTokenFixture, DeployTokenFixtureRunner, deployTokenFixtureRunnerCreator } from "./fixtures";
 import { getTitleEscrowContract, getTestUsers, TestUsers, createDeployFixtureRunner } from "./helpers";
 import { defaultAddress } from "../src/constants";
 
@@ -19,7 +18,7 @@ describe("TradeTrustTokenBurnable", async () => {
   let tokenId: string;
   let titleEscrowContract: TitleEscrow;
 
-  let deployTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustToken]>;
+  let deployTokenFixtureRunner: DeployTokenFixtureRunner;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -28,21 +27,8 @@ describe("TradeTrustTokenBurnable", async () => {
     registryName = "The Great Shipping Company";
     registrySymbol = "GSC";
 
-    deployTokenFixtureRunner = async () => {
-      const mockTitleEscrowFactoryContractFixture = (await (
-        await smock.mock("TitleEscrowFactory", users.carrier)
-      ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
-
-      const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
-        tokenContractName: "TradeTrustToken",
-        tokenName: registryName,
-        tokenInitials: registrySymbol,
-        escrowFactoryAddress: mockTitleEscrowFactoryContractFixture.address,
-        deployer: users.carrier,
-      });
-
-      return [mockTitleEscrowFactoryContractFixture, registryContractFixture];
-    };
+    deployTokenFixtureRunner = async () =>
+      deployTokenFixtureRunnerCreator(registryName, registrySymbol, users.carrier, "TradeTrustToken");
   });
 
   beforeEach(async () => {
