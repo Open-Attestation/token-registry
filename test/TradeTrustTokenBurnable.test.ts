@@ -2,21 +2,26 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
 import faker from "faker";
 import { expect } from ".";
-import { deployTokenFixture, DeployTokenFixtureRunner, deployTokenFixtureRunnerCreator } from "./fixtures";
-import { getTitleEscrowContract, getTestUsers, TestUsers, createDeployFixtureRunner } from "./helpers";
+import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
+import {
+  getTitleEscrowContract,
+  getTestUsers,
+  TestUsers,
+  createDeployFixtureRunner,
+  impersonateAccount,
+} from "./helpers";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 
 describe("TradeTrustTokenBurnable", async () => {
   let users: TestUsers;
+
   let registryContract: TradeTrustToken;
+  let registryContractAsAdmin: TradeTrustToken;
+  let titleEscrowContract: TitleEscrow;
 
   let registryName: string;
   let registrySymbol: string;
-
-  let registryContractAsAdmin: TradeTrustToken;
-
   let tokenId: string;
-  let titleEscrowContract: TitleEscrow;
 
   let deployTokenFixtureRunner: DeployTokenFixtureRunner;
 
@@ -28,7 +33,14 @@ describe("TradeTrustTokenBurnable", async () => {
     registrySymbol = "GSC";
 
     deployTokenFixtureRunner = async () =>
-      deployTokenFixtureRunnerCreator(registryName, registrySymbol, users.carrier, "TradeTrustToken");
+      createDeployFixtureRunner(
+        ...(await deployTokenFixture<TradeTrustToken>({
+          tokenContractName: "TradeTrustToken",
+          tokenName: registryName,
+          tokenInitials: registrySymbol,
+          deployer: users.carrier,
+        }))
+      );
   });
 
   beforeEach(async () => {
@@ -99,20 +111,22 @@ describe("TradeTrustTokenBurnable", async () => {
       // Note: This is only an additional defence and is not a normal flow.
       const deployMockTokenFixturesRunner = async () =>
         createDeployFixtureRunner(
-          deployTokenFixture<TradeTrustTokenMock>({
+          ...(await deployTokenFixture<TradeTrustTokenMock>({
             tokenContractName: "TradeTrustTokenMock",
             tokenName: "The Great Shipping Company",
             tokenInitials: "GSC",
             deployer: users.carrier,
-          })
+          }))
         );
 
-      const [registryContractMock] = await loadFixture(deployMockTokenFixturesRunner);
-      await registryContractMock.mintInternal(users.carrier.address, tokenId);
+      const [titleEscrowFactoryContract, registryContractMock] = await loadFixture(deployMockTokenFixturesRunner);
+      const tokenRecipientAddress = await titleEscrowFactoryContract.getAddress(registryContractMock.address, tokenId);
+      const tokenRecipientSigner = await impersonateAccount({ address: tokenRecipientAddress });
+      await registryContractMock.mintInternal(tokenRecipientAddress, tokenId);
 
       const tx = registryContractMock
-        .connect(users.carrier)
-        .transferFrom(users.carrier.address, defaultAddress.Burn, tokenId);
+        .connect(tokenRecipientSigner)
+        .transferFrom(tokenRecipientAddress, defaultAddress.Burn, tokenId);
 
       await expect(tx).to.be.revertedWithCustomError(registryContractMock, "TokenNotSurrendered");
     });

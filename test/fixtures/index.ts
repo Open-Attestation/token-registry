@@ -4,4 +4,4 @@ export { mintTokenFixture } from "./mint-token.fixture";
 export { deployTitleEscrowFixture } from "./deploy-title-escrow.fixture";
 export { deployTradeTrustTokenStandardFixture } from "./deploy-registry-impl.fixture";
 export { deployTDocDeployerFixture } from "./deploy-impl-deployer.fixture";
-export { DeployTokenFixtureRunner, deployTokenFixtureRunnerCreator } from "./deploy-token-fixture-runner-creator";
+export { DeployTokenFixtureRunner } from "./deploy-token-fixture-runner";

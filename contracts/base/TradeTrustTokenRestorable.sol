@@ -2,10 +2,17 @@
 pragma solidity ^0.8.0;
 
 import "./TradeTrustSBT.sol";
+import "./RegistryAccess.sol";
 import "../interfaces/ITradeTrustTokenRestorable.sol";
 
-abstract contract TradeTrustTokenRestorable is TradeTrustSBT, ITradeTrustTokenRestorable {
-  function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+abstract contract TradeTrustTokenRestorable is TradeTrustSBT, RegistryAccess, ITradeTrustTokenRestorable {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(TradeTrustSBT, RegistryAccess)
+    returns (bool)
+  {
     return interfaceId == type(ITradeTrustTokenRestorable).interfaceId || super.supportsInterface(interfaceId);
   }
 

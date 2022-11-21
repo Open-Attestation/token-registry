@@ -40,7 +40,7 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
     tokenId = faker.datatype.hexaDecimal(64);
 
     deployFixturesRunner = async () => {
-      const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
+      const [, registryContractFixture] = await deployTokenFixture<TradeTrustToken>({
         tokenContractName: "TradeTrustToken",
         tokenName: "The Great Shipping Company",
         tokenInitials: "GSC",
@@ -132,18 +132,22 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
   });
 
   describe("Minter Role", () => {
-    it("should allow a minter to mint new tokens", async () => {
-      const newTokenId = faker.datatype.hexaDecimal(64);
+    describe("Mint without token URI", () => {
+      it("should allow a minter to mint new tokens", async () => {
+        const newTokenId = faker.datatype.hexaDecimal(64);
 
-      const tx = registryContractAsMinter.mint(users.beneficiary.address, users.holder.address, newTokenId);
+        const tx = registryContractAsMinter.mint(users.beneficiary.address, users.holder.address, newTokenId);
 
-      await expect(tx).to.not.be.reverted;
-    });
+        await expect(tx).to.not.be.reverted;
+      });
 
-    it("should not allow a non-minter to mint new tokens", async () => {
-      const tx = registryContractAsNoRole.mint(users.beneficiary.address, users.holder.address, tokenId);
+      it("should not allow a non-minter to mint new tokens", async () => {
+        const tx = registryContractAsNoRole.mint(users.beneficiary.address, users.holder.address, tokenId);
 
-      await expect(tx).to.be.revertedWith(toAccessControlRevertMessage(users.beneficiary.address, roleHash.MinterRole));
+        await expect(tx).to.be.revertedWith(
+          toAccessControlRevertMessage(users.beneficiary.address, roleHash.MinterRole)
+        );
+      });
     });
   });
 

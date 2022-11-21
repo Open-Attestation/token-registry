@@ -1,10 +1,17 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
+import { Signer } from "ethers";
 import { expect } from ".";
-import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
+import {
+  getTitleEscrowContract,
+  getTestUsers,
+  TestUsers,
+  createDeployFixtureRunner,
+  impersonateAccount,
+} from "./helpers";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
-import { DeployTokenFixtureRunner, deployTokenFixtureRunnerCreator } from "./fixtures";
+import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
 
 describe("TradeTrustToken", async () => {
   let users: TestUsers;
@@ -29,7 +36,14 @@ describe("TradeTrustToken", async () => {
     registrySymbol = "GSC";
 
     deployTokenFixtureRunner = async () =>
-      deployTokenFixtureRunnerCreator(registryName, registrySymbol, users.carrier, "TradeTrustToken");
+      createDeployFixtureRunner(
+        ...(await deployTokenFixture<TradeTrustToken>({
+          tokenContractName: "TradeTrustToken",
+          tokenName: registryName,
+          tokenInitials: registrySymbol,
+          deployer: users.carrier,
+        }))
+      );
   });
 
   beforeEach(async () => {
@@ -117,6 +131,53 @@ describe("TradeTrustToken", async () => {
     beforeEach(async () => {
       await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
+    });
+
+    describe("Soulbound Properties", () => {
+      let titleEscrowContractSigner: Signer;
+
+      beforeEach(async () => {
+        titleEscrowContractSigner = await impersonateAccount({ address: titleEscrowContract.address });
+      });
+
+      it("should revert with TransferFailure when transfer to non-designated title escrow contract", async () => {
+        const nonDesignatedTitleEscrowAddress = await mockTitleEscrowFactoryContract.getAddress(
+          registryContract.address,
+          faker.datatype.hexaDecimal(64)
+        );
+
+        const tx = registryContract
+          .connect(titleEscrowContractSigner)
+          .transferFrom(titleEscrowContract.address, nonDesignatedTitleEscrowAddress, tokenId);
+
+        await expect(tx).to.be.revertedWithCustomError(registryContract, "TransferFailure");
+      });
+
+      it("should revert with TransferFailure when transfer to an EOA", async () => {
+        const tx = registryContract
+          .connect(titleEscrowContractSigner)
+          .transferFrom(titleEscrowContract.address, users.beneficiary.address, tokenId);
+
+        await expect(tx).to.be.revertedWithCustomError(registryContract, "TransferFailure");
+      });
+
+      it("should transfer successfully to registry token contract", async () => {
+        await registryContract
+          .connect(titleEscrowContractSigner)
+          .transferFrom(titleEscrowContract.address, registryContract.address, tokenId);
+
+        const owner = await registryContract.ownerOf(tokenId);
+
+        expect(owner).to.equal(registryContract.address);
+      });
+
+      it("should transfer successfully to designated title escrow contract", async () => {
+        const tx = registryContract
+          .connect(titleEscrowContractSigner)
+          .transferFrom(titleEscrowContract.address, titleEscrowContract.address, tokenId);
+
+        await expect(tx).to.not.be.reverted;
+      });
     });
 
     describe("Surrender Status", () => {

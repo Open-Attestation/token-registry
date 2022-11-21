@@ -1,13 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./TokenURIStorage.sol";
+import "./TradeTrustSBT.sol";
+import "./RegistryAccess.sol";
 import "../interfaces/ITradeTrustTokenBurnable.sol";
 
-abstract contract TradeTrustTokenBurnable is TokenURIStorage, ITradeTrustTokenBurnable {
+abstract contract TradeTrustTokenBurnable is TradeTrustSBT, RegistryAccess, ITradeTrustTokenBurnable {
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(TradeTrustSBT, RegistryAccess)
+    returns (bool)
+  {
     return interfaceId == type(ITradeTrustTokenBurnable).interfaceId || super.supportsInterface(interfaceId);
   }
 
@@ -15,16 +22,12 @@ abstract contract TradeTrustTokenBurnable is TokenURIStorage, ITradeTrustTokenBu
     _burnTitle(tokenId);
   }
 
-  function _burnTitle(uint256 tokenId) internal virtual whenNotPaused onlyRole(ACCEPTER_ROLE) {
+  function _burnTitle(uint256 tokenId) internal virtual {
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
     ITitleEscrow(titleEscrow).shred();
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
     _registryTransferTo(BURN_ADDRESS, tokenId);
-
-    if (bytes(_tokenURIs[tokenId]).length != 0) {
-      delete _tokenURIs[tokenId];
-    }
   }
 
   function _beforeTokenTransfer(

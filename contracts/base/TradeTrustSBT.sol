@@ -1,34 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./SBTUpgradeable.sol";
-import "../base/RegistryAccess.sol";
-import "../base/Pausable.sol";
 import "../interfaces/ITitleEscrow.sol";
 import "../interfaces/ITitleEscrowFactory.sol";
 import "../interfaces/TradeTrustTokenErrors.sol";
-import "./TokenURIStorage.sol";
 import "../interfaces/ITradeTrustSBT.sol";
 
-abstract contract TradeTrustSBT is RegistryAccess, Pausable, TradeTrustTokenErrors, SBTUpgradeable, ITradeTrustSBT {
-  function __TradeTrustSBT_init(
-    string memory name,
-    string memory symbol,
-    address admin
-  ) internal onlyInitializing {
+abstract contract TradeTrustSBT is SBTUpgradeable, PausableUpgradeable, TradeTrustTokenErrors, ITradeTrustSBT {
+  function __TradeTrustSBT_init(string memory name, string memory symbol) internal onlyInitializing {
     __SBT_init(name, symbol);
     __Pausable_init();
-    __RegistryAccess_init(admin);
   }
 
   function supportsInterface(bytes4 interfaceId)
     public
     view
     virtual
-    override(SBTUpgradeable, IERC165Upgradeable, AccessControlUpgradeable, RegistryAccess)
+    override(SBTUpgradeable, IERC165Upgradeable)
     returns (bool)
   {
-    return SBTUpgradeable.supportsInterface(interfaceId) || RegistryAccess.supportsInterface(interfaceId);
+    return interfaceId == type(ITradeTrustSBT).interfaceId || SBTUpgradeable.supportsInterface(interfaceId);
   }
 
   function onERC721Received(
@@ -42,6 +35,14 @@ abstract contract TradeTrustSBT is RegistryAccess, Pausable, TradeTrustTokenErro
 
   function _registryTransferTo(address to, uint256 tokenId) internal {
     this.transferFrom(address(this), to, tokenId);
+  }
+
+  function _beforeTokenTransfer(
+    address from,
+    address to,
+    uint256 tokenId
+  ) internal virtual override whenNotPaused {
+    super._beforeTokenTransfer(from, to, tokenId);
   }
 
   function genesis() public view virtual override returns (uint256);

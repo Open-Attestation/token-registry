@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Signer } from "ethers";
 import { FakeContract, MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
-import { deployTokenFixture, deployTitleEscrowFixture } from "./fixtures";
+import { deployTokenFixture, deployTitleEscrowFixture, DeployTokenFixtureRunner } from "./fixtures";
 import {
   getTitleEscrowContract,
   impersonateAccount,
@@ -63,7 +63,7 @@ describe("Title Escrow", async () => {
       deployer = users.others[users.others.length - 1];
 
       deployFixturesRunner = async () => {
-        const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
+        const [, registryContractFixture] = await deployTokenFixture<TradeTrustToken>({
           tokenContractName: "TradeTrustToken",
           tokenName: "The Great Shipping Company",
           tokenInitials: "GSC",
@@ -417,23 +417,23 @@ describe("Title Escrow", async () => {
     let registryContract: TradeTrustToken;
     let titleEscrowOwnerContract: TitleEscrow;
 
-    let deployTokenFixtureRunner: () => Promise<[TradeTrustToken]>;
+    let deployTokenFixtureRunner: DeployTokenFixtureRunner;
 
     // eslint-disable-next-line no-undef
     before(async () => {
       deployTokenFixtureRunner = async () =>
         createDeployFixtureRunner(
-          deployTokenFixture<TradeTrustToken>({
+          ...(await deployTokenFixture<TradeTrustToken>({
             tokenContractName: "TradeTrustToken",
             tokenName: "The Great Shipping Company",
             tokenInitials: "GSC",
             deployer: users.carrier,
-          })
+          }))
         );
     });
 
     beforeEach(async () => {
-      [registryContract] = await loadFixture(deployTokenFixtureRunner);
+      [, registryContract] = await loadFixture(deployTokenFixtureRunner);
     });
 
     describe("Nomination", () => {

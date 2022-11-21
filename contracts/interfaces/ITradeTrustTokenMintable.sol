@@ -7,11 +7,4 @@ interface ITradeTrustTokenMintable {
     address holder,
     uint256 tokenId
   ) external returns (address);
-
-  function mintWithUri(
-    address beneficiary,
-    address holder,
-    uint256 tokenId,
-    string memory tokenUri
-  ) external returns (address);
 }

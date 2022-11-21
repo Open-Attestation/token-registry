@@ -18,20 +18,29 @@ export const deployTokenFixture = async <T extends Contract | unknown>({
   deployer: SignerWithAddress | Signer;
   escrowFactoryAddress?: string;
   useMock?: boolean;
-}) => {
+}): Promise<[TitleEscrowFactory, T]> => {
+  const escrowFactory = await ethers.getContractFactory("TitleEscrowFactory");
+  let titleEscrowFactoryContract: TitleEscrowFactory;
   if (!escrowFactoryAddress) {
-    const escrowFactory = await ethers.getContractFactory("TitleEscrowFactory");
-    const escrowFactoryContract = (await escrowFactory.connect(deployer).deploy()) as TitleEscrowFactory;
+    titleEscrowFactoryContract = (await escrowFactory.connect(deployer).deploy()) as TitleEscrowFactory;
     // eslint-disable-next-line no-param-reassign
-    escrowFactoryAddress = escrowFactoryContract.address;
-  }
-
-  if (useMock) {
-    return (await (
-      await smock.mock(tokenContractName, deployer)
-    ).deploy(tokenName, tokenInitials, escrowFactoryAddress)) as unknown as T;
+    escrowFactoryAddress = titleEscrowFactoryContract.address;
+  } else {
+    titleEscrowFactoryContract = escrowFactory.attach(escrowFactoryAddress) as TitleEscrowFactory;
   }
 
   const tradeTrustTokenFactory = await ethers.getContractFactory(tokenContractName);
-  return (await tradeTrustTokenFactory.connect(deployer).deploy(tokenName, tokenInitials, escrowFactoryAddress)) as T;
+  let tradeTrustTokenContract: T;
+
+  if (useMock) {
+    tradeTrustTokenContract = (await (
+      await smock.mock(tokenContractName, deployer)
+    ).deploy(tokenName, tokenInitials, escrowFactoryAddress)) as unknown as T;
+  } else {
+    tradeTrustTokenContract = (await tradeTrustTokenFactory
+      .connect(deployer)
+      .deploy(tokenName, tokenInitials, escrowFactoryAddress)) as T;
+  }
+
+  return [titleEscrowFactoryContract, tradeTrustTokenContract];
 };

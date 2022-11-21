@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./TokenURIStorage.sol";
+import "./TradeTrustSBT.sol";
+import "./RegistryAccess.sol";
 import "../interfaces/ITradeTrustTokenMintable.sol";
 
-abstract contract TradeTrustTokenMintable is TokenURIStorage, ITradeTrustTokenMintable {
-  function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+abstract contract TradeTrustTokenMintable is TradeTrustSBT, RegistryAccess, ITradeTrustTokenMintable {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(TradeTrustSBT, RegistryAccess)
+    returns (bool)
+  {
     return interfaceId == type(ITradeTrustTokenMintable).interfaceId || super.supportsInterface(interfaceId);
   }
 
@@ -14,23 +21,13 @@ abstract contract TradeTrustTokenMintable is TokenURIStorage, ITradeTrustTokenMi
     address holder,
     uint256 tokenId
   ) external virtual override whenNotPaused onlyRole(MINTER_ROLE) returns (address) {
-    return _mintTitle(beneficiary, holder, tokenId, "");
-  }
-
-  function mintWithUri(
-    address beneficiary,
-    address holder,
-    uint256 tokenId,
-    string memory tokenUri
-  ) external virtual override whenNotPaused onlyRole(MINTER_ROLE) returns (address) {
-    return _mintTitle(beneficiary, holder, tokenId, tokenUri);
+    return _mintTitle(beneficiary, holder, tokenId);
   }
 
   function _mintTitle(
     address beneficiary,
     address holder,
-    uint256 tokenId,
-    string memory tokenUri
+    uint256 tokenId
   ) internal virtual returns (address) {
     if (_exists(tokenId)) {
       revert TokenExists();
@@ -38,8 +35,6 @@ abstract contract TradeTrustTokenMintable is TokenURIStorage, ITradeTrustTokenMi
 
     address newTitleEscrow = titleEscrowFactory().create(tokenId);
     _safeMint(newTitleEscrow, tokenId, abi.encode(beneficiary, holder));
-
-    _setTokenURI(tokenId, tokenUri);
 
     return newTitleEscrow;
   }

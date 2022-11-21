@@ -2,9 +2,9 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
 import { expect } from ".";
-import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
+import { getTitleEscrowContract, getTestUsers, TestUsers, createDeployFixtureRunner } from "./helpers";
 import { computeTitleEscrowAddress } from "../src/utils";
-import { DeployTokenFixtureRunner, deployTokenFixtureRunnerCreator } from "./fixtures";
+import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
 import { contractInterfaceId } from "../src/constants";
 
 describe("TradeTrustTokenRestorable", async () => {
@@ -32,7 +32,14 @@ describe("TradeTrustTokenRestorable", async () => {
     registrySymbol = "GSC";
 
     deployTokenFixtureRunner = async () =>
-      deployTokenFixtureRunnerCreator(registryName, registrySymbol, users.carrier, "TradeTrustToken");
+      createDeployFixtureRunner(
+        ...(await deployTokenFixture<TradeTrustToken>({
+          tokenContractName: "TradeTrustToken",
+          tokenName: registryName,
+          tokenInitials: registrySymbol,
+          deployer: users.carrier,
+        }))
+      );
   });
 
   beforeEach(async () => {
