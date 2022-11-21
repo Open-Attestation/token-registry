@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../interfaces/RegistryAccessErrors.sol";
+import "./SBTUpgradeable.sol";
 
 abstract contract RegistryAccess is RegistryAccessErrors, AccessControlUpgradeable {
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");

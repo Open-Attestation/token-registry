@@ -58,16 +58,32 @@ describe("TradeTrustToken", async () => {
   });
 
   describe("ERC165 Support", () => {
-    it("should support ITradeTrustToken interface", async () => {
-      const interfaceId = contractInterfaceId.TradeTrustToken;
+    it("should support ITradeTrustTokenMintable", async () => {
+      const interfaceId = contractInterfaceId.TradeTrustTokenMintable;
 
       const res = await registryContract.supportsInterface(interfaceId);
 
       expect(res).to.be.true;
     });
 
-    it("should support ERC721 interface", async () => {
-      const interfaceId = contractInterfaceId.ERC721;
+    it("should support ITradeTrustTokenBurnable", async () => {
+      const interfaceId = contractInterfaceId.TradeTrustTokenBurnable;
+
+      const res = await registryContract.supportsInterface(interfaceId);
+
+      expect(res).to.be.true;
+    });
+
+    it("should support ITradeTrustTokenRestorable", async () => {
+      const interfaceId = contractInterfaceId.TradeTrustTokenRestorable;
+
+      const res = await registryContract.supportsInterface(interfaceId);
+
+      expect(res).to.be.true;
+    });
+
+    it("should support the SBT interface", async () => {
+      const interfaceId = contractInterfaceId.SBT;
 
       const res = await registryContract.supportsInterface(interfaceId);
 

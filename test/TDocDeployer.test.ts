@@ -249,14 +249,6 @@ describe("TDocDeployer", async () => {
         });
       });
 
-      it("should clone TradeTrustTokenStandard", async () => {
-        const interfaceId = contractInterfaceId.TradeTrustToken;
-
-        const res = await clonedRegistryContract.supportsInterface(interfaceId);
-
-        expect(res).to.be.true;
-      });
-
       it("should emit Deployment event", async () => {
         expect(createTx)
           .to.emit(deployerContract, "Deployment")
@@ -267,6 +259,40 @@ describe("TDocDeployer", async () => {
             fakeTitleEscrowFactory,
             initParams
           );
+      });
+
+      describe("Clone TradeTrustTokenStandard with key interfaces", () => {
+        it("should support ITradeTrustTokenMintable", async () => {
+          const interfaceId = contractInterfaceId.TradeTrustTokenMintable;
+
+          const res = await clonedRegistryContract.supportsInterface(interfaceId);
+
+          expect(res).to.be.true;
+        });
+
+        it("should support ITradeTrustTokenBurnable", async () => {
+          const interfaceId = contractInterfaceId.TradeTrustTokenBurnable;
+
+          const res = await clonedRegistryContract.supportsInterface(interfaceId);
+
+          expect(res).to.be.true;
+        });
+
+        it("should support ITradeTrustTokenRestorable", async () => {
+          const interfaceId = contractInterfaceId.TradeTrustTokenRestorable;
+
+          const res = await clonedRegistryContract.supportsInterface(interfaceId);
+
+          expect(res).to.be.true;
+        });
+
+        it("should support the SBT interface", async () => {
+          const interfaceId = contractInterfaceId.SBT;
+
+          const res = await clonedRegistryContract.supportsInterface(interfaceId);
+
+          expect(res).to.be.true;
+        });
       });
     });
   });
