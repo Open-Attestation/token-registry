@@ -1,11 +1,10 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { TitleEscrow, TitleEscrowFactory, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
+import { TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
 import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture } from "./fixtures";
-import { getTitleEscrowContract, getTestUsers, TestUsers, createDeployFixtureRunner } from "./helpers";
-import { computeTitleEscrowAddress } from "../src/utils";
+import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 
 describe("TradeTrustToken", async () => {
@@ -20,7 +19,6 @@ describe("TradeTrustToken", async () => {
   let mockTitleEscrowFactoryContract: MockContract<TitleEscrowFactory>;
 
   let tokenId: string;
-  let titleEscrowImplAddr: string;
 
   let deployTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustToken]>;
 
@@ -54,7 +52,6 @@ describe("TradeTrustToken", async () => {
     [mockTitleEscrowFactoryContract, registryContract] = await loadFixture(deployTokenFixtureRunner);
 
     registryContractAsAdmin = registryContract.connect(users.carrier);
-    titleEscrowImplAddr = await mockTitleEscrowFactoryContract.implementation();
   });
 
   describe("ERC165 Support", () => {
@@ -134,229 +131,6 @@ describe("TradeTrustToken", async () => {
     beforeEach(async () => {
       await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
-    });
-
-    describe("Burn Token", () => {
-      describe("When token has been surrendered", () => {
-        beforeEach(async () => {
-          await titleEscrowContract.connect(users.beneficiary).surrender();
-        });
-
-        it("should shred the correct title escrow", async () => {
-          const initialActive = await titleEscrowContract.active();
-
-          await registryContractAsAdmin.burn(tokenId);
-          const currentActive = await titleEscrowContract.active();
-
-          expect(initialActive).to.be.true;
-          expect(currentActive).to.be.false;
-        });
-
-        it("should transfer token to burn address", async () => {
-          await registryContractAsAdmin.burn(tokenId);
-
-          const res = await registryContract.ownerOf(tokenId);
-
-          expect(res).to.equal(defaultAddress.Burn);
-        });
-
-        it("should not allow burning a burnt token", async () => {
-          await registryContractAsAdmin.burn(tokenId);
-
-          const tx = registryContractAsAdmin.burn(tokenId);
-
-          await expect(tx).to.be.reverted;
-        });
-
-        it("should emit Transfer event with correct values", async () => {
-          const tx = await registryContractAsAdmin.burn(tokenId);
-
-          expect(tx)
-            .to.emit(registryContract, "Transfer")
-            .withArgs(registryContract.address, defaultAddress.Burn, tokenId);
-        });
-      });
-
-      describe("When token has not been surrendered", () => {
-        it("should revert when burn token", async () => {
-          const tx = registryContractAsAdmin.burn(tokenId);
-
-          await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
-        });
-
-        it("should revert before transfer when forcefully sent to burn address", async () => {
-          // Note: This is only an additional defence and is not a normal flow.
-          const deployMockTokenFixturesRunner = async () =>
-            createDeployFixtureRunner(
-              deployTokenFixture<TradeTrustTokenMock>({
-                tokenContractName: "TradeTrustTokenMock",
-                tokenName: "The Great Shipping Company",
-                tokenInitials: "GSC",
-                deployer: users.carrier,
-              })
-            );
-
-          const [registryContractMock] = await loadFixture(deployMockTokenFixturesRunner);
-          await registryContractMock.mintInternal(users.carrier.address, tokenId);
-
-          const tx = registryContractMock
-            .connect(users.carrier)
-            .transferFrom(users.carrier.address, defaultAddress.Burn, tokenId);
-
-          await expect(tx).to.be.revertedWithCustomError(registryContractMock, "TokenNotSurrendered");
-        });
-      });
-    });
-
-    describe("Mint Token", () => {
-      beforeEach(async () => {
-        // Fixtures need to be redeployed here without loadFixture because snapshot does not reset call counts in mocks
-        // Only this section has tests that test for call counts
-        [mockTitleEscrowFactoryContract, registryContract] = await deployTokenFixtureRunner();
-
-        registryContractAsAdmin = registryContract.connect(users.carrier);
-        titleEscrowImplAddr = await mockTitleEscrowFactoryContract.implementation();
-
-        await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
-        titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
-      });
-
-      it("should mint token to a title escrow", async () => {
-        const interfaceId = contractInterfaceId.TitleEscrow;
-
-        const res = await titleEscrowContract.supportsInterface(interfaceId);
-
-        expect(res).to.be.true;
-      });
-
-      it("should mint token to a correct title escrow address", async () => {
-        const expectedTitleEscrowAddr = computeTitleEscrowAddress({
-          tokenId,
-          registryAddress: registryContract.address,
-          implementationAddress: titleEscrowImplAddr,
-          factoryAddress: mockTitleEscrowFactoryContract.address,
-        });
-
-        const res = await registryContract.ownerOf(tokenId);
-
-        expect(res).to.equal(expectedTitleEscrowAddr);
-      });
-
-      it("should not allow minting a token that has been burnt", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContractAsAdmin.burn(tokenId);
-
-        const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
-
-        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenExists");
-      });
-
-      it("should not allow minting an existing token", async () => {
-        const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
-
-        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenExists");
-      });
-
-      it("should create title escrow from factory", async () => {
-        expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnce;
-      });
-
-      it("should create title escrow with correct token ID", async () => {
-        expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnceWith(tokenId);
-      });
-
-      describe("Minting with correct beneficiary and holder", () => {
-        beforeEach(async () => {
-          tokenId = faker.datatype.hexaDecimal(64);
-          await registryContractAsAdmin.mint(users.beneficiary.address, users.holder.address, tokenId);
-          titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
-        });
-
-        it("should create title escrow with the correct beneficiary", async () => {
-          const beneficiary = await titleEscrowContract.beneficiary();
-
-          expect(beneficiary).to.equal(users.beneficiary.address);
-        });
-
-        it("should create title escrow with the correct holder", async () => {
-          const holder = await titleEscrowContract.holder();
-
-          expect(holder).to.equal(users.holder.address);
-        });
-      });
-
-      it("should emit Transfer event with correct values", async () => {
-        tokenId = faker.datatype.hexaDecimal(64);
-        const tx = await registryContractAsAdmin.mint(users.beneficiary.address, users.holder.address, tokenId);
-        titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
-
-        expect(tx)
-          .to.emit(registryContract, "Transfer")
-          .withArgs(defaultAddress.Zero, titleEscrowContract.address, tokenId);
-      });
-    });
-
-    describe("Restore Token", () => {
-      it("should revert if Invalid token", async () => {
-        const invalidTokenId = faker.datatype.hexaDecimal(64);
-        const tx = registryContractAsAdmin.restore(invalidTokenId);
-
-        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "InvalidTokenId");
-      });
-
-      it("should revert if token is not surrendered", async () => {
-        const tx = registryContractAsAdmin.restore(tokenId);
-
-        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
-      });
-
-      it("should not allow to restore burnt token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContractAsAdmin.burn(tokenId);
-
-        const tx = registryContractAsAdmin.restore(tokenId);
-
-        await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
-      });
-
-      it("should allow to restore after token is surrendered", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
-
-        const tx = registryContractAsAdmin.restore(tokenId);
-
-        await expect(tx).to.not.be.reverted;
-      });
-
-      it("should restore to the correct title escrow", async () => {
-        const expectedTitleEscrowAddr = computeTitleEscrowAddress({
-          tokenId,
-          registryAddress: registryContract.address,
-          implementationAddress: titleEscrowImplAddr,
-          factoryAddress: mockTitleEscrowFactoryContract.address,
-        });
-        await titleEscrowContract.connect(users.beneficiary).surrender();
-
-        await registryContractAsAdmin.restore(tokenId);
-        const res = await registryContract.ownerOf(tokenId);
-
-        expect(res).to.equal(expectedTitleEscrowAddr);
-      });
-
-      it("should emit Transfer event with the correct values", async () => {
-        const titleEscrowAddress = computeTitleEscrowAddress({
-          tokenId,
-          registryAddress: registryContract.address,
-          implementationAddress: titleEscrowImplAddr,
-          factoryAddress: mockTitleEscrowFactoryContract.address,
-        });
-        await titleEscrowContract.connect(users.beneficiary).surrender();
-
-        const tx = await registryContractAsAdmin.restore(tokenId);
-
-        expect(tx)
-          .to.emit(registryContract, "Transfer")
-          .withArgs(registryContract.address, titleEscrowAddress, tokenId);
-      });
     });
 
     describe("Surrender Status", () => {
