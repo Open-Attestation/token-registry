@@ -70,6 +70,14 @@ describe("TradeTrustTokenMintable", async () => {
     expect(res).to.be.true;
   });
 
+  it("should support ITradeTrustTokenMintable", async () => {
+    const interfaceId = contractInterfaceId.TradeTrustTokenMintable;
+
+    const res = await registryContract.supportsInterface(interfaceId);
+
+    expect(res).to.be.true;
+  });
+
   it("should mint token to a correct title escrow address", async () => {
     const expectedTitleEscrowAddr = computeTitleEscrowAddress({
       tokenId,

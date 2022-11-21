@@ -5,6 +5,7 @@ import { expect } from ".";
 import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { DeployTokenFixtureRunner, deployTokenFixtureRunnerCreator } from "./fixtures";
+import { contractInterfaceId } from "../src/constants";
 
 describe("TradeTrustTokenRestorable", async () => {
   let users: TestUsers;
@@ -44,6 +45,14 @@ describe("TradeTrustTokenRestorable", async () => {
 
     await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
     titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
+  });
+
+  it("should support ITradeTrustTokenRestorable", async () => {
+    const interfaceId = contractInterfaceId.TradeTrustTokenRestorable;
+
+    const res = await registryContract.supportsInterface(interfaceId);
+
+    expect(res).to.be.true;
   });
 
   it("should revert if Invalid token", async () => {

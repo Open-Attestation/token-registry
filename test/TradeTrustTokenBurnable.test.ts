@@ -4,7 +4,7 @@ import faker from "faker";
 import { expect } from ".";
 import { deployTokenFixture, DeployTokenFixtureRunner, deployTokenFixtureRunnerCreator } from "./fixtures";
 import { getTitleEscrowContract, getTestUsers, TestUsers, createDeployFixtureRunner } from "./helpers";
-import { defaultAddress } from "../src/constants";
+import { contractInterfaceId, defaultAddress } from "../src/constants";
 
 describe("TradeTrustTokenBurnable", async () => {
   let users: TestUsers;
@@ -40,6 +40,14 @@ describe("TradeTrustTokenBurnable", async () => {
 
     await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
     titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
+  });
+
+  it("should support ITradeTrustTokenBurnable", async () => {
+    const interfaceId = contractInterfaceId.TradeTrustTokenBurnable;
+
+    const res = await registryContract.supportsInterface(interfaceId);
+
+    expect(res).to.be.true;
   });
 
   describe("When token has been surrendered", () => {
