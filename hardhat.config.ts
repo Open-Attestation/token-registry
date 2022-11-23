@@ -70,10 +70,7 @@ const config: HardhatUserConfig = {
        * Ethereum
        */
       mainnet: ETHERSCAN_API_KEY,
-      ropsten: ETHERSCAN_API_KEY,
       goerli: ETHERSCAN_API_KEY,
-      rinkeby: ETHERSCAN_API_KEY,
-      kovan: ETHERSCAN_API_KEY,
       /**
        * Polygon
        */
@@ -89,21 +86,9 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: `https://mainnet.infura.io/v3/${INFURA_APP_ID}`,
     },
-    ropsten: {
-      ...networkConfig,
-      url: `https://ropsten.infura.io/v3/${INFURA_APP_ID}`,
-    },
     goerli: {
       ...networkConfig,
       url: `https://goerli.infura.io/v3/${INFURA_APP_ID}`,
-    },
-    rinkeby: {
-      ...networkConfig,
-      url: `https://rinkeby.infura.io/v3/${INFURA_APP_ID}`,
-    },
-    kovan: {
-      ...networkConfig,
-      url: `https://kovan.infura.io/v3/${INFURA_APP_ID}`,
     },
     sepolia: {
       ...networkConfig,
