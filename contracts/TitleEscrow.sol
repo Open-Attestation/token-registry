@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "./interfaces/ITitleEscrow.sol";
-import "./interfaces/ITradeTrustERC721.sol";
+import "./interfaces/ITradeTrustToken.sol";
 import "./interfaces/TitleEscrowErrors.sol";
 
 contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow {
@@ -165,7 +165,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   function surrender() external virtual override whenNotPaused whenActive onlyBeneficiary onlyHolder whenHoldingToken {
     _setNominee(address(0));
-    ITradeTrustERC721(registry).safeTransferFrom(address(this), registry, tokenId);
+    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId);
 
     emit Surrender(msg.sender, registry, tokenId);
   }
@@ -190,7 +190,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   }
 
   function _isHoldingToken() internal view returns (bool) {
-    return ITradeTrustERC721(registry).ownerOf(tokenId) == address(this);
+    return ITradeTrustToken(registry).ownerOf(tokenId) == address(this);
   }
 
   function _setNominee(address newNominee) internal virtual {

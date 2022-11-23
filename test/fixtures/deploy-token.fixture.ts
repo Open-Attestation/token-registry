@@ -32,6 +32,6 @@ export const deployTokenFixture = async <T extends Contract | unknown>({
     ).deploy(tokenName, tokenInitials, escrowFactoryAddress)) as unknown as T;
   }
 
-  const tradeTrustERC721Factory = await ethers.getContractFactory(tokenContractName);
-  return (await tradeTrustERC721Factory.connect(deployer).deploy(tokenName, tokenInitials, escrowFactoryAddress)) as T;
+  const tradeTrustTokenFactory = await ethers.getContractFactory(tokenContractName);
+  return (await tradeTrustTokenFactory.connect(deployer).deploy(tokenName, tokenInitials, escrowFactoryAddress)) as T;
 };

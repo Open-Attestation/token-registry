@@ -1,5 +1,5 @@
 import { task } from "hardhat/config";
-import { TradeTrustERC721Impl } from "@tradetrust/contracts";
+import { TradeTrustTokenImpl } from "@tradetrust/contracts";
 import { verifyContract, wait, deployContract } from "./helpers";
 import { TASK_DEPLOY_TOKEN_IMPL } from "./task-names";
 
@@ -14,9 +14,9 @@ task(TASK_DEPLOY_TOKEN_IMPL)
 
       console.log(`[Deployer] ${deployerAddress}`);
 
-      const registryImplContract = await deployContract<TradeTrustERC721Impl>({
+      const registryImplContract = await deployContract<TradeTrustTokenImpl>({
         params: [],
-        contractName: "TradeTrustERC721Impl",
+        contractName: "TradeTrustTokenImpl",
         hre,
       });
 
@@ -28,7 +28,7 @@ task(TASK_DEPLOY_TOKEN_IMPL)
         await verifyContract({
           address: registryImplContract.address,
           constructorArgsParams: [],
-          contract: "contracts/TradeTrustERC721Impl.sol:TradeTrustERC721Impl",
+          contract: "contracts/TradeTrustTokenImpl.sol:TradeTrustTokenImpl",
           hre,
         });
       }

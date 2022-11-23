@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "./access/RegistryAccess.sol";
-import "./interfaces/ITradeTrustERC721.sol";
-import "./interfaces/ITitleEscrow.sol";
-import "./interfaces/ITitleEscrowFactory.sol";
-import "./interfaces/TradeTrustTokenErrors.sol";
+import "./SBTUpgradeable.sol";
+import "../access/RegistryAccess.sol";
+import "../interfaces/ITradeTrustToken.sol";
+import "../interfaces/ITitleEscrow.sol";
+import "../interfaces/ITitleEscrowFactory.sol";
+import "../interfaces/TradeTrustTokenErrors.sol";
 
-abstract contract TradeTrustERC721Base is
+abstract contract TradeTrustTokenBase is
   RegistryAccess,
   PausableUpgradeable,
-  ERC721Upgradeable,
+  SBTUpgradeable,
   TradeTrustTokenErrors,
-  ITradeTrustERC721
+  ITradeTrustToken
 {
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
@@ -23,7 +23,7 @@ abstract contract TradeTrustERC721Base is
     string memory symbol,
     address admin
   ) internal onlyInitializing {
-    __ERC721_init(name, symbol);
+    __SBT_init(name, symbol);
     __Pausable_init();
     __RegistryAccess_init(admin);
   }
@@ -32,12 +32,12 @@ abstract contract TradeTrustERC721Base is
     public
     view
     virtual
-    override(ERC721Upgradeable, IERC165Upgradeable, RegistryAccess)
+    override(SBTUpgradeable, IERC165Upgradeable, RegistryAccess)
     returns (bool)
   {
     return
-      interfaceId == type(ITradeTrustERC721).interfaceId ||
-      ERC721Upgradeable.supportsInterface(interfaceId) ||
+      interfaceId == type(ITradeTrustToken).interfaceId ||
+      SBTUpgradeable.supportsInterface(interfaceId) ||
       RegistryAccess.supportsInterface(interfaceId);
   }
 
@@ -115,7 +115,7 @@ abstract contract TradeTrustERC721Base is
   }
 
   function _registryTransferTo(address to, uint256 tokenId) internal {
-    this.safeTransferFrom(address(this), to, tokenId, "");
+    this.transferFrom(address(this), to, tokenId);
   }
 
   function genesis() public view virtual override returns (uint256);

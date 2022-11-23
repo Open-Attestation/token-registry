@@ -1,4 +1,4 @@
-import { TitleEscrow, TradeTrustERC721, TradeTrustERC721Mock } from "@tradetrust/contracts";
+import { TitleEscrow, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
 import faker from "faker";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from ".";
@@ -6,14 +6,14 @@ import { deployTokenFixture, mintTokenFixture } from "./fixtures";
 import { createDeployFixtureRunner, getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
 import { roleHash } from "../src/constants";
 
-describe("TradeTrustERC721 Pausable Behaviour", async () => {
+describe("TradeTrustToken Pausable Behaviour", async () => {
   let users: TestUsers;
-  let registryContract: TradeTrustERC721;
+  let registryContract: TradeTrustToken;
 
-  let registryContractAsAdmin: TradeTrustERC721;
-  let registryContractAsNonAdmin: TradeTrustERC721;
+  let registryContractAsAdmin: TradeTrustToken;
+  let registryContractAsNonAdmin: TradeTrustToken;
 
-  let deployTokenFixturesRunner: () => Promise<[TradeTrustERC721]>;
+  let deployTokenFixturesRunner: () => Promise<[TradeTrustToken]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -21,8 +21,8 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
 
     deployTokenFixturesRunner = async () =>
       createDeployFixtureRunner(
-        deployTokenFixture<TradeTrustERC721>({
-          tokenContractName: "TradeTrustERC721",
+        deployTokenFixture<TradeTrustToken>({
+          tokenContractName: "TradeTrustToken",
           tokenName: "The Great Shipping Company",
           tokenInitials: "GSC",
           deployer: users.carrier,
@@ -106,8 +106,8 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       });
 
       it("should not allow transfers token", async () => {
-        const registryContractMock = await deployTokenFixture<TradeTrustERC721Mock>({
-          tokenContractName: "TradeTrustERC721Mock",
+        const registryContractMock = await deployTokenFixture<TradeTrustTokenMock>({
+          tokenContractName: "TradeTrustTokenMock",
           tokenName: "The Great Shipping Company",
           tokenInitials: "GSC",
           deployer: users.carrier,
@@ -127,13 +127,13 @@ describe("TradeTrustERC721 Pausable Behaviour", async () => {
       let titleEscrowContract: TitleEscrow;
 
       // eslint-disable-next-line no-undef
-      let deployFixturesRunner: () => Promise<[TradeTrustERC721, TitleEscrow]>;
+      let deployFixturesRunner: () => Promise<[TradeTrustToken, TitleEscrow]>;
 
       // eslint-disable-next-line no-undef
       before(async () => {
         deployFixturesRunner = async () => {
-          const registryContractFixture = await deployTokenFixture<TradeTrustERC721>({
-            tokenContractName: "TradeTrustERC721",
+          const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
+            tokenContractName: "TradeTrustToken",
             tokenName: "The Great Shipping Company",
             tokenInitials: "GSC",
             deployer: users.carrier,

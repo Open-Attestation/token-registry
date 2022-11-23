@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "./TitleEscrow.sol";
-import "./utils/SigHelper.sol";
-import { BeneficiaryTransferEndorsement } from "./lib/TitleEscrowStructs.sol";
-import "./interfaces/ITitleEscrowSignable.sol";
-import "./interfaces/TitleEscrowSignableErrors.sol";
+import "../TitleEscrow.sol";
+import "../utils/SigHelper.sol";
+import { BeneficiaryTransferEndorsement } from "../lib/TitleEscrowStructs.sol";
+import "../interfaces/ITitleEscrowSignable.sol";
+import "../interfaces/TitleEscrowSignableErrors.sol";
 
 /// @notice This Title Escrow allows the holder to perform an off-chain endorsement of beneficiary transfers
 /// @custom:experimental Note that this is currently an experimental feature. See readme for usage details.

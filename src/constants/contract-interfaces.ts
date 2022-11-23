@@ -1,5 +1,5 @@
 export const contractInterfaces = {
-  TradeTrustERC721: [
+  TradeTrustToken: [
     "genesis()",
     "titleEscrowFactory()",
     "burn(uint256)",
@@ -33,15 +33,5 @@ export const contractInterfaces = {
     "revokeRole(bytes32,address)",
     "renounceRole(bytes32,address)",
   ],
-  ERC721: [
-    "balanceOf(address)",
-    "ownerOf(uint256)",
-    "approve(address,uint256)",
-    "getApproved(uint256)",
-    "setApprovalForAll(address,bool)",
-    "isApprovedForAll(address,address)",
-    "transferFrom(address,address,uint256)",
-    "safeTransferFrom(address,address,uint256)",
-    "safeTransferFrom(address,address,uint256,bytes)",
-  ],
+  SBT: ["balanceOf(address)", "ownerOf(uint256)", "transferFrom(address,address,uint256)"],
 };

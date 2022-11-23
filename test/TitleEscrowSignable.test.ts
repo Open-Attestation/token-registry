@@ -2,7 +2,7 @@
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import faker from "faker";
-import { TitleEscrowSignable, TradeTrustERC721 } from "@tradetrust/contracts";
+import { TitleEscrowSignable, TradeTrustToken } from "@tradetrust/contracts";
 import { Signature, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { FakeContract, smock } from "@defi-wonderland/smock";
@@ -132,12 +132,12 @@ describe("TitleEscrowSignable", async () => {
   });
 
   describe("Operational Behaviours", () => {
-    let fakeRegistryContract: FakeContract<TradeTrustERC721>;
+    let fakeRegistryContract: FakeContract<TradeTrustToken>;
     let fakeTokenId: string;
     let titleEscrowContractAsBeneficiary: TitleEscrowSignable;
 
     beforeEach(async () => {
-      fakeRegistryContract = (await smock.fake("TradeTrustERC721")) as FakeContract<TradeTrustERC721>;
+      fakeRegistryContract = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
 
       fakeTokenId = faker.datatype.hexaDecimal(64);
       titleEscrowContractAsBeneficiary = titleEscrowContract.connect(users.beneficiary);
