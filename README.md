@@ -1,11 +1,20 @@
-[![CircleCI](https://img.shields.io/circleci/build/github/Open-Attestation/token-registry/beta)](https://circleci.com/gh/Open-Attestation/token-registry/tree/master)
-[![codecov](https://codecov.io/gh/Open-Attestation/token-registry/branch/beta/graph/badge.svg?token=Y4R9SWXATG)](https://codecov.io/gh/Open-Attestation/token-registry)
-[![npm](https://img.shields.io/npm/dw/@govtechsg/token-registry)](https://www.npmjs.com/package/@govtechsg/token-registry)
-![GitHub](https://img.shields.io/github/license/open-attestation/token-registry)
+<h1 align="center">
+  <p align="center">Token Registry</p>
+  <a href="https://tradetrust.io"><img src="docs/images/tt-logo.png" alt="TradeTrust Token Registry"></a>
+</h1>
 
-# Token Registry
+<p align="center">
+    <a href="https://tradetrust.io">TradeTrust</a> Electronic Bill of Lading (eBL)
+</p>
 
-The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract
+<p align="center">
+  <a href="https://circleci.com/gh/Open-Attestation/token-registry/tree/master" alt="Circle CI"><img src="https://img.shields.io/circleci/build/github/Open-Attestation/token-registry/beta" /></a>
+  <a href="https://codecov.io/gh/Open-Attestation/token-registry" alt="Code Coverage"><img src="https://codecov.io/gh/Open-Attestation/token-registry/branch/beta/graph/badge.svg?token=Y4R9SWXATG" /></a>
+  <a href="https://www.npmjs.com/package/@govtechsg/token-registry" alt="NPM"><img src="https://img.shields.io/npm/dw/@govtechsg/token-registry" /></a>
+  <img src="https://img.shields.io/github/license/open-attestation/token-registry" />
+</p>
+
+The Electronic Bill of Lading (eBL) is a digital document that can be used to prove the ownership of goods. It is a standardised document that is accepted by all major shipping lines and customs authorities. The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract
 code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
 
 > ⚠️ **Beta Notice**
