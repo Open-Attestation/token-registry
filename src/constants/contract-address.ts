@@ -23,9 +23,9 @@ export const contractAddress = {
   },
   TokenImplementation: {
     [ChainId.Ethereum]: undefined,
-    [ChainId.Goerli]: "0x021C1e895e39D53Cf87722211FF0a824d9D73c60",
-    [ChainId.Sepolia]: "0x021C1e895e39D53Cf87722211FF0a824d9D73c60",
+    [ChainId.Goerli]: "0xC78BA1a49663Ef8b920F36B036E91Ab40D8F26D6",
+    [ChainId.Sepolia]: "0xC78BA1a49663Ef8b920F36B036E91Ab40D8F26D6",
     [ChainId.Polygon]: undefined,
-    [ChainId.PolygonMumbai]: "0xC78BA1a49663Ef8b920F36B036E91Ab40D8F26D6",
+    [ChainId.PolygonMumbai]: "0x83A533397eFE1d90baA26dEc7743626d7598656F",
   },
 };
