@@ -17,12 +17,6 @@
 The Electronic Bill of Lading (eBL) is a digital document that can be used to prove the ownership of goods. It is a standardised document that is accepted by all major shipping lines and customs authorities. The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract
 code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
 
-> ⚠️ **Beta Notice**
->
-> Welcome to the beta branch of Token Registry! This branch is still in active development. Please expect bugs and breaking changes. Be warned but be brave!💪
->
-> Please report any issues or suggestions [here](https://github.com/Open-Attestation/token-registry/issues).
-
 ## Table of Contents
 
 - [Installation](#installation)
