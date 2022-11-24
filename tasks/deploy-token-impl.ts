@@ -28,7 +28,7 @@ task(TASK_DEPLOY_TOKEN_IMPL)
         await verifyContract({
           address: registryImplContract.address,
           constructorArgsParams: [],
-          contract: "contracts/TradeTrustTokenImpl.sol:TradeTrustTokenImpl",
+          contract: "contracts/presets/TradeTrustTokenImpl.sol:TradeTrustTokenImpl",
           hre,
         });
       }
