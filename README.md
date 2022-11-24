@@ -21,7 +21,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 
 - [Installation](#installation)
 - [Usage](#usage)
-  - [TradeTrustERC721](#tradetrusterc721)
+  - [TradeTrustToken](#tradetrusttoken)
   - [Title Escrow](#title-escrow)
   - [Title Escrow Signable (Experimental)](#title-escrow-signable-experimental)
   - [Provider & Signer](#provider--signer)
@@ -57,14 +57,18 @@ Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/)
 or [signer](https://docs.ethers.io/v5/api/signer/#Wallet) (if you are writing to the blockchain).
 This package exposes the [Typechain (Ethers)](https://github.com/dethcrypto/TypeChain/tree/master/packages/target-ethers-v5) bindings for the contracts.
 
-### TradeTrustERC721
+### TradeTrustToken
+
+The `TradeTrustToken` is a Soulbound Token (SBT) tied to the Title Escrow. The SBT implementation is loosely based on OpenZeppelin's implementation of the [ERC721](http://erc721.org/) standard.
+An SBT is used in this case because the token, while can be transferred to the registry, is largely restricted to its designated Title Escrow contracts.
+See issue [#108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
 #### Connect to existing token registry
 
 ```ts
-import { TradeTrustERC721__factory } from "@govtechsg/token-registry/contracts";
+import { TradeTrustToken__factory } from "@govtechsg/token-registry/contracts";
 
-const connectedRegistry = TradeTrustERC721__factory.connect(tokenRegistryAddress, signer);
+const connectedRegistry = TradeTrustToken__factory.connect(tokenRegistryAddress, signer);
 ```
 
 #### Issuing a Document
@@ -84,11 +88,6 @@ await connectedRegistry.restore(tokenId);
 ```ts
 await connectedRegistry.burn(tokenId);
 ```
-
-#### ERC721 NFT Standard
-
-Although the registry contract is based on the [ERC721](http://erc721.org/) standards, token transfer is currently restricted to the tokens' Title Escrow contracts only.
-See [issue #108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
 ### Title Escrow
 
@@ -295,7 +294,7 @@ OPTIONS:
   --symbol    	Symbol of token
   --verify    	Verify on Etherscan
 
-deploy:token: Deploys the TradeTrustERC721 token
+deploy:token: Deploys the TradeTrust token
 ```
 
 > 💡 Tip: Note that the `--factory` argument is optional. When not provided, the task will use the default Title Escrow Factory.
