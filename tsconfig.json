@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist/types",
     "target": "esnext",
-    "module": "esnext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "jsx": "react",
     "strict": true,
@@ -14,8 +14,28 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "stripInternal": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "emitDeclarationOnly": true,
+    "baseUrl": ".",
+    "paths": {
+      "@tradetrust/contracts": [
+        "./src/contracts"
+      ],
+      "@tradetrust/contracts/*": [
+        "./src/contracts/*"
+      ]
+    }
   },
-  "include": ["./src/**/*", "./test/**/*"],
-  "exclude": ["./src/contracts/**/*"]
+  "ts-node": {
+    "files": true
+  },
+  "include": [
+    "./src/**/*",
+    "./test/**/*",
+    "./hardhat.config.ts"
+  ],
+  "exclude": [
+    "./src/contracts/**/*"
+  ]
 }
