@@ -196,7 +196,7 @@ import { Wallet, providers, getDefaultProvider } from "ethers";
 
 // Providers
 const mainnetProvider = getDefaultProvider();
-const ropstenProvider = getDefaultProvider("ropsten");
+const goerliProvider = getDefaultProvider("goerli");
 const metamaskProvider = new providers.Web3Provider(web3.currentProvider); // Will change network automatically
 
 // Signer
@@ -275,7 +275,7 @@ For users who want to quickly deploy their contracts without too much hassle, yo
 npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symbol GSC
 ```
 
-👆 This is the easiest and most cost-effective method to deploy. Currently, this is supported on Ropsten, Rinkeby and Polygon Mumbai. The deployed contract will inherit all the standard functionality from our on-chain contracts. This helps to save deployment costs and make the process more convenient for users and integrators.
+👆 This is the easiest and most cost-effective method to deploy. Currently, this is supported on Goerli, Sepolia and Polygon Mumbai. The deployed contract will inherit all the standard functionality from our on-chain contracts. This helps to save deployment costs and make the process more convenient for users and integrators.
 
 > 💡 Remember to supply the`--network` argument with the name of the network you wish to deploy on.
 > See [Network Configuration](#network-configuration) section for more info on the list of network names.
@@ -367,10 +367,8 @@ tasks (which internally uses the same plugin), you will need to include your cor
 Here's a list of network names currently pre-configured:
 
 - `mainnet` (Ethereum)
-- `ropsten`
-- `rinkeby`
-- `kovan`
 - `goerli`
+- `sepolia`
 - `polygon` (Polygon Mainnet)
 - `mumbai` (Polygon Mumbai)
 
