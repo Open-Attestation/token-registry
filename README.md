@@ -256,7 +256,7 @@ Can only be called by default admin.
 Hardhat is used to manage the contract development environment and deployment. This repository provides a couple of
 Hardhat tasks to simplify the deployment process.
 
-Starting from v4 beta, we have included an easy and cost-effective way to deploy the contracts while also keeping options available for advanced users to setup the contracts their preferred way.
+Starting from v4, we have included an easy and cost-effective way to deploy the contracts while also keeping options available for advanced users to setup the contracts their preferred way.
 
 > 💡 Please ensure that you have setup your configuration file before deployment.
 > See [Configuration](#configuration) section for more details. The deployer (configured in your `.env` file) will be made the default admin.
