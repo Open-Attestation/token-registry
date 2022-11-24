@@ -45,7 +45,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 ## Installation
 
 ```sh
-npm install --save @govtechsg/token-registry@beta
+npm install --save @govtechsg/token-registry
 ```
 
 ---
