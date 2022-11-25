@@ -15,6 +15,8 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
     bytes params
   );
 
+  event AddImplementation(address indexed implementation, address indexed titleEscrowFactory);
+
   // mapping: implementation => title escrow factory
   mapping(address => address) public implementations;
 
@@ -48,6 +50,8 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
       revert ImplementationAlreadyAdded();
     }
     implementations[implementation] = titleEscrowFactory;
+
+    emit AddImplementation(implementation, titleEscrowFactory);
   }
 
   function removeImplementation(address implementation) external onlyOwner {

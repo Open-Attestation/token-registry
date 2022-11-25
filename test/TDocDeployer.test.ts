@@ -105,6 +105,14 @@ describe("TDocDeployer", async () => {
         expect(res).to.equal(fakeTitleEscrowFactory);
       });
 
+      it("should emit AddImplementation when add implementation", async () => {
+        const tx = await deployerContractAsNonOwner.implementations(implContract.address);
+
+        expect(tx)
+          .to.emit(deployerContract, "AddImplementation")
+          .withArgs(implContract.address, fakeTitleEscrowFactory);
+      });
+
       it("should not allow adding an already added implementation", async () => {
         const tx = deployerContractAsOwner.addImplementation(implContract.address, fakeTitleEscrowFactory);
 
