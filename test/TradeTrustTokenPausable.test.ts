@@ -2,8 +2,14 @@ import { TitleEscrow, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/c
 import faker from "faker";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from ".";
-import { deployTokenFixture, mintTokenFixture } from "./fixtures";
-import { createDeployFixtureRunner, getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
+import { deployTokenFixture, DeployTokenFixtureRunner, mintTokenFixture } from "./fixtures";
+import {
+  createDeployFixtureRunner,
+  getTestUsers,
+  impersonateAccount,
+  TestUsers,
+  toAccessControlRevertMessage,
+} from "./helpers";
 import { roleHash } from "../src/constants";
 
 describe("TradeTrustToken Pausable Behaviour", async () => {
@@ -13,7 +19,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
   let registryContractAsAdmin: TradeTrustToken;
   let registryContractAsNonAdmin: TradeTrustToken;
 
-  let deployTokenFixturesRunner: () => Promise<[TradeTrustToken]>;
+  let deployTokenFixturesRunner: DeployTokenFixtureRunner;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -21,18 +27,18 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
 
     deployTokenFixturesRunner = async () =>
       createDeployFixtureRunner(
-        deployTokenFixture<TradeTrustToken>({
+        ...(await deployTokenFixture<TradeTrustToken>({
           tokenContractName: "TradeTrustToken",
           tokenName: "The Great Shipping Company",
           tokenInitials: "GSC",
           deployer: users.carrier,
-        })
+        }))
       );
   });
 
   describe("Rights to pause and unpause registry", () => {
     beforeEach(async () => {
-      [registryContract] = await loadFixture(deployTokenFixturesRunner);
+      [, registryContract] = await loadFixture(deployTokenFixturesRunner);
 
       registryContractAsAdmin = registryContract.connect(users.carrier);
       registryContractAsNonAdmin = registryContract.connect(users.beneficiary);
@@ -106,18 +112,23 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
       });
 
       it("should not allow transfers token", async () => {
-        const registryContractMock = await deployTokenFixture<TradeTrustTokenMock>({
+        const [titleEscrowFactoryContract, registryContractMock] = await deployTokenFixture<TradeTrustTokenMock>({
           tokenContractName: "TradeTrustTokenMock",
           tokenName: "The Great Shipping Company",
           tokenInitials: "GSC",
           deployer: users.carrier,
         });
-        await registryContractMock.mintInternal(users.beneficiary.address, tokenId);
+        const tokenRecipientAddress = await titleEscrowFactoryContract.getAddress(
+          registryContractMock.address,
+          tokenId
+        );
+        const tokenRecipientSigner = await impersonateAccount({ address: tokenRecipientAddress });
+        await registryContractMock.mintInternal(tokenRecipientAddress, tokenId);
         await registryContractMock.pause();
 
         const tx = registryContractMock
-          .connect(users.beneficiary)
-          .transferFrom(users.beneficiary.address, users.holder.address, tokenId);
+          .connect(tokenRecipientSigner)
+          .transferFrom(tokenRecipientAddress, users.holder.address, tokenId);
 
         await expect(tx).to.be.revertedWith("Pausable: paused");
       });
@@ -132,7 +143,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
       // eslint-disable-next-line no-undef
       before(async () => {
         deployFixturesRunner = async () => {
-          const registryContractFixture = await deployTokenFixture<TradeTrustToken>({
+          const [, registryContractFixture] = await deployTokenFixture<TradeTrustToken>({
             tokenContractName: "TradeTrustToken",
             tokenName: "The Great Shipping Company",
             tokenInitials: "GSC",

@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { TDocDeployer, TradeTrustTokenImpl } from "@tradetrust/contracts";
+import { TDocDeployer, TradeTrustTokenStandard } from "@tradetrust/contracts";
 import { DeploymentEvent } from "@tradetrust/contracts/contracts/utils/TDocDeployer";
 import faker from "faker";
 import { ContractTransaction } from "ethers";
@@ -8,7 +8,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from ".";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 import { defaultAddress, contractInterfaceId } from "../src/constants";
-import { deployTDocDeployerFixture, deployTradeTrustTokenImplFixture } from "./fixtures";
+import { deployTDocDeployerFixture, deployTradeTrustTokenStandardFixture } from "./fixtures";
 import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 
 describe("TDocDeployer", async () => {
@@ -16,13 +16,13 @@ describe("TDocDeployer", async () => {
   let deployer: SignerWithAddress;
 
   let deployerContract: TDocDeployer;
-  let implContract: TradeTrustTokenImpl;
+  let implContract: TradeTrustTokenStandard;
   let fakeTitleEscrowFactory: string;
 
   let deployerContractAsOwner: TDocDeployer;
   let deployerContractAsNonOwner: TDocDeployer;
 
-  let deployFixturesRunner: () => Promise<[TradeTrustTokenImpl, TDocDeployer]>;
+  let deployFixturesRunner: () => Promise<[TradeTrustTokenStandard, TDocDeployer]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -31,7 +31,7 @@ describe("TDocDeployer", async () => {
 
     deployFixturesRunner = async () =>
       createDeployFixtureRunner(
-        deployTradeTrustTokenImplFixture({ deployer }),
+        deployTradeTrustTokenStandardFixture({ deployer }),
         deployTDocDeployerFixture({ deployer })
       );
   });
@@ -195,7 +195,7 @@ describe("TDocDeployer", async () => {
 
     describe("Deploy", () => {
       let createTx: ContractTransaction;
-      let clonedRegistryContract: TradeTrustTokenImpl;
+      let clonedRegistryContract: TradeTrustTokenStandard;
       let initParams: string;
 
       beforeEach(async () => {
@@ -210,9 +210,9 @@ describe("TDocDeployer", async () => {
           createReceipt,
           deployerContract.interface.getEventTopic("Deployment")
         );
-        clonedRegistryContract = (await ethers.getContractFactory("TradeTrustTokenImpl")).attach(
+        clonedRegistryContract = (await ethers.getContractFactory("TradeTrustTokenStandard")).attach(
           event.args.deployed
-        ) as TradeTrustTokenImpl;
+        ) as TradeTrustTokenStandard;
       });
 
       describe("Initialisation by deployer", () => {
@@ -249,14 +249,6 @@ describe("TDocDeployer", async () => {
         });
       });
 
-      it("should clone TradeTrustTokenImpl", async () => {
-        const interfaceId = contractInterfaceId.TradeTrustToken;
-
-        const res = await clonedRegistryContract.supportsInterface(interfaceId);
-
-        expect(res).to.be.true;
-      });
-
       it("should emit Deployment event", async () => {
         expect(createTx)
           .to.emit(deployerContract, "Deployment")
@@ -267,6 +259,40 @@ describe("TDocDeployer", async () => {
             fakeTitleEscrowFactory,
             initParams
           );
+      });
+
+      describe("Clone TradeTrustTokenStandard with key interfaces", () => {
+        it("should support ITradeTrustTokenMintable", async () => {
+          const interfaceId = contractInterfaceId.TradeTrustTokenMintable;
+
+          const res = await clonedRegistryContract.supportsInterface(interfaceId);
+
+          expect(res).to.be.true;
+        });
+
+        it("should support ITradeTrustTokenBurnable", async () => {
+          const interfaceId = contractInterfaceId.TradeTrustTokenBurnable;
+
+          const res = await clonedRegistryContract.supportsInterface(interfaceId);
+
+          expect(res).to.be.true;
+        });
+
+        it("should support ITradeTrustTokenRestorable", async () => {
+          const interfaceId = contractInterfaceId.TradeTrustTokenRestorable;
+
+          const res = await clonedRegistryContract.supportsInterface(interfaceId);
+
+          expect(res).to.be.true;
+        });
+
+        it("should support the SBT interface", async () => {
+          const interfaceId = contractInterfaceId.SBT;
+
+          const res = await clonedRegistryContract.supportsInterface(interfaceId);
+
+          expect(res).to.be.true;
+        });
       });
     });
   });

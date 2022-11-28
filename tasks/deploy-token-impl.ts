@@ -1,5 +1,5 @@
 import { task } from "hardhat/config";
-import { TradeTrustTokenImpl } from "@tradetrust/contracts";
+import { TradeTrustTokenStandard } from "@tradetrust/contracts";
 import { verifyContract, wait, deployContract } from "./helpers";
 import { TASK_DEPLOY_TOKEN_IMPL } from "./task-names";
 
@@ -14,9 +14,9 @@ task(TASK_DEPLOY_TOKEN_IMPL)
 
       console.log(`[Deployer] ${deployerAddress}`);
 
-      const registryImplContract = await deployContract<TradeTrustTokenImpl>({
+      const registryImplContract = await deployContract<TradeTrustTokenStandard>({
         params: [],
-        contractName: "TradeTrustTokenImpl",
+        contractName: "TradeTrustTokenStandard",
         hre,
       });
 
@@ -28,7 +28,7 @@ task(TASK_DEPLOY_TOKEN_IMPL)
         await verifyContract({
           address: registryImplContract.address,
           constructorArgsParams: [],
-          contract: "contracts/presets/TradeTrustTokenImpl.sol:TradeTrustTokenImpl",
+          contract: "contracts/presets/TradeTrustTokenStandard.sol:TradeTrustTokenStandard",
           hre,
         });
       }

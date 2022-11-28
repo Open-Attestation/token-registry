@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../interfaces/RegistryAccessErrors.sol";
 
-abstract contract RegistryAccess is RegistryAccessErrors, AccessControlUpgradeable {
+abstract contract RegistryAccess is AccessControlUpgradeable, RegistryAccessErrors {
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
   bytes32 public constant RESTORER_ROLE = keccak256("RESTORER_ROLE");
   bytes32 public constant ACCEPTER_ROLE = keccak256("ACCEPTER_ROLE");
@@ -19,7 +19,7 @@ abstract contract RegistryAccess is RegistryAccessErrors, AccessControlUpgradeab
     _setupRole(ACCEPTER_ROLE, admin);
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControlUpgradeable) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 

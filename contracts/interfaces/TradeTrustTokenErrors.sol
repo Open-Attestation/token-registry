@@ -7,4 +7,6 @@ interface TradeTrustTokenErrors {
   error InvalidTokenId();
 
   error TokenExists();
+
+  error TransferFailure();
 }

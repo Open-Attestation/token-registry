@@ -1,11 +1,8 @@
 export const contractInterfaces = {
-  TradeTrustToken: [
-    "genesis()",
-    "titleEscrowFactory()",
-    "burn(uint256)",
-    "restore(uint256)",
-    "mint(address,address,uint256)",
-  ],
+  TradeTrustSBT: ["genesis()", "titleEscrowFactory()"],
+  TradeTrustTokenMintable: ["mint(address,address,uint256)"],
+  TradeTrustTokenBurnable: ["burn(uint256)"],
+  TradeTrustTokenRestorable: ["restore(uint256)"],
   TitleEscrow: [
     "nominate(address)",
     "transferBeneficiary(address)",

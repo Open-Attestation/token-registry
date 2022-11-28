@@ -1,20 +1,20 @@
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import faker from "faker";
-import { TradeTrustTokenImpl } from "@tradetrust/contracts";
+import { TradeTrustTokenStandard } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ContractTransaction } from "ethers";
 import { expect } from ".";
-import { deployTradeTrustTokenImplFixture } from "./fixtures";
+import { deployTradeTrustTokenStandardFixture } from "./fixtures";
 import { encodeInitParams } from "../src/utils";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 import { defaultAddress, roleHash } from "../src/constants";
 import { getTestUsers, TestUsers } from "./helpers";
 
-describe("TradeTrustTokenImpl", async () => {
+describe("TradeTrustTokenStandard", async () => {
   let users: TestUsers;
-  let implContract: TradeTrustTokenImpl;
-  let registryImplContract: TradeTrustTokenImpl;
+  let implContract: TradeTrustTokenStandard;
+  let registryImplContract: TradeTrustTokenStandard;
 
   let registryName: string;
   let registrySymbol: string;
@@ -23,7 +23,7 @@ describe("TradeTrustTokenImpl", async () => {
   let deployer: SignerWithAddress;
   let initialiserSigner: SignerWithAddress;
 
-  let deployFixturesRunner: () => Promise<[TradeTrustTokenImpl, TradeTrustTokenImpl]>;
+  let deployFixturesRunner: () => Promise<[TradeTrustTokenStandard, TradeTrustTokenStandard]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -35,9 +35,9 @@ describe("TradeTrustTokenImpl", async () => {
     registrySymbol = "GSC";
 
     deployFixturesRunner = async () => {
-      const implContractFixture = await deployTradeTrustTokenImplFixture({ deployer });
+      const implContractFixture = await deployTradeTrustTokenStandardFixture({ deployer });
 
-      const registryWithProxyContractFixture = await deployImplProxy<TradeTrustTokenImpl>({
+      const registryWithProxyContractFixture = await deployImplProxy<TradeTrustTokenStandard>({
         implementation: implContractFixture,
         deployer: users.carrier,
       });
