@@ -1,6 +1,6 @@
 <h1 align="center">
   <p align="center">Token Registry</p>
-  <a href="https://tradetrust.io"><img src="docs/images/tt-logo.png" alt="TradeTrust Token Registry"></a>
+  <a href="https://tradetrust.io"><img src="docs/images/tt-logo.png" alt="TradeTrust Token Registry" /></a>
 </h1>
 
 <p align="center">
@@ -19,13 +19,6 @@ code for token registry (in `/contracts`) as well as the node package for using 
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-  - [TradeTrustToken](#tradetrusttoken)
-  - [Title Escrow](#title-escrow)
-  - [Title Escrow Signable (Experimental)](#title-escrow-signable-experimental)
-  - [Provider & Signer](#provider--signer)
-  - [Roles and Access](#roles-and-access)
 - [Deployment](#deployment)
   - [Quick Start](#quick-start)
   - [Advanced Usage](#advanced-usage)
@@ -36,11 +29,11 @@ code for token registry (in `/contracts`) as well as the node package for using 
       - [Deploy a new Title Escrow Factory](#deploy-a-new-title-escrow-factory)
   - [Verification](#verification)
   - [Network Configuration](#network-configuration)
-- [Configuration](#configuration)
+  - [Configuration](#configuration)
 - [Development](#development)
-  - [Scripts](#scripts)
-- [Subgraph](#subgraph)
-- [Notes](#notes)
+    - [Scripts](#scripts)
+  - [Subgraph](#subgraph)
+  - [Notes](#notes)
 
 ## Installation
 
