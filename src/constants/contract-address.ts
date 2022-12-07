@@ -9,10 +9,10 @@ const ChainId = {
 export const contractAddress = {
   TitleEscrowFactory: {
     [ChainId.Ethereum]: "0xA38CC56c9291B9C1f52F862dd92326d352e710b8",
-    [ChainId.Goerli]: "0x878A327daA390Bc602Ae259D3A374610356b6485",
-    [ChainId.Sepolia]: "0x878A327daA390Bc602Ae259D3A374610356b6485",
+    [ChainId.Goerli]: "0x5aA71Cc9559bC5e54E9504a81496d9F8454721F5",
+    [ChainId.Sepolia]: "0x5aA71Cc9559bC5e54E9504a81496d9F8454721F5",
     [ChainId.Polygon]: "0xA38CC56c9291B9C1f52F862dd92326d352e710b8",
-    [ChainId.PolygonMumbai]: "0xBf6aF71F523aD7A0531536eB33972E6fCA5aaA53",
+    [ChainId.PolygonMumbai]: "0x5aA71Cc9559bC5e54E9504a81496d9F8454721F5",
   },
   Deployer: {
     [ChainId.Ethereum]: "0x92470d0Fc33Cbf2f04B39696733806a15eD7eef3",
