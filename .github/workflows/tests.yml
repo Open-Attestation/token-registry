@@ -1,0 +1,51 @@
+on:
+  pull_request:
+    types: [ opened, reopened, synchronize ]
+  workflow_call:
+
+env:
+  NODE_ENV: ci
+
+name: "Tests"
+
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+      - run: npm ci --ignore-scripts
+      - run: npm run coverage
+      - uses: actions/upload-artifact@v3
+        with:
+          name: test-coverage
+          path: ./coverage/lcov.info
+
+  test-build:
+    name: Test Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+
+  coverage:
+    name: Test Coverage
+    needs: [ run-tests ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download coverage
+        uses: actions/download-artifact@v3
+        with:
+          name: test-coverage
+      - uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          verbose: true
