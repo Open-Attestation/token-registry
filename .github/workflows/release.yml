@@ -27,8 +27,6 @@ jobs:
       - run: npm ci
       - run: npm run build
       - uses: codfish/semantic-release-action@v2
-        with:
-          dry_run: true
         id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
