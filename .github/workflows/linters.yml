@@ -1,0 +1,41 @@
+on:
+  pull_request:
+  workflow_call:
+
+env:
+  NODE_ENV: ci
+
+name: "Linters"
+
+jobs:
+  lint:
+    name: Code Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+
+  eslint-review:
+    name: ES Lint Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  commit-lint:
+    name: Commit Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Commit Lint Dependencies
+        run: npm install @commitlint/config-conventional
+      - uses: JulienKode/pull-request-name-linter-action@v0.5.0
