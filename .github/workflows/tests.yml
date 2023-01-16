@@ -1,6 +1,4 @@
 on:
-  pull_request:
-    types: [ opened, reopened, synchronize ]
   workflow_call:
 
 env:
@@ -49,3 +47,4 @@ jobs:
         with:
           fail_ci_if_error: true
           verbose: true
+

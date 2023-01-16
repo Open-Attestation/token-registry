@@ -12,9 +12,13 @@ name: Release
 
 jobs:
   tests:
+    name: Tests
     uses: ./.github/workflows/tests.yml
+
   linters:
+    name: Linters
     uses: ./.github/workflows/linters.yml
+
   release:
     name: Publish Release
     runs-on: ubuntu-latest

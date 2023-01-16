@@ -1,5 +1,4 @@
 on:
-  pull_request:
   workflow_call:
 
 env:
@@ -18,18 +17,6 @@ jobs:
           node-version: 14.x
       - run: npm ci --ignore-scripts
       - run: npm run lint
-
-  eslint-review:
-    name: ES Lint Review
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-eslint@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   commit-lint:
     name: Commit Lint
