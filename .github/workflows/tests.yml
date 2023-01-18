@@ -1,6 +1,4 @@
 on:
-  pull_request:
-    types: [ opened, reopened, synchronize ]
   workflow_call:
 
 env:
