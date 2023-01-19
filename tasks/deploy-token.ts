@@ -21,7 +21,7 @@ task(TASK_DEPLOY_TOKEN)
 
     let testUselessVar;
 
-    var oldSchoolCoolVar = "cool";
+    let oldSchoolCoolVar = "cool";
 
     try {
       const [deployer] = await ethers.getSigners();
