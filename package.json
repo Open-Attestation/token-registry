@@ -102,7 +102,7 @@
     "semantic-release": "^19.0.3",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
-    "solidity-coverage": "^0.7.21",
+    "solidity-coverage": "^0.8.2",
     "solium": "^1.2.5",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
