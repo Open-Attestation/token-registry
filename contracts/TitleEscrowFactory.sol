@@ -14,7 +14,7 @@ contract TitleEscrowFactory is ITitleEscrowFactory, TitleEscrowFactoryErrors {
   }
 
   function create(uint256 tokenId) external override returns (address) {
-    if (msg.sender.code.length == 0) {
+    if (tx.origin == msg.sender) {
       revert CreateCallerNotContract();
     }
     bytes32 salt = keccak256(abi.encodePacked(msg.sender, tokenId));
