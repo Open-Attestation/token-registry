@@ -1,14 +1,14 @@
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import faker from "faker";
-import { ContractTransaction, Signer } from "ethers";
-import { DummyContractMock, TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
+import { ContractTransaction } from "ethers";
+import { TitleEscrow, TitleEscrowFactory, TitleEscrowFactoryCallerMock } from "@tradetrust/contracts";
 import { TitleEscrowCreatedEvent } from "@tradetrust/contracts/contracts/TitleEscrowFactory";
 import { expect } from ".";
 import { deployEscrowFactoryFixture } from "./fixtures";
 import { computeTitleEscrowAddress, getEventFromReceipt } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
-import { createDeployFixtureRunner, getTestUsers, impersonateAccount, TestUsers } from "./helpers";
+import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 
 describe("TitleEscrowFactory", async () => {
   let users: TestUsers;
@@ -85,9 +85,14 @@ describe("TitleEscrowFactory", async () => {
 
   describe("Create Title Escrow Contract", () => {
     let tokenId: string;
+    let titleEscrowFactoryCallerMock: TitleEscrowFactoryCallerMock;
 
     beforeEach(async () => {
       tokenId = faker.datatype.hexaDecimal(64);
+
+      titleEscrowFactoryCallerMock = (await (
+        await ethers.getContractFactory("TitleEscrowFactoryCallerMock")
+      ).deploy()) as TitleEscrowFactoryCallerMock;
     });
 
     describe("Create Caller", () => {
@@ -100,33 +105,29 @@ describe("TitleEscrowFactory", async () => {
       });
 
       it("should call create successfully from a contract", async () => {
-        const dummyContractMock = (await (
-          await ethers.getContractFactory("DummyContractMock")
-        ).deploy()) as DummyContractMock;
-        const mockContractSigner = await impersonateAccount({ address: dummyContractMock.address });
-
-        const tx = titleEscrowFactory.connect(mockContractSigner).create(tokenId);
+        const tx = titleEscrowFactoryCallerMock.connect(users.carrier).callCreate(titleEscrowFactory.address, tokenId);
 
         await expect(tx).to.not.be.reverted;
       });
     });
 
     describe("Create Title Escrow Behaviours", () => {
-      let mockContractSigner: Signer;
       let titleEscrowFactoryCreateTx: ContractTransaction;
       let titleEscrowContract: TitleEscrow;
 
       beforeEach(async () => {
-        const dummyContractMock = (await (
-          await ethers.getContractFactory("DummyContractMock")
-        ).deploy()) as DummyContractMock;
-        mockContractSigner = await impersonateAccount({ address: dummyContractMock.address });
-        titleEscrowFactoryCreateTx = await titleEscrowFactory.connect(mockContractSigner).create(tokenId);
+        const signer = users.others[faker.datatype.number(users.others.length - 1)];
+        titleEscrowFactoryCreateTx = await titleEscrowFactoryCallerMock
+          .connect(signer)
+          .callCreate(titleEscrowFactory.address, tokenId);
 
         const receipt = await titleEscrowFactoryCreateTx.wait();
+
+        const titleEscrowFactoryInterface = (await ethers.getContractFactory("TitleEscrowFactory")).interface;
         const titleEscrowAddress = getEventFromReceipt<TitleEscrowCreatedEvent>(
           receipt,
-          titleEscrowFactory.interface.getEventTopic("TitleEscrowCreated")
+          titleEscrowFactory.interface.getEventTopic("TitleEscrowCreated"),
+          titleEscrowFactoryInterface
         ).args.titleEscrow;
 
         titleEscrowContract = (await ethers.getContractFactory("TitleEscrow")).attach(
@@ -136,17 +137,17 @@ describe("TitleEscrowFactory", async () => {
 
       it("should create with the correct token registry address", async () => {
         const registryAddress = await titleEscrowContract.registry();
-        const signerAddress = await mockContractSigner.getAddress();
+        const createCallerAddress = titleEscrowFactoryCallerMock.address;
 
-        expect(registryAddress).to.equal(signerAddress);
+        expect(registryAddress).to.equal(createCallerAddress);
       });
 
       it("should emit TitleEscrowCreated event", async () => {
-        const signerAddress = await mockContractSigner.getAddress();
+        const createCallerAddress = titleEscrowFactoryCallerMock.address;
 
         expect(titleEscrowFactoryCreateTx)
           .to.emit(titleEscrowFactory, "TitleEscrowCreated")
-          .withArgs(titleEscrowContract.address, signerAddress, tokenId);
+          .withArgs(titleEscrowContract.address, createCallerAddress, tokenId);
       });
     });
   });
