@@ -313,7 +313,7 @@ network using the default Title Escrow factory. The contract will also be _verif
 
 #### Using an existing Title Escrow Factory
 
-To use an existing or your own version of Title Escrow factory, you can supply its address to the `—factory` argument. This works with and without the `--standalone` flag.
+To use an existing or your own version of Title Escrow factory, you can supply its address to the `—factory` argument. This option only works with the `--standalone` flag.
 
 ```
 npx hardhat deploy:token --network polygon --name "The Great Shipping Co." --symbol GSC --factory 0xfac70
