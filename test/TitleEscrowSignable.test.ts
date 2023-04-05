@@ -339,7 +339,7 @@ describe("TitleEscrowSignable", async () => {
             const [, invalidNominee] = users.others;
             await titleEscrowContractAsBeneficiary.nominate(invalidNominee.address);
             const onChainNominee = await titleEscrowContract.nominee();
-            assert(onChainNominee === invalidNominee.address, "Wrong on-chain nominee");
+            assert.isOk(onChainNominee === invalidNominee.address, "Wrong on-chain nominee");
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
@@ -396,7 +396,7 @@ describe("TitleEscrowSignable", async () => {
           it("should transfer beneficiary successfully if on-chain nominee is same as endorsed nominee", async () => {
             await titleEscrowContractAsBeneficiary.nominate(nominee.address);
             const onChainNominee = await titleEscrowContract.nominee();
-            assert(onChainNominee === nominee.address, "On-chain nominee is different from endorsed nominee");
+            assert.isOk(onChainNominee === nominee.address, "On-chain nominee is different from endorsed nominee");
 
             await titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
             const res = await titleEscrowContract.beneficiary();
@@ -416,7 +416,7 @@ describe("TitleEscrowSignable", async () => {
           it("should revert if Beneficiary Transfer is cancelled", async () => {
             await titleEscrowContract.connect(users.holder).cancelBeneficiaryTransfer(endorsement);
             const cancelStatus = await titleEscrowContract.cancelled(hashStruct);
-            assert(cancelStatus, "Beneficiary Transfer is not cancelled");
+            assert.isOk(cancelStatus, "Beneficiary Transfer is not cancelled");
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
@@ -444,7 +444,7 @@ describe("TitleEscrowSignable", async () => {
 
           it("should add correct hash to cancel", async () => {
             const initStatus = await titleEscrowContract.cancelled(hashStruct);
-            assert(!initStatus, "Initial cancel status should be false");
+            assert.isOk(!initStatus, "Initial cancel status should be false");
 
             await titleEscrowContractAsEndorsingHolder.cancelBeneficiaryTransfer(endorsement);
 

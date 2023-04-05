@@ -95,7 +95,7 @@ describe("SBTUpgradeable", async () => {
 
       it("should revert when token ID exists", async () => {
         const exists = await mockSbtContract.existsInternal(tokenId);
-        assert(exists, "Token already exists");
+        assert.isOk(exists, "Token already exists");
 
         const tx = mockSbtContract.safeMintInternal(recipient, tokenId);
 
@@ -104,7 +104,7 @@ describe("SBTUpgradeable", async () => {
 
       it("should increase balance by one", async () => {
         const balance = await mockSbtContract.balanceOf(recipient);
-        assert(balance.eq(1), "Balance should be 1");
+        assert.isOk(balance.eq(1), "Balance should be 1");
 
         await mockSbtContract.safeMintInternal(recipient, faker.finance.ethereumAddress());
         const newBalance = await mockSbtContract.balanceOf(recipient);
@@ -211,7 +211,7 @@ describe("SBTUpgradeable", async () => {
         await mockSbtContract.safeMintInternal(recipient, faker.datatype.hexaDecimal(64));
 
         const balance = await mockSbtContract.balanceOf(recipient);
-        assert(balance.eq(2), "Balance should be 2");
+        assert.isOk(balance.eq(2), "Balance should be 2");
 
         burnTx = await mockSbtContract.burn(tokenId);
       });
