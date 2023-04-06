@@ -6,10 +6,12 @@ import "./TradeTrustTokenBurnable.sol";
 import "./TradeTrustTokenMintable.sol";
 import "./TradeTrustTokenRestorable.sol";
 import "../interfaces/ITradeTrustToken.sol";
+import "./TradeTrustTokenBaseURI.sol";
 
 abstract contract TradeTrustTokenBase is
   TradeTrustSBT,
   RegistryAccess,
+  TradeTrustTokenBaseURI,
   TradeTrustTokenBurnable,
   TradeTrustTokenMintable,
   TradeTrustTokenRestorable
@@ -30,6 +32,7 @@ abstract contract TradeTrustTokenBase is
     override(
       TradeTrustSBT,
       RegistryAccess,
+      TradeTrustTokenBaseURI,
       TradeTrustTokenRestorable,
       TradeTrustTokenMintable,
       TradeTrustTokenBurnable
@@ -58,5 +61,9 @@ abstract contract TradeTrustTokenBase is
     if (to != address(this) && to != titleEscrow && to != BURN_ADDRESS) {
       revert TransferFailure();
     }
+  }
+
+  function _baseURI() internal view virtual override(SBTUpgradeable, TradeTrustTokenBaseURI) returns (string memory) {
+    return super._baseURI();
   }
 }

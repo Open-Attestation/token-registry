@@ -69,7 +69,7 @@ describe("SigHelper", async () => {
 
     it("should cancel successfully", async () => {
       const initStatus = await sigHelperMock.cancelled(fakeHash);
-      assert(!initStatus, "Initial status should be false");
+      assert.isOk(!initStatus, "Initial status should be false");
 
       await sigHelperMock.cancelHashInternal(fakeHash);
 
@@ -81,7 +81,7 @@ describe("SigHelper", async () => {
     it("should not cancel an already cancelled hash", async () => {
       await sigHelperMock.cancelHashInternal(fakeHash);
       const initStatus = await sigHelperMock.cancelled(fakeHash);
-      assert(initStatus, "Initial status should be true");
+      assert.isOk(initStatus, "Initial status should be true");
 
       const tx = sigHelperMock.cancelHashInternal(fakeHash);
 
