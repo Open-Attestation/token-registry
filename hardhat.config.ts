@@ -69,13 +69,13 @@ const config: HardhatUserConfig = {
       /**
        * Ethereum
        */
-      mainnet: ETHERSCAN_API_KEY,
-      goerli: ETHERSCAN_API_KEY,
+      mainnet: ETHERSCAN_API_KEY!,
+      goerli: ETHERSCAN_API_KEY!,
       /**
        * Polygon
        */
-      polygon: POLYGONSCAN_API_KEY,
-      polygonMumbai: POLYGONSCAN_API_KEY,
+      polygon: POLYGONSCAN_API_KEY!,
+      polygonMumbai: POLYGONSCAN_API_KEY!,
     },
   },
   networks: {
