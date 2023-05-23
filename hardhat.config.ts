@@ -117,14 +117,6 @@ const config: HardhatUserConfig = {
       // Uncomment line below if using Infura
       // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
     },
-    xdc: {
-      ...networkConfig,
-      url: "https://erpc.xinfin.network",
-    },
-    xdcapothem: {
-      ...networkConfig,
-      url: "https://erpc.apothem.network",
-    },
     /**
      * Development
      */
