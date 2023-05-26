@@ -24,8 +24,6 @@ export const contractAddress = {
     [ChainId.Sepolia]: "0x9eBC30E7506E6Ce36eAc5507FCF0121BaF7AeA57",
     [ChainId.Polygon]: "0x92470d0Fc33Cbf2f04B39696733806a15eD7eef3",
     [ChainId.PolygonMumbai]: "0x9eBC30E7506E6Ce36eAc5507FCF0121BaF7AeA57",
-    [ChainId.XDC]: "0x09C4183aC99B432c4BA78d354F8d21257bd15aaa",
-    [ChainId.XDCApothem]: "0x09C4183aC99B432c4BA78d354F8d21257bd15aaa",
   },
   TokenImplementation: {
     [ChainId.Ethereum]: "0xd3F09dD800525Ecf7e452C3c167C7c716632d016",
@@ -33,7 +31,5 @@ export const contractAddress = {
     [ChainId.Sepolia]: "0xC78BA1a49663Ef8b920F36B036E91Ab40D8F26D6",
     [ChainId.Polygon]: "0xd3F09dD800525Ecf7e452C3c167C7c716632d016",
     [ChainId.PolygonMumbai]: "0x83A533397eFE1d90baA26dEc7743626d7598656F",
-    [ChainId.XDC]: "0x56E9b6B1C249de045Bd15016047E90c8641b6046",
-    [ChainId.XDCApothem]: "0x5228b10FF132C1BFEa8bB08C10E8766f7938f289",
   },
 };
