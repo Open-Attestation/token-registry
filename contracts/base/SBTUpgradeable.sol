@@ -52,7 +52,7 @@ contract SBTUpgradeable is
   }
 
   /**
-   * @dev See {IERC165-supportsInterface}.
+   * @dev See {ERC165Upgradeable-supportsInterface}.
    */
   function supportsInterface(bytes4 interfaceId)
     public
