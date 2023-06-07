@@ -7,8 +7,11 @@ import { BeneficiaryTransferEndorsement } from "../lib/TitleEscrowStructs.sol";
 import "../interfaces/ITitleEscrowSignable.sol";
 import "../interfaces/TitleEscrowSignableErrors.sol";
 
-/// @notice This Title Escrow allows the holder to perform an off-chain endorsement of beneficiary transfers
-/// @custom:experimental Note that this is currently an experimental feature. See readme for usage details.
+/**
+ * @title TitleEscrowSignable
+ * @dev This Title Escrow allows the holder to perform an off-chain endorsement of beneficiary transfers
+ * @custom:experimental Note that this is currently an experimental feature. See readme for usage details.
+ */
 contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableErrors, ITitleEscrowSignable {
   string public constant name = "TradeTrust Title Escrow";
 
@@ -29,6 +32,9 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     return super.supportsInterface(interfaceId) || interfaceId == type(ITitleEscrowSignable).interfaceId;
   }
 
+  /**
+   * @dev See {ITitleEscrowSignable-transferBeneficiaryWithSig}.
+   */
   function transferBeneficiaryWithSig(BeneficiaryTransferEndorsement memory endorsement, Sig memory sig)
     public
     virtual
@@ -68,6 +74,9 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     _setBeneficiary(endorsement.nominee);
   }
 
+  /**
+   * @dev See {ITitleEscrowSignable-cancelBeneficiaryTransfer}.
+   */
   function cancelBeneficiaryTransfer(BeneficiaryTransferEndorsement memory endorsement)
     public
     virtual
