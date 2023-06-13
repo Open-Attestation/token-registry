@@ -5,17 +5,23 @@ import "./TradeTrustSBT.sol";
 import "./RegistryAccess.sol";
 import "../interfaces/ITradeTrustTokenRestorable.sol";
 
+/**
+ * @title TradeTrustTokenRestorable
+ * @dev This contract defines the restore functionality for the TradeTrustToken.
+ */
 abstract contract TradeTrustTokenRestorable is TradeTrustSBT, RegistryAccess, ITradeTrustTokenRestorable {
-  function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    virtual
-    override(TradeTrustSBT, RegistryAccess)
-    returns (bool)
-  {
+  /**
+   * @dev See {ERC165Upgradeable-supportsInterface}.
+   */
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view virtual override(TradeTrustSBT, RegistryAccess) returns (bool) {
     return interfaceId == type(ITradeTrustTokenRestorable).interfaceId || super.supportsInterface(interfaceId);
   }
 
+  /**
+   * @dev See {ITradeTrustTokenRestorable-restore}.
+   */
   function restore(uint256 tokenId) external virtual override whenNotPaused onlyRole(RESTORER_ROLE) returns (address) {
     if (!_exists(tokenId)) {
       revert InvalidTokenId();

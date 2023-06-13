@@ -6,6 +6,10 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../interfaces/TDocDeployerErrors.sol";
 
+/**
+ * @title TDocDeployer
+ * @dev Deployer for transferable documents
+ */
 contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors {
   event Deployment(
     address indexed deployed,
