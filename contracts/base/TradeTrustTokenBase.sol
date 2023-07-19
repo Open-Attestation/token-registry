@@ -8,6 +8,10 @@ import "./TradeTrustTokenRestorable.sol";
 import "../interfaces/ITradeTrustToken.sol";
 import "./TradeTrustTokenBaseURI.sol";
 
+/**
+ * @title TradeTrustTokenBase
+ * @dev Base token contract for TradeTrust tokens.
+ */
 abstract contract TradeTrustTokenBase is
   TradeTrustSBT,
   RegistryAccess,
@@ -16,6 +20,11 @@ abstract contract TradeTrustTokenBase is
   TradeTrustTokenMintable,
   TradeTrustTokenRestorable
 {
+  /**
+   * @dev Initializss the contract by setting a `name` and a `symbol` to the token contract.
+   * @param name The name of the token contract.
+   * @param symbol The symbol of the token contract.
+   */
   function __TradeTrustTokenBase_init(
     string memory name,
     string memory symbol,
@@ -25,7 +34,12 @@ abstract contract TradeTrustTokenBase is
     __RegistryAccess_init(admin);
   }
 
-  function supportsInterface(bytes4 interfaceId)
+  /**
+   * @dev See {ERC165Upgradeable-supportsInterface}.
+   */
+  function supportsInterface(
+    bytes4 interfaceId
+  )
     public
     view
     virtual
@@ -42,14 +56,25 @@ abstract contract TradeTrustTokenBase is
     return interfaceId == type(ITradeTrustToken).interfaceId || super.supportsInterface(interfaceId);
   }
 
+  /**
+   * @dev Pauses all token transfers.
+   * @notice Requires the caller to be admin.
+   */
   function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
     _pause();
   }
 
+  /**
+   * @dev Unpauses all token transfers.
+   * @notice Requires the caller to be admin.
+   */
   function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
     _unpause();
   }
 
+  /**
+   * @dev See {SBTUpgradeable-_beforeTokenTransfer}.
+   */
   function _beforeTokenTransfer(
     address from,
     address to,
@@ -63,6 +88,9 @@ abstract contract TradeTrustTokenBase is
     }
   }
 
+  /**
+   * @dev See {TradeTrustTokenBaseURI-_baseURI}.
+   */
   function _baseURI() internal view virtual override(SBTUpgradeable, TradeTrustTokenBaseURI) returns (string memory) {
     return super._baseURI();
   }

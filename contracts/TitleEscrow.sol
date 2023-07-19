@@ -8,6 +8,10 @@ import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustToken.sol";
 import "./interfaces/TitleEscrowErrors.sol";
 
+/**
+ * @title TitleEscrow
+ * @dev Title escrow contract for managing the beneficiaries and holders of a transferable record.
+ */
 contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow {
   address public override registry;
   uint256 public override tokenId;
@@ -21,6 +25,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   constructor() initializer {}
 
+  /**
+   * @dev Modifier to make a function callable only by the beneficiary.
+   */
   modifier onlyBeneficiary() {
     if (msg.sender != beneficiary) {
       revert CallerNotBeneficiary();
@@ -28,6 +35,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _;
   }
 
+  /**
+   * @dev Modifier to make a function callable only by the holder.
+   */
   modifier onlyHolder() {
     if (msg.sender != holder) {
       revert CallerNotHolder();
@@ -35,6 +45,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _;
   }
 
+  /**
+   * @dev Modifier to ensure the contract is holding the token.
+   */
   modifier whenHoldingToken() {
     if (!_isHoldingToken()) {
       revert TitleEscrowNotHoldingToken();
@@ -42,6 +55,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _;
   }
 
+  /**
+   * @dev Modifier to ensure the registry is not paused.
+   */
   modifier whenNotPaused() {
     bool paused = Pausable(registry).paused();
     if (paused) {
@@ -50,6 +66,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _;
   }
 
+  /**
+   * @dev Modifier to ensure the title escrow is active.
+   */
   modifier whenActive() {
     if (!active) {
       revert InactiveTitleEscrow();
@@ -57,20 +76,34 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _;
   }
 
+  /**
+   * @notice Initializes the TitleEscrow contract with the registry address and the tokenId
+   * @param _registry The address of the registry
+   * @param _tokenId The id of the token
+   */
   function initialize(address _registry, uint256 _tokenId) public virtual initializer {
     __TitleEscrow_init(_registry, _tokenId);
   }
 
+  /**
+   * @notice Initializes the TitleEscrow contract with the registry address and the tokenId
+   */
   function __TitleEscrow_init(address _registry, uint256 _tokenId) internal virtual onlyInitializing {
     registry = _registry;
     tokenId = _tokenId;
     active = true;
   }
 
+  /**
+   * @dev See {ERC165-supportsInterface}.
+   */
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
     return interfaceId == type(ITitleEscrow).interfaceId;
   }
 
+  /**
+   * @dev See {IERC721Receiver-onERC721Received}.
+   */
   function onERC721Received(
     address, /* operator */
     address, /* from */
@@ -101,6 +134,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
   }
 
+  /**
+   * @dev See {ITitleEscrow-nominate}.
+   */
   function nominate(address _nominee)
     public
     virtual
@@ -120,6 +156,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _setNominee(_nominee);
   }
 
+  /**
+   * @dev See {ITitleEscrow-transferBeneficiary}.
+   */
   function transferBeneficiary(address _nominee)
     public
     virtual
@@ -139,6 +178,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _setBeneficiary(_nominee);
   }
 
+  /**
+   * @dev See {ITitleEscrow-transferHolder}.
+   */
   function transferHolder(address newHolder)
     public
     virtual
@@ -158,11 +200,17 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _setHolder(newHolder);
   }
 
+  /**
+   * @dev See {ITitleEscrow-transferOwners}.
+   */
   function transferOwners(address _nominee, address newHolder) external virtual override {
     transferBeneficiary(_nominee);
     transferHolder(newHolder);
   }
 
+  /**
+   * @dev See {ITitleEscrow-surrender}.
+   */
   function surrender() external virtual override whenNotPaused whenActive onlyBeneficiary onlyHolder whenHoldingToken {
     _setNominee(address(0));
     ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId);
@@ -170,6 +218,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     emit Surrender(msg.sender, registry, tokenId);
   }
 
+  /**
+   * @dev See {ITitleEscrow-shred}.
+   */
   function shred() external virtual override whenNotPaused whenActive {
     if (_isHoldingToken()) {
       revert TokenNotSurrendered();
@@ -185,25 +236,44 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     emit Shred(registry, tokenId);
   }
 
+  /**
+   * @dev See {ITitleEscrow-isHoldingToken}.
+   */
   function isHoldingToken() external view override returns (bool) {
     return _isHoldingToken();
   }
 
+  /**
+   * @notice Internal function to check if the contract is holding a token
+   * @return A boolean indicating whether the contract is holding a token
+   */
   function _isHoldingToken() internal view returns (bool) {
     return ITradeTrustToken(registry).ownerOf(tokenId) == address(this);
   }
 
+  /**
+   * @notice Sets the nominee
+   * @param newNominee The address of the new nominee
+   */
   function _setNominee(address newNominee) internal virtual {
     emit Nomination(nominee, newNominee, registry, tokenId);
     nominee = newNominee;
   }
 
+  /**
+   * @notice Sets the beneficiary
+   * @param newBeneficiary The address of the new beneficiary
+   */
   function _setBeneficiary(address newBeneficiary) internal virtual {
     emit BeneficiaryTransfer(beneficiary, newBeneficiary, registry, tokenId);
     _setNominee(address(0));
     beneficiary = newBeneficiary;
   }
 
+  /**
+   * @notice Sets the holder
+   * @param newHolder The address of the new holder
+   */
   function _setHolder(address newHolder) internal virtual {
     emit HolderTransfer(holder, newHolder, registry, tokenId);
     holder = newHolder;
