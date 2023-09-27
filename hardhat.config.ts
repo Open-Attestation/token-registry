@@ -102,6 +102,14 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: "https://erpc.apothem.network",
     },
+    hederamainnet: {
+      ...networkConfig,
+      url: "https://mainnet.hashio.io/api",
+    },
+    hederatestnet: {
+      ...networkConfig,
+      url: "https://testnet.hashio.io/api",
+    },
     /**
      * Polygon
      */
