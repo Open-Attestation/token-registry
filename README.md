@@ -366,8 +366,6 @@ Here's a list of network names currently pre-configured:
 - `mumbai` (Polygon Mumbai)
 - `xdc` (XDC Network Mainnet)
 - `xdcapothem` (XDC Apothem TestNet)
-- `hederamainet` (Hedera Network Mainnet)
-- `hederatestnet` (Hedera Network TestNet)
 
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
 
