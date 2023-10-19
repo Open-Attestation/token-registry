@@ -70,7 +70,6 @@ const config: HardhatUserConfig = {
        * Ethereum
        */
       mainnet: ETHERSCAN_API_KEY!,
-      goerli: ETHERSCAN_API_KEY!,
       /**
        * Polygon
        */
@@ -85,10 +84,6 @@ const config: HardhatUserConfig = {
     mainnet: {
       ...networkConfig,
       url: `https://mainnet.infura.io/v3/${INFURA_APP_ID}`,
-    },
-    goerli: {
-      ...networkConfig,
-      url: `https://goerli.infura.io/v3/${INFURA_APP_ID}`,
     },
     sepolia: {
       ...networkConfig,
