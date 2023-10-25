@@ -5,6 +5,8 @@ const ChainId = {
   PolygonMumbai: 80001,
   XDC: 50,
   XDCApothem: 51,
+  HederaMainnet: 295,
+  HederaTestnet: 296,
 };
 
 export const contractAddress = {
