@@ -7,9 +7,12 @@ export const contractInterfaces = {
     "nominate(address)",
     "transferBeneficiary(address)",
     "transferHolder(address)",
+    "transferHolderByAttorney(address,address,bytes,bytes)",
     "transferOwners(address,address)",
+    "changeAttorney(address)",
     "beneficiary()",
     "holder()",
+    "attorney()",
     "active()",
     "nominee()",
     "registry()",
@@ -17,6 +20,9 @@ export const contractInterfaces = {
     "isHoldingToken()",
     "surrender()",
     "shred()",
+    "setAttorney(address)",
+    "attorneySet()"
+
   ],
   TitleEscrowSignable: [
     "transferBeneficiaryWithSig((address,address,address,address,uint256,uint256,uint256),(bytes32,bytes32,uint8))",

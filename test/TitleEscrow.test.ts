@@ -667,6 +667,38 @@ describe("Title Escrow", async () => {
         });
       });
 
+      describe("Holder Transfer By Attorney", () => {
+        let targetNewHolder: SignerWithAddress;
+
+        beforeEach(async () => {
+          [targetNewHolder] = users.others;
+        });
+
+        it("should allow designated Attorney to transfer holder to another holder", async () => {
+                    
+          const fakeTokenId = faker.datatype.hexaDecimal(64);          
+          await registryContract
+            .connect(users.carrier)
+            .mint(users.holder.address, users.holder.address, fakeTokenId);
+          const titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, fakeTokenId);          
+          await titleEscrowOwnerContract.setAttorney(users.carrier.address);  
+          const attorney = await titleEscrowOwnerContract.attorney();
+          expect(attorney).to.equal(users.carrier.address);
+          
+          const data = ethers.utils.formatBytes32String(`approved`);
+          
+          const transferHolderHash = await titleEscrowOwnerContract.getApprovalHash(data);
+
+          const signature = await users.holder.signMessage(ethers.utils.arrayify(transferHolderHash))          
+        
+          await titleEscrowOwnerContract.transferHolderByAttorney(users.holder.address, targetNewHolder.address,data, signature);
+          const newHolder = await titleEscrowOwnerContract.holder();  
+          
+          expect(newHolder).to.equal(targetNewHolder.address);
+                    
+        });
+      });
+
       describe("Transfer all owners", () => {
         let beneficiaryNominee: SignerWithAddress;
         let holderNominee: SignerWithAddress;

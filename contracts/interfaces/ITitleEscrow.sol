@@ -26,6 +26,7 @@ interface ITitleEscrow is IERC721Receiver {
   event HolderTransfer(address indexed fromHolder, address indexed toHolder, address registry, uint256 tokenId);
   event Surrender(address indexed surrenderer, address registry, uint256 tokenId);
   event Shred(address registry, uint256 tokenId);
+  event AttorneyChanged(address indexed oldAttorney, address indexed newAttorney);
 
   /**
    * @notice Allows the beneficiary to nominate a new beneficiary
@@ -47,15 +48,34 @@ interface ITitleEscrow is IERC721Receiver {
   function transferHolder(address newHolder) external;
 
   /**
+   * @notice Allows the designated attorney to transfer holdership from old holder to new holder
+   * @param currentHolder The address of the escrow
+   * @param newHolder The address of the new holder
+   * @param data Data associated with the transfer.
+   * @param signature The signature to verify the transfer.
+   */
+  function transferHolderByAttorney(address currentHolder, address newHolder, bytes memory data, bytes calldata signature) external;
+        
+  /**
    * @notice Allows for the simultaneous transfer of both beneficiary and holder roles
    * @param nominee The address of the new beneficiary
    * @param newHolder The address of the new holder
    */
   function transferOwners(address nominee, address newHolder) external;
 
+  /**
+   * @notice Changes the current attorney to a new address.
+   * @param newAttorney The address of the new attorney.
+  */
+  function changeAttorney(address newAttorney) external;  
+
+  function setAttorney(address newAttorney) external;
+
   function beneficiary() external view returns (address);
 
   function holder() external view returns (address);
+
+  function attorney() external view returns (address);
 
   function active() external view returns (bool);
 
@@ -64,6 +84,8 @@ interface ITitleEscrow is IERC721Receiver {
   function registry() external view returns (address);
 
   function tokenId() external view returns (uint256);
+
+  function attorneySet() external view returns (bool);
 
   /**
    * @notice Check if the TitleEscrow is currently holding a token

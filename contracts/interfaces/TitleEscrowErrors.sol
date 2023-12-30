@@ -31,4 +31,10 @@ interface TitleEscrowErrors {
   error RecipientAlreadyHolder();
 
   error TokenNotSurrendered();
+
+  error CallerNotAttorney();
+
+  error FirstTimeAttorneyAlreadySet(address attorney);
+
+  error SignerNotHolder(address holder);
 }
