@@ -24,6 +24,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   address public override nominee;
 
   bool public override active;
+  mapping(address => uint256) private nonces;
 
   constructor() initializer {}
 
@@ -193,7 +194,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   /**
    * @dev See {ITitleEscrow-nominateByAttorney}.
    */
-  function nominateByAttorney(address _beneficiary, address _nominee, bytes memory data, bytes calldata signature) 
+  function nominateByAttorney(address _beneficiary, address _nominee, bytes memory data, bytes calldata signature, uint256 _nonce) 
     public
     virtual
     override
@@ -204,6 +205,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     onlyBeneficiarySigner(_beneficiary)
   {
     require(_beneficiary != address(0), "Invalid _beneficiary address");
+    require(_nonce == nonces[_beneficiary], "Invalid nonce");
+    nonces[_beneficiary]++;
     require(_nominee != address(0), "Invalid _nominee address");
     require(signature.length == 65, "Invalid signature length");
     require(_verifyApprover(_beneficiary, data, signature), "Signature verification failed");
@@ -265,7 +268,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     address currentHolder, 
     address newHolder, 
     bytes memory data, 
-    bytes calldata signature) 
+    bytes calldata signature,
+    uint256 _nonce) 
     public 
     virtual
     override
@@ -276,12 +280,14 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     onlyHolderSigner(currentHolder)
   {
     require(currentHolder != address(0), "Invalid currentHolder address");
+    require(_nonce == nonces[currentHolder], "Invalid nonce");
+    nonces[currentHolder]++;
     require(newHolder != address(0), "Invalid newHolder address");
     require(currentHolder == holder, "Invalid newHolder address");
-    require(signature.length == 65, "Invalid signature length");
+    require(signature.length == 65, "Invalid signature length");    
     require(_verifyApprover(currentHolder, data, signature), "Signature verification failed");
 
-    _setHolder(newHolder);
+    _setHolder(newHolder);    
   }
 
   /**
@@ -295,7 +301,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     address currentBeneficiary, 
     address newBeneficiary, 
     bytes memory data, 
-    bytes calldata signature) 
+    bytes calldata signature,
+    uint256 _nonce) 
     public 
     virtual
     override
@@ -305,7 +312,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     onlyAttorney
     onlyBeneficiarySigner(currentBeneficiary)
   {
-    require(currentBeneficiary != address(0), "Invalid currentBeneficiary address");
+    require(currentBeneficiary != address(0), "Invalid currentBeneficiary");
+    require(_nonce == nonces[currentBeneficiary], "Invalid nonce");
+    nonces[currentBeneficiary]++;
     require(newBeneficiary != address(0), "Invalid newBeneficiary address");
     require(currentBeneficiary == holder, "Invalid newBeneficiary address");
     require(signature.length == 65, "Invalid signature length");
@@ -323,9 +332,42 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   }
 
   /**
+   * @dev See {ITitleEscrow-nonce}.
+   */
+  function nonce(address user)  external view override returns (uint256) {
+    return  nonces[user];
+  }
+
+  /**
    * @dev See {ITitleEscrow-surrender}.
    */
   function surrender() external virtual override whenNotPaused whenActive onlyBeneficiary onlyHolder whenHoldingToken {
+    _setNominee(address(0));
+    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId);
+
+    emit Surrender(msg.sender, registry, tokenId);
+  }
+
+  /**
+   * @dev See {ITitleEscrow-surrenderByAttorney}.
+   */
+  function surrenderByAttorney(address _beneficiary, address _holder, bytes memory data, bytes calldata signature, uint256 _nonce) 
+    external 
+    virtual 
+    override 
+    whenNotPaused 
+    whenActive 
+    onlyAttorney
+    onlyBeneficiarySigner(_beneficiary) 
+    onlyHolderSigner(_holder)
+    whenHoldingToken 
+  {
+    require(_beneficiary != address(0), "Invalid _beneficiary address");
+    require(_holder != address(0), "Invalid _holder address");
+    require(_nonce == nonces[_beneficiary], "Invalid nonce");
+    nonces[_beneficiary]++;
+    require(signature.length == 65, "Invalid signature length");
+    require(_verifyApprover(_beneficiary, data, signature), "Signature verification failed");
     _setNominee(address(0));
     ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId);
 

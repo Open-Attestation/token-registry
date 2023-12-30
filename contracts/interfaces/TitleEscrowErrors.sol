@@ -39,4 +39,6 @@ interface TitleEscrowErrors {
   error SignerNotHolder(address holder);
 
   error SignerNotBeneficiary(address beneficiary);
+
+  error InvalidNonce();
 }
