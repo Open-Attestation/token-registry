@@ -65,9 +65,16 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _;
   }
 
-  modifier onlySigner(address signer) { 
+  modifier onlyHolderSigner(address signer) { 
     if(signer != holder) {
       revert SignerNotHolder(signer);
+    }
+    _;
+  }
+
+   modifier onlyBeneficiarySigner(address signer) { 
+    if(signer != beneficiary) {
+      revert SignerNotBeneficiary(signer);
     }
     _;
   }
@@ -184,6 +191,33 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   }
 
   /**
+   * @dev See {ITitleEscrow-nominateByAttorney}.
+   */
+  function nominateByAttorney(address _beneficiary, address _nominee, bytes memory data, bytes calldata signature) 
+    public
+    virtual
+    override
+    whenNotPaused
+    whenActive
+    whenHoldingToken
+    onlyAttorney
+    onlyBeneficiarySigner(_beneficiary)
+  {
+    require(_beneficiary != address(0), "Invalid _beneficiary address");
+    require(_nominee != address(0), "Invalid _nominee address");
+    require(signature.length == 65, "Invalid signature length");
+    require(_verifyApprover(_beneficiary, data, signature), "Signature verification failed");
+    if (_beneficiary == _nominee) {
+      revert TargetNomineeAlreadyBeneficiary();
+    }
+    if (nominee == _nominee) {
+      revert NomineeAlreadyNominated();
+    }
+
+    _setNominee(_nominee);
+  }
+
+  /**
    * @dev See {ITitleEscrow-transferBeneficiary}.
    */
   function transferBeneficiary(address _nominee)
@@ -239,15 +273,45 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     whenActive
     whenHoldingToken
     onlyAttorney
-    onlySigner(currentHolder)
+    onlyHolderSigner(currentHolder)
   {
     require(currentHolder != address(0), "Invalid currentHolder address");
     require(newHolder != address(0), "Invalid newHolder address");
     require(currentHolder == holder, "Invalid newHolder address");
     require(signature.length == 65, "Invalid signature length");
-    require(_verifyTransferHolder(currentHolder, data, signature), "Signature verification failed");
+    require(_verifyApprover(currentHolder, data, signature), "Signature verification failed");
 
     _setHolder(newHolder);
+  }
+
+  /**
+   * @notice Allows the designated attorney to transfer beneficiary from old beneficiary to new beneficiary
+   * @param currentBeneficiary The address of the old beneficiary
+   * @param newBeneficiary The address of the new holder
+   * @param data Data associated with the transfer.
+   * @param signature The signature to verify the transfer.
+  */
+  function transferBeneficiaryByAttorney(
+    address currentBeneficiary, 
+    address newBeneficiary, 
+    bytes memory data, 
+    bytes calldata signature) 
+    public 
+    virtual
+    override
+    whenNotPaused
+    whenActive
+    whenHoldingToken
+    onlyAttorney
+    onlyBeneficiarySigner(currentBeneficiary)
+  {
+    require(currentBeneficiary != address(0), "Invalid currentBeneficiary address");
+    require(newBeneficiary != address(0), "Invalid newBeneficiary address");
+    require(currentBeneficiary == holder, "Invalid newBeneficiary address");
+    require(signature.length == 65, "Invalid signature length");
+    require(_verifyApprover(currentBeneficiary, data, signature), "Signature verification failed");
+
+    _setBeneficiary(newBeneficiary);
   }
 
   /**
@@ -331,21 +395,21 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   /**
      * @dev Verifies the transfer of holder using provided parameters and signature.
-     * @param oldHolder The current holder's address.
+     * @param aprover The current holder's address.
      * @param data Data associated with the transfer.
      * @param signature The signature to verify the transfer.
      * @return A boolean indicating if the signature matches the current holder's address.
      * @notice This function is private and is intended for internal use within the contract.
     */
-    function _verifyTransferHolder(
-        address oldHolder,
+    function _verifyApprover(
+        address aprover,
         bytes memory data,
         bytes memory signature
     ) private pure returns (bool) {
         bytes32 messageHash = getApprovalHash(data);
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
-        return recoverSigner(ethSignedMessageHash, signature) == oldHolder;
+        return recoverSigner(ethSignedMessageHash, signature) == aprover;
     }
 
     function recoverSigner(

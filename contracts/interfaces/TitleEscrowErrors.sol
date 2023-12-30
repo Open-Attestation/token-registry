@@ -37,4 +37,6 @@ interface TitleEscrowErrors {
   error FirstTimeAttorneyAlreadySet(address attorney);
 
   error SignerNotHolder(address holder);
+
+  error SignerNotBeneficiary(address beneficiary);
 }

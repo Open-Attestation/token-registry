@@ -8,6 +8,8 @@ export const contractInterfaces = {
     "transferBeneficiary(address)",
     "transferHolder(address)",
     "transferHolderByAttorney(address,address,bytes,bytes)",
+    "transferBeneficiaryByAttorney(address,address,bytes,bytes)",
+    "nominateByAttorney(address,address,bytes,bytes)",
     "transferOwners(address,address)",
     "changeAttorney(address)",
     "beneficiary()",

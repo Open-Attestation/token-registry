@@ -33,7 +33,7 @@ interface ITitleEscrow is IERC721Receiver {
    * @dev The nominated beneficiary will need to be transferred by the holder to become the actual beneficiary
    * @param nominee The address of the nominee
    */
-  function nominate(address nominee) external;
+  function nominate(address nominee) external;  
 
   /**
    * @notice Allows the holder to transfer the beneficiary role to the nominated beneficiary or to themselves
@@ -49,12 +49,30 @@ interface ITitleEscrow is IERC721Receiver {
 
   /**
    * @notice Allows the designated attorney to transfer holdership from old holder to new holder
-   * @param currentHolder The address of the escrow
+   * @param currentHolder The address of the old holder
    * @param newHolder The address of the new holder
    * @param data Data associated with the transfer.
    * @param signature The signature to verify the transfer.
    */
   function transferHolderByAttorney(address currentHolder, address newHolder, bytes memory data, bytes calldata signature) external;
+
+  /**
+   * @notice Allows the designated attorney to transfer beneficiary from old beneficiary to new beneficiary
+   * @param currentBeneficiary The address of the old beneficiary
+   * @param newBeneficiary The address of the new holder
+   * @param data Data associated with the transfer.
+   * @param signature The signature to verify the transfer.
+   */
+  function transferBeneficiaryByAttorney(address currentBeneficiary, address newBeneficiary, bytes memory data, bytes calldata signature) external;
+
+  /**
+   * @notice Allows the beneficiary to nominate a nominee
+   * @param beneficiary The address of the beneficiary
+   * @param _nominee The address of the new nominee
+   * @param data Data associated with the nomination.
+   * @param signature The signature to verify the nomination.
+   */
+  function nominateByAttorney(address beneficiary, address _nominee, bytes memory data, bytes calldata signature) external;
         
   /**
    * @notice Allows for the simultaneous transfer of both beneficiary and holder roles

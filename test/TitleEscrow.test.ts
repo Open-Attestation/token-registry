@@ -523,6 +523,33 @@ describe("Title Escrow", async () => {
       });
     });
 
+    describe("Nomination by attorney", ()=>{
+      let beneficiaryNominee: SignerWithAddress;
+
+      beforeEach(async () => {
+        [beneficiaryNominee] = users.others;
+        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
+        titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
+      });
+
+      it("should allow beneficiary to nominate a new beneficiary through designated attorney", async () => {
+        await titleEscrowOwnerContract.connect(users.carrier).setAttorney(users.carrier.address);  
+        const attorney = await titleEscrowOwnerContract.attorney();
+        expect(attorney).to.equal(users.carrier.address);
+        
+        const data = ethers.utils.formatBytes32String(`approved`);
+        
+        const transferBeneficiaryHash = await titleEscrowOwnerContract.getApprovalHash(data);
+
+        const signature = await users.beneficiary.signMessage(ethers.utils.arrayify(transferBeneficiaryHash));
+        await titleEscrowOwnerContract.connect(users.carrier).nominateByAttorney(users.beneficiary.address, beneficiaryNominee.address, data, signature)
+
+        const res = await titleEscrowOwnerContract.nominee();
+
+        expect(res).to.equal(beneficiaryNominee.address);
+      });
+    })
+
     describe("Beneficiary and Holder Transfer", () => {
       beforeEach(async () => {
         await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
@@ -664,6 +691,39 @@ describe("Title Escrow", async () => {
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "HolderTransfer")
             .withArgs(users.holder.address, targetNewHolder.address, registryContract.address, tokenId);
+        });
+      });
+
+      describe("Beneficiary Transfer By Attorney", () => {
+        let targetNewBeneficiary: SignerWithAddress;
+
+        beforeEach(async () => {
+          [targetNewBeneficiary] = users.others;
+        });
+
+        it("should allow designated Attorney to transfer beneficiary to another beneficiary", async () => {
+                    
+          const fakeTokenId = faker.datatype.hexaDecimal(64);          
+          await registryContract
+            .connect(users.carrier)
+            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId);
+          const titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, fakeTokenId);          
+          
+          await titleEscrowOwnerContract.setAttorney(users.carrier.address);  
+          const attorney = await titleEscrowOwnerContract.attorney();
+          expect(attorney).to.equal(users.carrier.address);
+          
+          const data = ethers.utils.formatBytes32String(`approved`);
+          
+          const transferBeneficiaryHash = await titleEscrowOwnerContract.getApprovalHash(data);
+
+          const signature = await users.beneficiary.signMessage(ethers.utils.arrayify(transferBeneficiaryHash))          
+        
+          await titleEscrowOwnerContract.transferBeneficiaryByAttorney(users.beneficiary.address, targetNewBeneficiary.address,data, signature);
+          const newBeneficiary = await titleEscrowOwnerContract.beneficiary();
+          
+          expect(newBeneficiary).to.equal(targetNewBeneficiary.address);
+                    
         });
       });
 
