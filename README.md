@@ -240,7 +240,7 @@ Using roles, you can grant the users to access only certain functions. Currently
 
 The admin user can grant a trusted user multiple roles to perform different operations.
 
-To grant roles to the users or revoke roles from them, the admin user can call on the token contract the following functions:
+To grant roles to the users or revoke roles from them, the admin user can call the following functions:
 
 #### Granting a role to a user
 
@@ -454,4 +454,3 @@ for more information on using and deploying your own subgraphs for the Token Reg
 ## Additional information
 
 The contracts have not gone through formal audits. Use them at your own discretion.
-<!--Flag: Question here: Have the contracts gone thru formal audits so far? If not, shall we move this paragraph to the beginning to inform the user before they get started?-->
