@@ -284,8 +284,7 @@ await tokenRegistry.setRoleAdmin(roleHash.AccepterRole, roleHash.AccepterAdminRo
 
 With Hardhat, you can manage the contract development environment and deployment. This repository provides a couple of Hardhat tasks to simplify the deployment process.
 
-Starting from V4, OpenAttestation includes an easy and cost-effective way to deploy the contracts and meanwhile keep the options available for advanced users to set up the contracts in a preferable way.
-<!--Flag: Question about V4 here, does it mean OA or TradeTrust?-->
+Starting from V4, the token registry includes an easy and cost-effective way to deploy the contracts and meanwhile keep the options available for advanced users to set up the contracts in a preferable way.
 
 >**Note:** Before deployment, ensure that you have set up your configuration file. See the [Configuration](#configuration) section for more details. The deployer (configured in your `.env` file) will be the default admin.
 
