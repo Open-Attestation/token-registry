@@ -1,6 +1,6 @@
 <h1 align="center">
   <p align="center">Token Registry</p>
-  <a href="https://tradetrust.io"><img src="https://www.tradetrust.io/static/images/tradetrust_logo.svg" alt="TradeTrust Token Registry" /></a>
+  <a href="https://tradetrust.io"><img src="https://github.com/Open-Attestation/token-registry/blob/master/docs/images/tt-logo.png?raw=true" alt="TradeTrust Token Registry" /></a>
 </h1>
 
 <p align="center">
