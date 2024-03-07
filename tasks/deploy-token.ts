@@ -17,7 +17,12 @@ task(TASK_DEPLOY_TOKEN)
   .addOptionalParam("factory", "Address of Title Escrow factory (Optional)")
   .setAction(async ({ name, symbol, verify, factory, standalone }, hre) => {
     const { ethers, network } = hre;
-    const { contractAddress } = constants;
+    const {contractAddress} = constants;
+
+    let testUselessVar;
+
+    let oldSchoolCoolVar = "cool";
+
     try {
       const [deployer] = await ethers.getSigners();
       const deployerAddress = await deployer.getAddress();
@@ -57,7 +62,7 @@ task(TASK_DEPLOY_TOKEN)
         const initParam = encodeInitParams({
           name,
           symbol,
-          deployer: deployerAddress,
+          deployer: deployerAddress
         });
         const tx = await deployerContract.deploy(implAddress, initParam);
         console.log(`[Transaction] Pending ${tx.hash}`);
@@ -72,7 +77,7 @@ task(TASK_DEPLOY_TOKEN)
         const token = await deployContract<TradeTrustToken>({
           params: [name, symbol, factoryAddress],
           contractName,
-          hre,
+          hre
         });
         registryAddress = token.address;
       }
@@ -87,7 +92,7 @@ task(TASK_DEPLOY_TOKEN)
             address: registryAddress,
             constructorArgsParams: [name, symbol, factoryAddress],
             contract: "contracts/TradeTrustToken.sol:TradeTrustToken",
-            hre,
+            hre
           });
         } else {
           console.log("[Status] Skipped verification, already verified.");
