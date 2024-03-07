@@ -12,7 +12,9 @@ import "./tasks";
 
 dotenv.config();
 
-const { INFURA_APP_ID, MNEMONIC, DEPLOYER_PK, COINMARKETCAP_API_KEY, ETHERSCAN_API_KEY, POLYGONSCAN_API_KEY } =
+// const { INFURA_APP_ID, MNEMONIC, DEPLOYER_PK, COINMARKETCAP_API_KEY, ETHERSCAN_API_KEY, POLYGONSCAN_API_KEY } =
+//   process.env;
+const { INFURA_APP_ID, MNEMONIC, DEPLOYER_PK, ETHERSCAN_API_KEY, POLYGONSCAN_API_KEY } =
   process.env;
 const IS_CI_ENV = process.env.NODE_ENV === "ci";
 
@@ -60,10 +62,10 @@ const config: HardhatUserConfig = {
       files: ["./contracts", "./test"],
     },
   },
-  gasReporter: {
-    coinmarketcap: COINMARKETCAP_API_KEY,
-    currency: "USD",
-  },
+  // gasReporter: {
+  //   coinmarketcap: COINMARKETCAP_API_KEY,
+  //   currency: "USD",
+  // },
   etherscan: {
     apiKey: {
       /**
@@ -106,11 +108,18 @@ const config: HardhatUserConfig = {
       // Uncomment line below if using Infura
       // url: `https://polygon-mainnet.infura.io/v3/${INFURA_APP_ID}`,
     },
+    // mumbai: {
+    //   ...networkConfig,
+    //   url: "https://matic-mumbai.chainstacklabs.com",
+    //   // Uncomment line below if using Infura
+    //   // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
+    // },
     mumbai: {
-      ...networkConfig,
-      url: "https://matic-mumbai.chainstacklabs.com",
-      // Uncomment line below if using Infura
-      // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
+      url: process.env.POLYGON_URL || "",
+      gas: 6000000,           // Gas sent with each transaction (default: ~6700000)
+      gasPrice: 5000000000,  // 3 gwei (in wei) (default: 100 gwei)
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     /**
      * Development
