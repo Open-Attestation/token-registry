@@ -118,6 +118,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@typechain/ethers-v5": "~10.0.0"
+    "@typechain/ethers-v5": "~10.2.1"
   }
 }
