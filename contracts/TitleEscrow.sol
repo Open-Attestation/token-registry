@@ -18,10 +18,13 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   address public override beneficiary;
   address public override holder;
+  address public override attorney;
+  bool public attorneySet = false;  // This variable will track if the attorney has been set
 
   address public override nominee;
 
   bool public override active;
+  mapping(address => uint256) private nonces;
 
   constructor() initializer {}
 
@@ -41,6 +44,38 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   modifier onlyHolder() {
     if (msg.sender != holder) {
       revert CallerNotHolder();
+    }
+    _;
+  }
+
+  /**
+   * @dev Modifier to make a function callable only by an authorized attorney.
+   */
+  modifier onlyAttorney() {
+    if (msg.sender != attorney) {
+      revert CallerNotAttorney();
+    }
+    _;
+  }
+
+  // Modifier to ensure the function can only be called once
+  modifier onlyOnceFirstAttorneySet() { 
+    if(attorneySet) {
+      revert FirstTimeAttorneyAlreadySet(attorney);
+    }
+    _;
+  }
+
+  modifier onlyHolderSigner(address signer) { 
+    if(signer != holder) {
+      revert SignerNotHolder(signer);
+    }
+    _;
+  }
+
+   modifier onlyBeneficiarySigner(address signer) { 
+    if(signer != beneficiary) {
+      revert SignerNotBeneficiary(signer);
     }
     _;
   }
@@ -157,6 +192,35 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   }
 
   /**
+   * @dev See {ITitleEscrow-nominateByAttorney}.
+   */
+  function nominateByAttorney(address _beneficiary, address _nominee, bytes memory data, bytes calldata signature, uint256 _nonce) 
+    public
+    virtual
+    override
+    whenNotPaused
+    whenActive
+    whenHoldingToken
+    onlyAttorney
+    onlyBeneficiarySigner(_beneficiary)
+  {
+    require(_beneficiary != address(0), "Invalid _beneficiary address");
+    require(_nonce == nonces[_beneficiary], "Invalid nonce");
+    nonces[_beneficiary]++;
+    require(_nominee != address(0), "Invalid _nominee address");
+    require(signature.length == 65, "Invalid signature length");
+    require(_verifyApprover(_beneficiary, data, signature), "Signature verification failed");
+    if (_beneficiary == _nominee) {
+      revert TargetNomineeAlreadyBeneficiary();
+    }
+    if (nominee == _nominee) {
+      revert NomineeAlreadyNominated();
+    }
+
+    _setNominee(_nominee);
+  }
+
+  /**
    * @dev See {ITitleEscrow-transferBeneficiary}.
    */
   function transferBeneficiary(address _nominee)
@@ -200,6 +264,65 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _setHolder(newHolder);
   }
 
+  function transferHolderByAttorney(
+    address currentHolder, 
+    address newHolder, 
+    bytes memory data, 
+    bytes calldata signature,
+    uint256 _nonce) 
+    public 
+    virtual
+    override
+    whenNotPaused
+    whenActive
+    whenHoldingToken
+    onlyAttorney
+    onlyHolderSigner(currentHolder)
+  {
+    require(currentHolder != address(0), "Invalid currentHolder address");
+    require(_nonce == nonces[currentHolder], "Invalid nonce");
+    nonces[currentHolder]++;
+    require(newHolder != address(0), "Invalid newHolder address");
+    require(currentHolder == holder, "Invalid newHolder address");
+    require(signature.length == 65, "Invalid signature length");    
+    require(_verifyApprover(currentHolder, data, signature), "Signature verification failed");
+
+    _setHolder(newHolder);    
+  }
+
+  /**
+   * @notice Allows the designated attorney to transfer beneficiary from old beneficiary to new beneficiary
+   * @param currentBeneficiary The address of the old beneficiary
+   * @param newBeneficiary The address of the new holder
+   * @param data Data associated with the transfer.
+   * @param signature The signature to verify the transfer.
+  */
+  function transferBeneficiaryByAttorney(
+    address currentBeneficiary, 
+    address newBeneficiary, 
+    bytes memory data, 
+    bytes calldata signature,
+    uint256 _nonce) 
+    public 
+    virtual
+    override
+    whenNotPaused
+    whenActive
+    whenHoldingToken
+    onlyAttorney
+    onlyBeneficiarySigner(currentBeneficiary)
+  {
+    require(currentBeneficiary != address(0), "Invalid currentBeneficiary");
+    require(_nonce == nonces[currentBeneficiary], "Invalid nonce");
+    nonces[currentBeneficiary]++;
+    require(newBeneficiary != address(0), "Invalid newBeneficiary address");
+    require(currentBeneficiary == holder, "Invalid newBeneficiary address");
+    require(signature.length == 65, "Invalid signature length");
+    require(_verifyApprover(currentBeneficiary, data, signature), "Signature verification failed");
+
+    _setBeneficiary(newBeneficiary);
+  }
+
   /**
    * @dev See {ITitleEscrow-transferOwners}.
    */
@@ -209,9 +332,42 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   }
 
   /**
+   * @dev See {ITitleEscrow-nonce}.
+   */
+  function nonce(address user)  external view override returns (uint256) {
+    return  nonces[user];
+  }
+
+  /**
    * @dev See {ITitleEscrow-surrender}.
    */
   function surrender() external virtual override whenNotPaused whenActive onlyBeneficiary onlyHolder whenHoldingToken {
+    _setNominee(address(0));
+    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId);
+
+    emit Surrender(msg.sender, registry, tokenId);
+  }
+
+  /**
+   * @dev See {ITitleEscrow-surrenderByAttorney}.
+   */
+  function surrenderByAttorney(address _beneficiary, address _holder, bytes memory data, bytes calldata signature, uint256 _nonce) 
+    external 
+    virtual 
+    override 
+    whenNotPaused 
+    whenActive 
+    onlyAttorney
+    onlyBeneficiarySigner(_beneficiary) 
+    onlyHolderSigner(_holder)
+    whenHoldingToken 
+  {
+    require(_beneficiary != address(0), "Invalid _beneficiary address");
+    require(_holder != address(0), "Invalid _holder address");
+    require(_nonce == nonces[_beneficiary], "Invalid nonce");
+    nonces[_beneficiary]++;
+    require(signature.length == 65, "Invalid signature length");
+    require(_verifyApprover(_beneficiary, data, signature), "Signature verification failed");
     _setNominee(address(0));
     ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId);
 
@@ -278,4 +434,107 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     emit HolderTransfer(holder, newHolder, registry, tokenId);
     holder = newHolder;
   }
+
+  /**
+     * @dev Verifies the transfer of holder using provided parameters and signature.
+     * @param aprover The current holder's address.
+     * @param data Data associated with the transfer.
+     * @param signature The signature to verify the transfer.
+     * @return A boolean indicating if the signature matches the current holder's address.
+     * @notice This function is private and is intended for internal use within the contract.
+    */
+    function _verifyApprover(
+        address aprover,
+        bytes memory data,
+        bytes memory signature
+    ) private pure returns (bool) {
+        bytes32 messageHash = getApprovalHash(data);
+        bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
+
+        return recoverSigner(ethSignedMessageHash, signature) == aprover;
+    }
+
+    function recoverSigner(
+        bytes32 _ethSignedMessageHash,
+        bytes memory _signature
+    ) private pure returns (address) {
+        (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
+
+        return ecrecover(_ethSignedMessageHash, v, r, s);
+    }
+
+    function splitSignature(
+        bytes memory sig
+    ) private pure returns (bytes32 r, bytes32 s, uint8 v) {
+        require(sig.length == 65, "invalid signature length");
+
+        assembly {
+            /*
+            First 32 bytes stores the length of the signature
+
+            add(sig, 32) = pointer of sig + 32
+            effectively, skips first 32 bytes of signature
+
+            mload(p) loads next 32 bytes starting at the memory address p into memory
+            */
+
+            // first 32 bytes, after the length prefix
+            r := mload(add(sig, 32))
+            // second 32 bytes
+            s := mload(add(sig, 64))
+            // final byte (first byte of the next 32 bytes)
+            v := byte(0, mload(add(sig, 96)))
+        }
+
+        // implicitly return (r, s, v)
+    }
+
+    function getEthSignedMessageHash(
+        bytes32 _messageHash
+    ) private pure returns (bytes32) {
+        /*
+        Signature is produced by signing a keccak256 hash with the following format:
+        "\x19Ethereum Signed Message\n" + len(msg) + msg
+        */
+        return
+            keccak256(
+                abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash)
+            );
+    }
+
+  /**
+     * @dev Computes and returns the hash of the transfer holder parameters.
+     * @param data Data associated with the transfer.
+     * @return A bytes32 hash representing the combination of input parameters.
+     * @notice This function is public and pure, ensuring it doesn't modify or interact with the contract's state.
+    */
+    function getApprovalHash(
+        bytes memory data
+    ) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(data));
+    }
+
+    /**
+     * @notice Changes the current attorney to a new address.
+     * @param newAttorney The address of the new attorney.
+    */
+    function changeAttorney(address newAttorney) external onlyAttorney {
+      require(newAttorney != address(0), "Invalid attorney address");
+      require(newAttorney != attorney, "Same attorney addresses");
+
+      attorney = newAttorney;
+      
+      // Emit an event or perform other actions as needed
+      emit AttorneyChanged(attorney, newAttorney);
+    }
+
+    /**
+     * @notice Set the current attorney to a new address.
+     * @param newAttorney The address of the new attorney.
+    */
+    function setAttorney(address newAttorney) external onlyOnceFirstAttorneySet{
+      attorney = newAttorney;
+      attorneySet = true;  // Mark the attorney as set
+      emit AttorneyChanged(attorney, newAttorney);
+    }
 }

@@ -26,13 +26,14 @@ interface ITitleEscrow is IERC721Receiver {
   event HolderTransfer(address indexed fromHolder, address indexed toHolder, address registry, uint256 tokenId);
   event Surrender(address indexed surrenderer, address registry, uint256 tokenId);
   event Shred(address registry, uint256 tokenId);
+  event AttorneyChanged(address indexed oldAttorney, address indexed newAttorney);
 
   /**
    * @notice Allows the beneficiary to nominate a new beneficiary
    * @dev The nominated beneficiary will need to be transferred by the holder to become the actual beneficiary
    * @param nominee The address of the nominee
    */
-  function nominate(address nominee) external;
+  function nominate(address nominee) external;  
 
   /**
    * @notice Allows the holder to transfer the beneficiary role to the nominated beneficiary or to themselves
@@ -47,15 +48,60 @@ interface ITitleEscrow is IERC721Receiver {
   function transferHolder(address newHolder) external;
 
   /**
+   * @notice Allows the designated attorney to transfer holdership from old holder to new holder
+   * @param currentHolder The address of the old holder
+   * @param newHolder The address of the new holder
+   * @param data Data associated with the transfer.
+   * @param signature The signature to verify the transfer.
+   */
+  function transferHolderByAttorney(address currentHolder, address newHolder, bytes memory data, bytes calldata signature, uint256 nonce) external;
+
+  /**
+   * @notice Allows the designated attorney to transfer beneficiary from old beneficiary to new beneficiary
+   * @param beneficiary The address of the old beneficiary
+   * @param newBeneficiary The address of the new holder
+   * @param data Data associated with the transfer.
+   * @param signature The signature to verify the transfer.
+   * @param _nonce The nonce value to protect the replay attacks.
+   */
+  function transferBeneficiaryByAttorney(address beneficiary, address newBeneficiary, bytes memory data, bytes calldata signature, uint256 _nonce) external;
+
+  /**
+   * @notice Allows the beneficiary to nominate a nominee
+   * @param beneficiary The address of the beneficiary
+   * @param _nominee The address of the new nominee
+   * @param data Data associated with the nomination.
+   * @param signature The signature to verify the nomination.
+   * @param _nonce The nonce value to protect the replay attacks.
+   */
+  function nominateByAttorney(address beneficiary, address _nominee, bytes memory data, bytes calldata signature, uint256 _nonce) external;
+
+  /**
    * @notice Allows for the simultaneous transfer of both beneficiary and holder roles
    * @param nominee The address of the new beneficiary
    * @param newHolder The address of the new holder
-   */
+  */
   function transferOwners(address nominee, address newHolder) external;
+
+  /**
+   * @notice Provides a nonce value for a user to protect from replay attacks
+   * @param user The address of the user
+  */
+  function nonce(address user)  external view returns (uint256);
+
+  /**
+   * @notice Changes the current attorney to a new address.
+   * @param newAttorney The address of the new attorney.
+  */
+  function changeAttorney(address newAttorney) external;  
+
+  function setAttorney(address newAttorney) external;
 
   function beneficiary() external view returns (address);
 
   function holder() external view returns (address);
+
+  function attorney() external view returns (address);
 
   function active() external view returns (bool);
 
@@ -64,6 +110,8 @@ interface ITitleEscrow is IERC721Receiver {
   function registry() external view returns (address);
 
   function tokenId() external view returns (uint256);
+
+  function attorneySet() external view returns (bool);
 
   /**
    * @notice Check if the TitleEscrow is currently holding a token
@@ -75,6 +123,11 @@ interface ITitleEscrow is IERC721Receiver {
    * @notice Allows the beneficiary and holder to surrender the token back to the registry
    */
   function surrender() external;
+
+  /**
+   * @notice Through Attorney the below method allows the beneficiary and holder to surrender the token back to the registry
+   */
+  function surrenderByAttorney(address beneficiary, address holder, bytes memory data, bytes calldata signature, uint256 _nonce) external;
 
   /**
    * @notice Allows the registry to shred the TitleEscrow by marking it as inactive and reset the beneficiary and holder addresses
