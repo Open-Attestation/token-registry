@@ -112,6 +112,10 @@ const config: HardhatUserConfig = {
       // Uncomment line below if using Infura
       // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
     },
+    amoy: {
+      ...networkConfig,
+      url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
+    },
     /**
      * Development
      */
