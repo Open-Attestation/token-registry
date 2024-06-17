@@ -108,9 +108,8 @@ const config: HardhatUserConfig = {
     },
     mumbai: {
       ...networkConfig,
-      url: "https://matic-mumbai.chainstacklabs.com",
+      url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
       // Uncomment line below if using Infura
-      // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
     },
     amoy: {
       ...networkConfig,
