@@ -74,7 +74,6 @@ const config: HardhatUserConfig = {
        * Polygon
        */
       polygon: POLYGONSCAN_API_KEY!,
-      polygonMumbai: POLYGONSCAN_API_KEY!,
     },
   },
   networks: {
@@ -105,12 +104,6 @@ const config: HardhatUserConfig = {
       url: "https://polygon-rpc.com",
       // Uncomment line below if using Infura
       // url: `https://polygon-mainnet.infura.io/v3/${INFURA_APP_ID}`,
-    },
-    mumbai: {
-      ...networkConfig,
-      url: "https://matic-mumbai.chainstacklabs.com",
-      // Uncomment line below if using Infura
-      // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
     },
     amoy: {
       ...networkConfig,

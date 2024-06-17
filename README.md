@@ -297,7 +297,7 @@ To quickly deploy contracts with ease, you need to supply your token name and sy
 npx hardhat deploy:token --network amoy --name "The Great Shipping Co." --symbol GSC
 ```
 
-The above is the easiest and most cost-effective method to deploy. Currently, this is supported on Ethereum, Sepolia, Polygon, and Polygon Mumbai/Amoy. The deployed contract will inherit all the standard functionalities from the Token Registry's on-chain contracts. This saves deployment costs and makes the process more convenient for users and integrators.
+The above is the easiest and most cost-effective method to deploy. Currently, this is supported on Ethereum, Sepolia, Polygon, and Polygon Amoy. The deployed contract will inherit all the standard functionalities from the Token Registry's on-chain contracts. This saves deployment costs and makes the process more convenient for users and integrators.
 
 > **Note:** Remember to supply the`--network` argument with the name of the network on which you want to deploy. See the [Network configuration](#network-configuration) section for more information on the list of network names.
 
@@ -391,7 +391,6 @@ The table below shows the network names that are currently pre-configured:
 | `1`        | Ethereum Mainnet         | `mainnet`    | Production |
 | `11155111` | Ethereum Testnet Sepolia | `sepolia`    | Test       |
 | `137`      | Polygon Mainnet          | `polygon`    | Production |
-| `80001`    | Polygon Testnet Mumbai   | `mumbai`     | Test       |
 | `80002`    | Polygon Testnet Amoy     | `amoy`       | Test       |
 | `50`       | XDC Network              | `xdc`        | Production |
 | `51`       | XDC Apothem Network      | `xdcapothem` | Test       |

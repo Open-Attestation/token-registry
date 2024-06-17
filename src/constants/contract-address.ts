@@ -2,7 +2,6 @@ const ChainId = {
   Ethereum: 1,
   Sepolia: 11155111,
   Polygon: 137,
-  PolygonMumbai: 80001,
   PolygonAmoy: 80002,
   XDC: 50,
   XDCApothem: 51,
