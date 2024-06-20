@@ -386,14 +386,12 @@ When verifying the contracts through either the Hardhat's verify plugin or passi
 
 The table below shows the network names that are currently pre-configured:
 
-| Network ID | Name                     | Network      | Type       |
-| ---------- | ------------------------ | ------------ | ---------- |
-| `1`        | Ethereum Mainnet         | `mainnet`    | Production |
-| `11155111` | Ethereum Testnet Sepolia | `sepolia`    | Test       |
-| `137`      | Polygon Mainnet          | `polygon`    | Production |
-| `80002`    | Polygon Testnet Amoy     | `amoy`       | Test       |
-| `50`       | XDC Network              | `xdc`        | Production |
-| `51`       | XDC Apothem Network      | `xdcapothem` | Test       |
+| Network ID | Name                     | Network   | Type       |
+| ---------- | ------------------------ | --------- | ---------- |
+| `1`        | Ethereum Mainnet         | `mainnet` | Production |
+| `11155111` | Ethereum Testnet Sepolia | `sepolia` | Test       |
+| `137`      | Polygon Mainnet          | `polygon` | Production |
+| `80002`    | Polygon Testnet Amoy     | `amoy`    | Test       |
 
 > **Note:** You can configure the existing networks and add others to which you want to deploy in the `hardhat.config.ts` file.
 

@@ -88,14 +88,6 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: "https://rpc.sepolia.org",
     },
-    xdc: {
-      ...networkConfig,
-      url: "https://erpc.xinfin.network",
-    },
-    xdcapothem: {
-      ...networkConfig,
-      url: "https://erpc.apothem.network",
-    },
     /**
      * Polygon
      */

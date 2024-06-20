@@ -3,8 +3,6 @@ const ChainId = {
   Sepolia: 11155111,
   Polygon: 137,
   PolygonAmoy: 80002,
-  XDC: 50,
-  XDCApothem: 51,
 };
 
 export const contractAddress = {
@@ -13,8 +11,6 @@ export const contractAddress = {
     [ChainId.Sepolia]: "0x5aA71Cc9559bC5e54E9504a81496d9F8454721F5",
     [ChainId.Polygon]: "0x5B5F8d94782be18E22420f3276D5ef5a1bc65C53",
     [ChainId.PolygonAmoy]: "0x0B0E0DA7Db10dB96f673dBe3796f7A509c68B472",
-    [ChainId.XDC]: "0x50BfCc1b699fD2308B978B7a6A26e3C3Bbad16DC",
-    [ChainId.XDCApothem]: "0xce28778bE6cF32ef3Ccbc09910258DF592F3b6F1",
   },
   Deployer: {
     [ChainId.Ethereum]: "0x92470d0Fc33Cbf2f04B39696733806a15eD7eef3",
