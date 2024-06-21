@@ -74,7 +74,6 @@ const config: HardhatUserConfig = {
        * Polygon
        */
       polygon: POLYGONSCAN_API_KEY!,
-      polygonMumbai: POLYGONSCAN_API_KEY!,
     },
   },
   networks: {
@@ -89,14 +88,6 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: "https://rpc.sepolia.org",
     },
-    xdc: {
-      ...networkConfig,
-      url: "https://erpc.xinfin.network",
-    },
-    xdcapothem: {
-      ...networkConfig,
-      url: "https://erpc.apothem.network",
-    },
     /**
      * Polygon
      */
@@ -106,11 +97,11 @@ const config: HardhatUserConfig = {
       // Uncomment line below if using Infura
       // url: `https://polygon-mainnet.infura.io/v3/${INFURA_APP_ID}`,
     },
-    mumbai: {
+    amoy: {
       ...networkConfig,
-      url: "https://matic-mumbai.chainstacklabs.com",
+      url: `https://rpc-amoy.polygon.technology`,
       // Uncomment line below if using Infura
-      // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
+      // url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
     },
     /**
      * Development

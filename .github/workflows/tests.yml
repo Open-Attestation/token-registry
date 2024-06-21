@@ -1,5 +1,8 @@
 on:
   workflow_call:
+    secrets:
+      codecov_token:
+        required: true
 
 env:
   NODE_ENV: ci
@@ -47,3 +50,4 @@ jobs:
         with:
           fail_ci_if_error: true
           verbose: true
+          token: ${{ secrets.codecov_token }}

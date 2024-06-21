@@ -14,16 +14,14 @@
   <img src="https://img.shields.io/github/license/open-attestation/token-registry" />
 </p>
 
-The Electronic Bill of Lading (eBL) is a digital document which you can use to prove the ownership of goods. It is a standardized document accepted by all major shipping lines and customs authorities. 
+The Electronic Bill of Lading (eBL) is a digital document which you can use to prove the ownership of goods. It is a standardized document accepted by all major shipping lines and customs authorities.
 
 The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains the following:
 
-* The smart contract code for token registry in the `/contracts` folder
-* The node package for using this library in the `/src` folder
+- The smart contract code for token registry in the `/contracts` folder
+- The node package for using this library in the `/src` folder
 
 ## Table of Contents
-
-
 
 - [Installation](#installation)
 - [Usage](#usage)
@@ -60,12 +58,12 @@ npm install --save @govtechsg/token-registry
 
 ## Usage
 
-Provide one of the following depending on your purpose: 
+Provide one of the following depending on your purpose:
 
-* To use the package, provide your own
-Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/)
+- To use the package, provide your own
+  Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/)
 
-* To write to the blockchain, provide the [signer](https://docs.ethers.io/v5/api/signer/#Wallet) that exposes the [Typechain (Ethers)](https://github.com/dethcrypto/TypeChain/tree/master/packages/target-ethers-v5) bindings for the contracts
+- To write to the blockchain, provide the [signer](https://docs.ethers.io/v5/api/signer/#Wallet) that exposes the [Typechain (Ethers)](https://github.com/dethcrypto/TypeChain/tree/master/packages/target-ethers-v5) bindings for the contracts
 
 ### TradeTrustToken
 
@@ -76,6 +74,7 @@ In this case, an SBT is used because the token is largely restricted to its desi
 See issue [#108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
 #### Connecting to an existing token registry
+
 The following is a code example that connects to a token registry:
 
 ```ts
@@ -114,6 +113,7 @@ Using the Title Escrow contract, you can manage and represent the ownership of a
 The actual owners will use the Title Escrow contract to perform their ownership operations.
 
 #### Connecting to a Title Escrow
+
 The following is a code example that connects to a Title Escrow:
 
 ```ts
@@ -137,11 +137,11 @@ function nominate(address beneficiaryNominee) external;
 
 ```
 
-* The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder.
+- The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder.
 
-* To transfer both the beneficiary and holder in a single transaction, use `transferOwners`. 
+- To transfer both the beneficiary and holder in a single transaction, use `transferOwners`.
 
-* Transfer of the beneficiary will require a nomination through the `nominate` method.
+- Transfer of the beneficiary will require a nomination through the `nominate` method.
 
 #### Surrendering or burning a document
 
@@ -174,9 +174,10 @@ const nominatedBeneficiary = await connectedEscrow.nominee();
 
 ### Title Escrow signable (experimental)
 
-This is similar to the [Title Escrow](#title-escrow) with the additional support for off-chain nomination and the endorsement of beneficiary nominees: 
-* The on-chain nominee will take precedence. 
-* The current beneficiary will initiate the transfer transaction with the endorsement.
+This is similar to the [Title Escrow](#title-escrow) with the additional support for off-chain nomination and the endorsement of beneficiary nominees:
+
+- The on-chain nominee will take precedence.
+- The current beneficiary will initiate the transfer transaction with the endorsement.
 
 With this feature, you can save on gas fees for cases where frequent nominations and endorsements occur between the owners.
 
@@ -205,7 +206,7 @@ contract TitleEscrowFactory is ITitleEscrowFactory {
 
 ```
 
->**Note:** This is currently an experimental feature. Implementers need to set up a "book-keeping" backend for the signed data.
+> **Note:** This is currently an experimental feature. Implementers need to set up a "book-keeping" backend for the signed data.
 
 ### Provider & signer
 
@@ -237,7 +238,6 @@ Using roles, you can grant the users to access only certain functions. Currently
 | `AccepterRole` | Able to accept a surrendered token  |
 | `RestorerRole` | Able to restore a surrendered token |
 
-
 The admin user can grant a trusted user multiple roles to perform different operations.
 
 To grant roles to the users or revoke roles from them, the admin user can call the following functions:
@@ -245,6 +245,7 @@ To grant roles to the users or revoke roles from them, the admin user can call t
 #### Granting a role to a user
 
 Only the default admin or the role admin will be able to call this function:
+
 <!--Flag: according to the table above, there is no "role admin".-->
 
 ```ts
@@ -286,25 +287,25 @@ With Hardhat, you can manage the contract development environment and deployment
 
 Starting from V4, the token registry includes an easy and cost-effective way to deploy the contracts and meanwhile keep the options available for advanced users to set up the contracts in a preferable way.
 
->**Note:** Before deployment, ensure that you have set up your configuration file. See the [Configuration](#configuration) section for more details. The deployer (configured in your `.env` file) will be the default admin.
+> **Note:** Before deployment, ensure that you have set up your configuration file. See the [Configuration](#configuration) section for more details. The deployer (configured in your `.env` file) will be the default admin.
 
 ## Quick start
 
 To quickly deploy contracts with ease, you need to supply your token name and symbol to the command:
 
 ```
-npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symbol GSC
+npx hardhat deploy:token --network amoy --name "The Great Shipping Co." --symbol GSC
 ```
 
-The above is the easiest and most cost-effective method to deploy. Currently, this is supported on Ethereum, Sepolia, Polygon, and Polygon Mumbai. The deployed contract will inherit all the standard functionalities from the Token Registry's on-chain contracts. This saves deployment costs and makes the process more convenient for users and integrators.
+The above is the easiest and most cost-effective method to deploy. Currently, this is supported on Ethereum, Sepolia, Polygon, and Polygon Amoy. The deployed contract will inherit all the standard functionalities from the Token Registry's on-chain contracts. This saves deployment costs and makes the process more convenient for users and integrators.
 
->**Note:** Remember to supply the`--network` argument with the name of the network on which you want to deploy. See the [Network configuration](#network-configuration) section for more information on the list of network names.
+> **Note:** Remember to supply the`--network` argument with the name of the network on which you want to deploy. See the [Network configuration](#network-configuration) section for more information on the list of network names.
 
 ## Advanced usage
 
 For experienced users who want more control over their setup (or have extra fund to spend), a few other options and commands are provided.
 
->**Important:** Depending on your use case, the gas costs might be higher than the method described in [Quick start](#quick-start).
+> **Important:** Depending on your use case, the gas costs might be higher than the method described in [Quick start](#quick-start).
 
 ### Token contract
 
@@ -324,19 +325,20 @@ OPTIONS:
 deploy:token: Deploys the TradeTrust token
 ```
 
->**Note:** 
-> * The `--factory` argument is optional. If not provided, the task will use the default Title Escrow Factory. 
-> * You can also reuse a  previously deployed Title Escrow factory by passing its address to the `--factory` argument.
+> **Note:**
+>
+> - The `--factory` argument is optional. If not provided, the task will use the default Title Escrow Factory.
+> - You can also reuse a previously deployed Title Escrow factory by passing its address to the `--factory` argument.
 
 #### Standalone contract
 
 To deploy your own modified version or your own copy of the token contract, use the `--standalone` flag:
 
 ```
-npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symbol GSC --verify --standalone
+npx hardhat deploy:token --network amoy --name "The Great Shipping Co." --symbol GSC --verify --standalone
 ```
 
-The above command will deploy a _full token contract_ with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon _mumbai_ network using the default Title Escrow factory. The contract will also be _verified_ on Etherscan.
+The above command will deploy a _full token contract_ with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon _amoy_ network using the default Title Escrow factory. The contract will also be _verified_ on Etherscan.
 
 #### Using an existing Title Escrow factory
 
@@ -384,17 +386,14 @@ When verifying the contracts through either the Hardhat's verify plugin or passi
 
 The table below shows the network names that are currently pre-configured:
 
-| Network ID | Name                     | Network      | Type       |
-| ---------- | ------------------------ | ------------ | ---------- |
-| `1`        | Ethereum Mainnet         | `mainnet`    | Production |
-| `11155111` | Ethereum Testnet Sepolia | `sepolia`    | Test       |
-| `137`      | Polygon Mainnet          | `polygon`    | Production |
-| `80001`    | Polygon Testnet Mumbai   | `mumbai`     | Test       |
-| `50`       | XDC Network              | `xdc`        | Production |
-| `51`       | XDC Apothem Network      | `xdcapothem` | Test       |
+| Network ID | Name                     | Network   | Type       |
+| ---------- | ------------------------ | --------- | ---------- |
+| `1`        | Ethereum Mainnet         | `mainnet` | Production |
+| `11155111` | Ethereum Testnet Sepolia | `sepolia` | Test       |
+| `137`      | Polygon Mainnet          | `polygon` | Production |
+| `80002`    | Polygon Testnet Amoy     | `amoy`    | Test       |
 
-
->**Note:** You can configure the existing networks and add others to which you want to deploy in the `hardhat.config.ts` file.
+> **Note:** You can configure the existing networks and add others to which you want to deploy in the `hardhat.config.ts` file.
 
 ## Configuration
 
@@ -417,9 +416,10 @@ DEPLOYER_PK=
 MNEMONIC=
 ```
 
-Only one of the following is needed: 
-* `DEPLOYER_PK` 
-* `MNEMONIC`
+Only one of the following is needed:
+
+- `DEPLOYER_PK`
+- `MNEMONIC`
 
 ## Development
 
@@ -439,6 +439,7 @@ npm run build
 ```
 
 For more information on the commands below, see the [Deployment](#deployment) section:
+
 ```sh
 npx hardhat deploy:token
 npx hardhat deploy:factory
